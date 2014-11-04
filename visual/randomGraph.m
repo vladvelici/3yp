@@ -2,7 +2,7 @@ function [ adj ] = randomGraph( nodes, edges )
 %RANDOMGRAPH Generates a random connected graph
 %   returns adjacency matrix
 
-adj = eye(nodes);
+adj = speye(nodes);
 % make it connected
 seq = randperm(nodes);
 for i=2:nodes
