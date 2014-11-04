@@ -7,7 +7,7 @@ nodes = size(adj,1);
 
 Dnum = 1 ./ repmat(sum(adj')',1, nodes);
 D = bsxfun(@times, adj, Dnum);
-
+D = sparse(D);
 c = speye(nodes);
 for j=1:iterations
     c = c + miu * D;

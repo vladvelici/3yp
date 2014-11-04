@@ -1,4 +1,4 @@
-function [ adj ] = randomGraph( nodes, edges )
+function [ adj ] = randomGraph( nodes, edges, directed )
 %RANDOMGRAPH Generates a random connected graph
 %   returns adjacency matrix
 
@@ -15,6 +15,9 @@ while edges > 0
     edge = randi([1 nodes], 2,1);
     if adj(edge(1),edge(2)) == 0
         adj(edge(1),edge(2)) = 1;
+        if not(directed)
+            adj(edge(2), edge(1)) = 1;
+        end
         edges = edges - 1;
     end
 end
