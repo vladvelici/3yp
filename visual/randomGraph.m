@@ -7,6 +7,9 @@ adj = speye(nodes);
 seq = randperm(nodes);
 for i=2:nodes
     adj(seq(i-1),seq(i)) = 1;
+    if not(directed)
+        adj(seq(i), seq(i-1)) = 1;
+    end
 end
 
 % add the rest of the edges
