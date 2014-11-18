@@ -1,0 +1,84 @@
+0000000000,0000000001,0000000001
+0000000000,0000000002,0000000002
+0000000000,0000000003,0000000003
+0000000004,0000000005,0000000004
+0000000004,0000000006,0000000005
+0000000003,0000000007,0000000006
+0000000003,0000000006,0000000007
+0000000003,0000000005,0000000007
+0000000003,0000000008,0000000008
+0000000003,0000000009,0000000009
+0000000003,0000000010,0000000010
+0000000003,0000000004,0000000011
+0000000003,0000000011,0000000012
+0000000003,0000000012,0000000013
+0000000003,0000000013,0000000013
+0000000003,0000000006,0000000014
+0000000003,0000000005,0000000014
+0000000003,0000000014,0000000015
+0000000003,0000000015,0000000015
+0000000003,0000000016,0000000015
+0000000003,0000000017,0000000015
+0000000003,0000000000,0000000016
+0000000011,0000000018,0000000010
+0000000011,0000000019,0000000015
+0000000006,0000000020,0000000015
+0000000006,0000000021,0000000017
+0000000006,0000000022,0000000018
+0000000006,0000000023,0000000019
+0000000005,0000000020,0000000015
+0000000005,0000000024,0000000017
+0000000005,0000000025,0000000018
+0000000005,0000000026,0000000019
+###############################################
+Symbol Dictionary
+###############################################
+0000000000	<http://eprints.soton.ac.uk/10000/>
+0000000001	"text/html"
+0000000002	"HTML Summary of #10000 \n\nUse of regularization techniques to identify structure-borne noise sources\n\n"
+0000000003	<http://eprints.soton.ac.uk/id/eprint/10000>
+0000000004	<http://eprints.soton.ac.uk/id/eprint/10000#authors>
+0000000005	<http://eprints.soton.ac.uk/id/person/ext-45775>
+0000000006	<http://eprints.soton.ac.uk/id/person/ext-43778>
+0000000007	<http://id.southampton.ac.uk/org/KR>
+0000000008	"2001"
+0000000009	<http://eprints.soton.ac.uk/id/repository>
+0000000010	"Use of regularization techniques to identify structure-borne noise sources"
+0000000011	<http://eprints.soton.ac.uk/id/event/ext-394ca935bc9497b6bbb1b16c9ff0b0de>
+0000000012	<http://purl.org/ontology/bibo/status/peerReviewed>
+0000000013	<http://purl.org/ontology/bibo/status/published>
+0000000014	<http://eprints.org/ontology/ConferenceItemEPrint>
+0000000015	<http://eprints.org/ontology/EPrint>
+0000000016	<http://purl.org/ontology/bibo/AcademicArticle>
+0000000017	<http://purl.org/ontology/bibo/Article>
+0000000018	"Inter-Noise 2001"
+0000000019	<http://purl.org/ontology/bibo/Conference>
+0000000020	<http://xmlns.com/foaf/0.1/Person>
+0000000021	"Thompson"
+0000000022	"D.J."
+0000000023	"D.J. Thompson"
+0000000024	"Thite"
+0000000025	"A.N."
+0000000026	"A.N. Thite"
+###############################################
+Predicate Dictionary
+###############################################
+0000000001	<http://purl.org/dc/elements/1.1/format>
+0000000002	<http://purl.org/dc/elements/1.1/title>
+0000000003	<http://xmlns.com/foaf/0.1/primaryTopic>
+0000000004	<http://www.w3.org/1999/02/22-rdf-syntax-ns#_1>
+0000000005	<http://www.w3.org/1999/02/22-rdf-syntax-ns#_2>
+0000000006	<http://id.southampton.ac.uk/ns/producedByDivision>
+0000000007	<http://purl.org/dc/terms/creator>
+0000000008	<http://purl.org/dc/terms/date>
+0000000009	<http://purl.org/dc/terms/isPartOf>
+0000000010	<http://purl.org/dc/terms/title>
+0000000011	<http://purl.org/ontology/bibo/authorList>
+0000000012	<http://purl.org/ontology/bibo/presentedAt>
+0000000013	<http://purl.org/ontology/bibo/status>
+0000000014	<http://www.loc.gov/loc.terms/relators/AUT>
+0000000015	<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+0000000016	<http://www.w3.org/2000/01/rdf-schema#seeAlso>
+0000000017	<http://xmlns.com/foaf/0.1/familyName>
+0000000018	<http://xmlns.com/foaf/0.1/givenName>
+0000000019	<http://xmlns.com/foaf/0.1/name>
