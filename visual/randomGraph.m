@@ -2,28 +2,28 @@ function [ adj ] = randomGraph( nodes, edges, directed )
 %RANDOMGRAPH Generates a random connected graph
 %   returns adjacency matrix
 
-adj = speye(nodes);
+connections = zeros(edges,2);
 % make it connected
 seq = randperm(nodes);
+edge = 1;
+
 for i=2:nodes
-    adj(seq(i-1),seq(i)) = 1;
-    if not(directed)
-        adj(seq(i), seq(i-1)) = 1;
-    end
+    connections(edge,:) = [seq(i-1) seq(i)];
+    edge = edge+1;
 end
 
 % add the rest of the edges
-edges = edges - nodes + 1;
-while edges > 0
-    edge = randi([1 nodes], 2,1);
-    if adj(edge(1),edge(2)) == 0
-        adj(edge(1),edge(2)) = 1;
-        if not(directed)
-            adj(edge(2), edge(1)) = 1;
-        end
-        edges = edges - 1;
-    end
+while edge <= edges
+    connections(edge,:) = randi([1 nodes], 1,2);
+    edge = edge+1;
 end
+
+if not(directed)
+    connections = [connections; connections(:,2) connections(:,1)];
+end
+
+adj = sparse(connections(:,1), connections(:,2), ones(size(connections,1),1), nodes, nodes);
+adj = adj + speye(nodes);
 
 end
 
