@@ -16,18 +16,26 @@ wHalf = diag(sqrt(neighinv));
 A = wHalf * adj * wHalf;
 [vec, val] = eigs(A,m);
 
-z = diag(sqrt(neigh)) * vec * (1-mu*val).^-1;
+gamma = zeros(m,m);
+for i=1:m
+    gamma(i,i) = (1-mu*val(i,i))^-1;
+end
+
+z = diag(sqrt(neigh)) * vec * gamma;
+
 q = vec' * w * vec;
 
 N = size(adj,1);
 l = zeros(N,1);
 veci = vec';
+% c = zeros(size(adj));
 for nodeId=1:N
     ci = zeros(N,1);
     for i = 1:m
         ci = ci + wHalf * vec(:,i) * (1/(1-(mu*val(i,i)))) * veci(i, nodeId) * neigh(i);
     end
     l(nodeId) = norm(ci);
+  %  c(:,nodeId)=ci;
 end
 
 end

@@ -23,7 +23,7 @@ if not(directed)
 end
 
 adj = sparse(connections(:,1), connections(:,2), ones(size(connections,1),1), nodes, nodes);
-adj = adj + speye(nodes);
+adj = (adj + speye(nodes))>0;
 
 end
 
