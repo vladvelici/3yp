@@ -31,7 +31,6 @@ disp('Got Q');
 
 N = size(adj,1);
 l = zeros(N,1);
-veci = vec';
 %c = zeros(size(adj));
 for nodeId=1:N
     ci = zeros(N,1);
