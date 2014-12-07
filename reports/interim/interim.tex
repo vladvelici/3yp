@@ -24,7 +24,8 @@
 \usepackage[english]{babel}
 \usepackage{sectsty}
 \usepackage{url, lipsum}
-
+\usepackage{amsmath}
+\usepackage{xfrac}
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1.2em}
 
@@ -81,17 +82,113 @@ MEng Computer Science with Artificial Intelligence
 
 \section*{Introduction}
 \addcontentsline{toc}{section}{Introduction}
-
+%
 Plenty of datasets are or can be represented as graphs where vertices represent entities and edges represent relationships between entities. A problem of interest is to find entities that are similarly connected. Example instances of this problem are finding \textit{people you may know} in a social network, people with common interests from research publications repositories or identifying possible duplicates in a dataset.
 \par
 It is easy to find exact similarities between vertices in small graphs by performing pairwise comparisons. Such an algorithm is too slow for large datasets of millions of vertices. This project investigates a method to compute an approximation of similarities between nodes and attempt to evaluate its performance on different datasets.
+%
+%-------------------------------------------------------------------------------
+% BRUTE FORCE
+%-------------------------------------------------------------------------------
+\section*{Brute-Force Approach}
+%
+The similarity algorithm is described in regards to the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
+%
+In order to derive an algorithm to find similarities between vertices in a graph, a measure of similarity between two vertices must be defined. $M$ is the adjacency matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let $D$ be a normalised adjacency matrix such that each column sums up to 1:
+%
+\begin{equation}
+\label{eq:initial-d}
+D_{i j} = \frac{1}{\sum_{j=1}^N M_{ij}}
+\end{equation}
+%
+Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matrix. Let $\mathbf{C_i}$ be a vector that represents how vertex $i$ is connected to the graph. In a brute-force approach, it can be computed as:
+%
+\begin{equation}
+\mathbf{C_i} = \sum_{t=0}^\infty \mu^t D^t \mathbf{\delta_i}
+\end{equation}
+%
+Where $\mu \in (0,1)$ is a penalising factor. $\mu$ controls how much the far connections are considered into the similarities. Therefore a large $\mu$ enforces consideration of very far connections whereas a small $\mu$ considers far connections less.
+%
+The similarity between two vertices $i$ and $j$ is the norm of the difference between $\mathbf{C_i}$ and $\mathbf{C_j}$:
+%
+\begin{equation}
+s(i,j) = \|\mathbf{C_i} - \mathbf{C_j}\|
+\end{equation}
+%
+The brute-force approach was run on small randomly generated connected graphs (200 vertices) with 50 iterations and it gave meaningful results but it does not scale for large datasets. In the next section an algorithm that scales to large datasets is described.
+%
+%-------------------------------------------------------------------------------
+% Approximative approach
+%-------------------------------------------------------------------------------
+\section*{Approximative Method}
+Geometrically, if vectors $\mathbf{C_i}$ and $\mathbf{C_j}$ start from the origin, then $\mathbf{C_i}$, $\mathbf{C_j}$ and $\mathbf{a} = \mathbf{C_i}-\mathbf{C_j}$ describe a triangle. Let $\theta$ be the angle between $\mathbf{C_i}$ and $\mathbf{C_j}$. From the Law of Cosines:
+\begin{equation}
+\label{eq:cosinelaw}
+\|\mathbf{a}\|^2 = \|\mathbf{C_i}\|^2 + \|\mathbf{C_j}\|^2 - 2  \|\mathbf{C_i}\| \|\mathbf{C_j}\| \cos \ \theta
+\end{equation}
+%
+Take the dot product $\mathbf{C_i^T}\mathbf{C_j} = \| \mathbf{C_i} \| \| \mathbf{C_j} \| \cos \theta$. Observe that the angle between $\mathbf{C_i}$ and itself is 0 and $\cos0=1$, and obtain $\|\mathbf{C_i}\|^2 = \mathbf{C_i^T}\mathbf{C_i}$. Now \emph{Equation~\ref{eq:cosinelaw}} becomes:
+\begin{equation}
+\label{eq:norm-equation}
+\|\mathbf{a}\|^2 = \mathbf{C_i^T}\mathbf{C_i} + \mathbf{C_j^T}\mathbf{C_j} - 2 \mathbf{C_i^T}\mathbf{C_j}
+\end{equation}
+%
+Therefore it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$ (for all $i, j \in v$) to compute the similarities between all vertices of the graph. Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory for a very large dataset if we use the brute-force approach.
+%
+\par
+%
+An approximative algorithm to efficiently compute the dot products $\mathbf{C_i^T}\mathbf{C_j}$ will be described. Let $W$ be a diagonal matrix:
+%
+\begin{equation}
+\label{eq:W}
+W_{ij} = \frac{[i=j]}{\sum_{j=1}^N M_{ij}}
+\end{equation}
+%
+Now \emph{Equation~\ref{eq:initial-d}} can be written as $D = WM$, thus 
+\begin{equation}
+\label{eq:newdt}
+D^t = (WM)^t
+\end{equation}
+Define a new matrix $A$:
+\begin{equation}
+\label{eq:a}
+A = W^{\sfrac{1}{2}}MW^{\sfrac{1}{2}}
+\end{equation}
+From \emph{Equation~\ref{eq:newdt}} and \emph{Equation~\ref{eq:a}}:
+\begin{equation}
+\label{eq:used-dt}
+D^t = W^{\sfrac{1}{2}} A^t W^{\sfrac{-1}{2}}
+\end{equation}
+The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute because $W$ is a diagonal matrix. Apply the matrix operation only on the diagonal elements and obtain $(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
+%
+\par
+%
+Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[1]. For directed graphs the Arnoldi Iteration[2] will be used instead.  Let $\lambda_i$ be the $i^{th}$ eigenvalue and $\bigvee^{(i)}$ be the $i^{th}$ eigenvector ($\forall i \in \{ 1, 2, ..., m \}$). $\bigvee$ is a matrix of all computed eigenvectors (such that $\bigvee^{(i)}$ is the $i^{th}$ column of $\bigvee$), and $\bigwedge$ is a diagonal matrix of all computed eigenvalues:
+\begin{align}
+\bigvee      &=  \begin{bmatrix}
+\vert & \vert &  & \vert \\
+\bigvee^{(1)} & \bigvee^{(2)} & \dots & \bigvee^{(m)}\\
+\vert & \vert &  & \vert \end{bmatrix} \\
+\bigwedge &= \begin{bmatrix}
+\lambda_1 & 0 		      & \dots  & 0\\
+0 	 	 & \lambda_2  & \dots  &  0\\
+\vdots 	 & \vdots	      & \ddots & \\
+0	          & 0                  &            & \lambda_m
+\end{bmatrix}
+\end{align}
 
-\section*{The algorithm}
 
-\section*{Limitations of current implementation}
+
+%
+%-------------------------------------------------------------------------------
+% LIMITATIONS
+%-------------------------------------------------------------------------------
+\section*{Limitations of Current Implementation}
 The current implementation of this algorithm has various limitations which are discussed along with possible improvements.
-
+%
 \paragraph*{Only undirected graphs} Directed graphs are not currently supported. In practice, datasets have meaningful unidirectional relationships (e.g. in a social network person A follows person B, but B does not follow A), and often datasets are represented as directed graphs rather than undirected graphs. The algorithm can be adapted to support both directed and undirected graphs but it will have the disadvantage of requiring to compute $V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
+%
+\paragraph*{Ignored relationship types} In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain these weights from the dataset.
 
 \paragraph*{Not distributed} What if the dataset is too large to fit into main memory? The algorithm is currently only designed to run on one machine. Methods of distributing the algorithm on more than one machine over a network will be investigated in the future.
 
@@ -102,13 +199,9 @@ The current implementation of this algorithm has various limitations which are d
 \section*{References}
 \addcontentsline{toc}{section}{References}
 
-Anand, U., 2010. The Elusive Free Radicals, \textit{The Clinical Chemist,} [e-journal] Available at:<\url{http://www.clinchem.org/content/56/10/1649.full.pdf}> [Accessed 2 November 2013]
-\newline
-\newline
+[1]: Calvetti, Daniela, L. Reichel, and Danny Chris Sorensen. "An implicitly restarted Lanczos method for large symmetric eigenvalue problems." Electronic Transactions on Numerical Analysis 2.1 (1994): 21.
 
-Biology Forums, 2012. \textit{Normal glomerulus. Acute glomerulonephritis.} [online] Available at: <\url{http://biology-forums.com/index.php?action=gallery;sa=view;id=9284}> [Accessed 23 October 2013].
-\newline
-\newline
+[2]: Lehoucq, Richard B., and Danny C. Sorensen. "Deflation techniques for an implicitly restarted Arnoldi iteration." SIAM Journal on Matrix Analysis and Applications 17.4 (1996): 789-821.
 
 \end{document}
 
