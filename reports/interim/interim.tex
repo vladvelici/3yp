@@ -91,6 +91,7 @@ It is easy to find exact similarities between vertices in small graphs by perfor
 %-------------------------------------------------------------------------------
 %
 \section*{Brute-Force Approach}
+\addcontentsline{toc}{section}{Brute-Force Approach}
 %
 The similarity algorithm is described in regards to the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
 %
@@ -123,6 +124,7 @@ The brute-force approach was run on small randomly generated connected graphs (2
 %-------------------------------------------------------------------------------
 %
 \section*{Approximative Method}
+\addcontentsline{toc}{section}{Approximative Method}
 %
 %% Geometry 
 %
@@ -301,6 +303,7 @@ After computing the matrices $Z$ and $Q$, the time complexity of computing the s
 %% Vectorisation
 %%%%%%%%%%%%%%%
 \subsection*{Vectorisation}
+\addcontentsline{toc}{subsection}{Vectorisation}
 It is usually more efficient to have vectorised implementations (to use matrix operations in favour of iterative solutions) in programming languages like Matlab, Octave or R. In this subsection is presented a way of computing the matrices $Z$ and $Q$ using matrix operations. For this purpose, in this subsection, $\bigvee$ only contains the computed eigenvectors (is of size $N \times m$), and $\bigwedge$ only contains the computed eigenvalues (is of size $m \times m$).
 \par
 %
@@ -331,6 +334,7 @@ Q = \bigvee\nolimits^T W \bigvee
 % LIMITATIONS
 %-------------------------------------------------------------------------------
 \section*{Limitations of Current Implementation}
+\addcontentsline{toc}{section}{Limitations of the Current Implementation}
 The current implementation of this algorithm has various limitations which are discussed along with possible improvements.
 %
 \paragraph*{Only undirected graphs} Directed graphs are not currently supported. In practice, datasets have meaningful unidirectional relationships (e.g. in a social network person A follows person B, but B does not follow A), and often datasets are represented as directed graphs rather than undirected graphs. The algorithm can be adapted to support both directed and undirected graphs but it will have the disadvantage of requiring to compute $V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
