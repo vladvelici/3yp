@@ -77,9 +77,8 @@ MEng Computer Science with Artificial Intelligence
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
-% BODY
+% INTRODUCTION
 %-------------------------------------------------------------------------------
-
 \section*{Introduction}
 \addcontentsline{toc}{section}{Introduction}
 %
@@ -90,6 +89,7 @@ It is easy to find exact similarities between vertices in small graphs by perfor
 %-------------------------------------------------------------------------------
 % BRUTE FORCE
 %-------------------------------------------------------------------------------
+%
 \section*{Brute-Force Approach}
 %
 The similarity algorithm is described in regards to the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
@@ -104,6 +104,7 @@ D_{i j} = \frac{1}{\sum_{j=1}^N M_{ij}}
 Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matrix. Let $\mathbf{C_i}$ be a vector that represents how vertex $i$ is connected to the graph. In a brute-force approach, it can be computed as:
 %
 \begin{equation}
+\label{eq:brute-ci}
 \mathbf{C_i} = \sum_{t=0}^\infty \mu^t D^t \mathbf{\delta_i}
 \end{equation}
 %
@@ -120,7 +121,11 @@ The brute-force approach was run on small randomly generated connected graphs (2
 %-------------------------------------------------------------------------------
 % Approximative approach
 %-------------------------------------------------------------------------------
+%
 \section*{Approximative Method}
+%
+%% Geometry 
+%
 Geometrically, if vectors $\mathbf{C_i}$ and $\mathbf{C_j}$ start from the origin, then $\mathbf{C_i}$, $\mathbf{C_j}$ and $\mathbf{a} = \mathbf{C_i}-\mathbf{C_j}$ describe a triangle. Let $\theta$ be the angle between $\mathbf{C_i}$ and $\mathbf{C_j}$. From the Law of Cosines:
 \begin{equation}
 \label{eq:cosinelaw}
@@ -137,6 +142,8 @@ Therefore it is sufficient to be able to compute all dot products $\mathbf{C_i^T
 %
 \par
 %
+%% Approximative algorithm intro
+%
 An approximative algorithm to efficiently compute the dot products $\mathbf{C_i^T}\mathbf{C_j}$ will be described. Let $W$ be a diagonal matrix:
 %
 \begin{equation}
@@ -145,40 +152,110 @@ W_{ij} = \frac{[i=j]}{\sum_{j=1}^N M_{ij}}
 \end{equation}
 %
 Now \emph{Equation~\ref{eq:initial-d}} can be written as $D = WM$, thus 
+%
 \begin{equation}
 \label{eq:newdt}
 D^t = (WM)^t
 \end{equation}
+%
+%
 Define a new matrix $A$:
+%
 \begin{equation}
 \label{eq:a}
 A = W^{\sfrac{1}{2}}MW^{\sfrac{1}{2}}
 \end{equation}
+%
+%
 From \emph{Equation~\ref{eq:newdt}} and \emph{Equation~\ref{eq:a}}:
+%
 \begin{equation}
 \label{eq:used-dt}
 D^t = W^{\sfrac{1}{2}} A^t W^{\sfrac{-1}{2}}
 \end{equation}
+%
+%
 The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute because $W$ is a diagonal matrix. Apply the matrix operation only on the diagonal elements and obtain $(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
 %
 \par
 %
-Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[1]. For directed graphs the Arnoldi Iteration[2] will be used instead.  Let $\lambda_i$ be the $i^{th}$ eigenvalue and $\bigvee^{(i)}$ be the $i^{th}$ eigenvector ($\forall i \in \{ 1, 2, ..., m \}$). $\bigvee$ is a matrix of all computed eigenvectors (such that $\bigvee^{(i)}$ is the $i^{th}$ column of $\bigvee$), and $\bigwedge$ is a diagonal matrix of all computed eigenvalues:
+%% Defining eigen*matrixes.
+%
+Let $\lambda_i$ be the $i^{th}$ eigenvalue and $\bigvee^{(i)}$ be the $i^{th}$ eigenvector ($\forall i \in \{ 1, 2, ..., N \}$). $\bigvee$ is a matrix of all computed eigenvectors (such that $\bigvee^{(i)}$ is the $i^{th}$ column of $\bigvee$), and $\bigwedge$ is a diagonal matrix of all computed eigenvalues:
 \begin{align}
 \bigvee      &=  \begin{bmatrix}
 \vert & \vert &  & \vert \\
-\bigvee^{(1)} & \bigvee^{(2)} & \dots & \bigvee^{(m)}\\
+\bigvee^{(1)} & \bigvee^{(2)} & \dots & \bigvee^{(N)}\\
 \vert & \vert &  & \vert \end{bmatrix} \\
 \bigwedge &= \begin{bmatrix}
 \lambda_1 & 0 		      & \dots  & 0\\
 0 	 	 & \lambda_2  & \dots  &  0\\
 \vdots 	 & \vdots	      & \ddots & \\
-0	          & 0                  &            & \lambda_m
+0	          & 0                  &            & \lambda_N
 \end{bmatrix}
 \end{align}
+%
+%% Eigenvalue decomposition
+%
+The eigendecomposition of the matrix A is $A = \bigvee \bigwedge \bigvee\nolimits^{-1}$. The graph $G$ is an undirected graph which makes $A$ a real symmetric matrix, thus $\bigvee\nolimits^{-1} = \bigvee\nolimits^{T}$. The eigendecomposition of the matrix $A$ is therefore:
+\begin{align}
+A &= \bigvee \bigwedge \bigvee\nolimits^{T} \\
+\Rightarrow A^t &= \big(\bigvee \bigwedge \bigvee\nolimits^{T}\big)^t = \bigvee \bigwedge\nolimits^t \bigvee\nolimits^{T} \\
+\Leftrightarrow A^t &= \sum_{a=1}^{N} \lambda_a^t \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)^T} \label{eq:a-at-t-sum} 
+\end{align} 
+%
+From \emph{Equation~\ref{eq:used-dt}} and \emph{Equation~\ref{eq:a-at-t-sum}}:
+\begin{equation}
+\label{eq:d-at-t-with-a}
+D^t = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)^T} W^{\sfrac{-1}{2}}
+\end{equation}
+%
+%% Plugging into the Ci
+%
+Plug $D^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into \emph{Equation~\ref{eq:brute-ci}}:
+\begin{equation}
+\mathbf{C_i} = \sum_{t=0}^\infty \mu^t W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i}
+\end{equation}
+Rearrange the equation and obtain:
+\begin{equation}
+\label{eq:ci-rearranged}
+\mathbf{C_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t  \lambda_a^t \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i}
+\end{equation}
+%
+%% Geometric series - to look into lambda mu < 1.
+%
+Note that $\sum_{t=0}^\infty \mu^t\lambda_a^t$ is a sum of a geometric series with the first term $1$ and ratio $\mu \lambda_a$, therefore:
+\begin{equation}
+\label{eq:geometric-series}
+\sum_{t=0}^\infty \mu^t\lambda_a^t = \frac{1}{1 - \mu \lambda_a}
+\end{equation}
+%
+Observe $\bigvee\nolimits^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i}$ is a scalar:
+\begin{equation}
+\label{eq:observe-scalar}
+\bigvee\nolimits^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i} = \bigvee\nolimits^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+\end{equation}
+%
+Plug \emph{Equation~\ref{eq:observe-scalar}} and \emph{Equation~\ref{eq:geometric-series}} back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain:
+\begin{equation}
+\label{eq:ci-rearranged-geometric}
+\mathbf{C_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a} \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+\end{equation}
+%
+%% Define Z
+%
+To simplify \emph{Equation~\ref{eq:ci-rearranged-geometric}}, let $Z$ be a matrix such that:
+\begin{equation}
+\label{eq:z-ij}
+Z_{ij} = \frac{\bigvee\nolimits^{(j)}_i W^{\sfrac{-1}{2}}_{ii}}{1-\mu \lambda_j}
+\end{equation}
+%
+%% Approximation explained.
+%
+An approximation of the vectors $\mathbf{C_i} (\forall i \in v)$ can be obtained by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[1]. For directed graphs the Arnoldi Iteration[2] will be used instead. These algorithms perform well on large sparse matrices. In real datasets it is very often the case that the number of edges is orders of magnitude smaller than the number of vertices squared, resulting in sparse adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C_i}}$ to be an approximation of $\mathbf{C_i}$.
 
 
-
+\par
 %
 %-------------------------------------------------------------------------------
 % LIMITATIONS
