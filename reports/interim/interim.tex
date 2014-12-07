@@ -284,7 +284,7 @@ Define a new $m \times m$ matrix $Q$ such that:
 \label{eq:q-ij}
 Q_{ij} = \bigvee\nolimits^{(i)^T} W \bigvee\nolimits^{(j)}
 \end{equation}
-Substitute $Q$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain:
+$\mathbf{Z_i}$ is the $i^{th}$ row of the matrix $Z$. Substitute $Q$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain:
 \begin{align}
 \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} Q_{aa'} \label{eq:dot-zq-sum} \\
 \Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \mathbf{Z_i^T} Q \mathbf{Z_j} \label{eq:dot-zq-vectorised}
@@ -331,6 +331,35 @@ Q = \bigvee\nolimits^T W \bigvee
 \end{equation}
 %
 %-------------------------------------------------------------------------------
+% IMPLEMENTATION
+%-------------------------------------------------------------------------------
+\section*{Implementation}
+\addcontentsline{toc}{section}{Implementation}
+%
+A choice had to be made on what tools and languages to use for the implementation of this algorithm. It involves linear algebra so programming languages that support such operations or have good libraries for this purpose were candidates. Matlab was chosen for this task because it has very strong linear algebra features built-in, it is easy and fast to try different experiments (can also be used interactively) and programs are usually smaller in size (lines of code) than their variants in C++ or other languages. At a later stage when the algorithm is closer to its final version, porting it to a language like C++ will be considered.
+\par
+Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues. Internally, it uses the Lanczos Method for Hermitian matrices and the Arnoldi Iteration for non-Hermitian matrices.[3]
+\par
+For the implementation of both the approximative method and the brute-force algorithm, sparse matrices were used. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values. For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory.
+\par
+The approximative method was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}. q represents the matrix $Q$, z represents the matrix $Z$, adj represents the adjacency matrix, and i and j represent vertex numbers.
+\begin{table}[!ht]\footnotesize
+   \centering
+   \begin{tabular}{ll}
+   similarity(adj, mu, m) & Computes and returns the matrices Q and Z. \\
+   sim2(q,z,i,j) & Computes the similarity between vertices i and j. \\
+   simlist(q,z,i) & Computes the similarity between vertex i and all other vertices. \\
+   top(q,z,i) & Uses simlist(q,z,i) and sorts the results. \\
+   randomGraph(nodes, vertices, directed) & Generates a random connected graph. \\
+   readEprints() & Reads ePrints data from a pre-processed file.
+   \end{tabular}
+   \caption{Implementation interface}
+   \label{tbl:interface}
+\end{table}
+\par
+The brute-force algorithm was implemented as a separate set of Matlab functions with a very similar interface.
+%
+%-------------------------------------------------------------------------------
 % LIMITATIONS
 %-------------------------------------------------------------------------------
 \section*{Limitations of Current Implementation}
@@ -354,6 +383,7 @@ The current implementation of this algorithm has various limitations which are d
 
 [2]: Lehoucq, Richard B., and Danny C. Sorensen. "Deflation techniques for an implicitly restarted Arnoldi iteration." SIAM Journal on Matrix Analysis and Applications 17.4 (1996): 789-821.
 
+[3]: "Matlab 2014b Documentation." Largest Eigenvalues and Eigenvectors of Matrix. The MathWorks, Inc., 3 Oct. 2014. Web. Accessed 07 Dec. 2014.\newline <http://uk.mathworks.com/help/matlab/ref/eigs.html>.
 \end{document}
 
 %-------------------------------------------------------------------------------
