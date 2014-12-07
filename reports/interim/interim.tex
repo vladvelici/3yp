@@ -242,55 +242,90 @@ Substitute \emph{Equation~\ref{eq:observe-scalar}} and \emph{Equation~\ref{eq:ge
 \mathbf{C_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a} \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
 \end{equation}
 %
+%% Approximation explained.
+%
+An approximation of the vectors $\mathbf{C_i} (\forall i \in v)$ can be obtained by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[1]. For directed graphs the Arnoldi Iteration[2] will be used instead. These algorithms perform well on large sparse matrices. In real datasets it is very often the case that the number of edges is orders of magnitude smaller than the number of vertices squared, resulting in sparse adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C}_i}$ to be an approximation of $\mathbf{C_i}$:
+\begin{equation}
+\label{eq:c-hat}
+\mathbf{\hat{C}_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{m} \frac{1}{1 - \mu \lambda_a} \bigvee\nolimits^{(a)} \bigvee\nolimits^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+\end{equation}
+%
 %% Define Z
 %
-To simplify the equation, let $Z$ be a matrix such that:
+To simplify the equation, let $Z$ be a $N \times m$ matrix such that:
 \begin{equation}
 \label{eq:z-ij}
 Z_{ij} = \frac{\bigvee\nolimits^{(j)}_i W^{\sfrac{-1}{2}}_{ii}}{1-\mu \lambda_j}
 \end{equation}
 %
-Substitute in \emph{Equation~\ref{eq:ci-rearranged-geometric}} and get:
+Substitute in \emph{Equation~\ref{eq:c-hat}} and get:
 %
 \begin{equation}
 \label{eq:ci-rearranged-z}
-\mathbf{C_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} Z_{ia} \bigvee\nolimits^{(a)}
+\mathbf{\hat{C}_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} Z_{ia} \bigvee\nolimits^{(a)}
 \end{equation}
 %
-The dot product between $\mathbf{C_i}$ and $\mathbf{C_j}$ becomes:
+The dot product between $\mathbf{\hat{C}_i}$ and $\mathbf{\hat{C}_j}$ becomes:
 \begin{align}
 %
-\mathbf{C_i^T} \mathbf{C_j} &= \Big(  W^{\sfrac{1}{2}} \sum_{a=1}^{N} Z_{ia} \bigvee\nolimits^{(a)} \Big)^T \Big(  W^{\sfrac{1}{2}} \sum_{a'=1}^{N} Z_{ia'} \bigvee\nolimits^{(a')} \Big)
+\mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \Big(  W^{\sfrac{1}{2}} \sum_{a=1}^{m} Z_{ia} \bigvee\nolimits^{(a)} \Big)^T \Big(  W^{\sfrac{1}{2}} \sum_{a'=1}^{m} Z_{ia'} \bigvee\nolimits^{(a')} \Big)
 \\
-\Leftrightarrow \mathbf{C_i^T} \mathbf{C_j} &= \sum_{a=1}^{N} Z_{ia}  \bigvee\nolimits^{(a)^T} W \sum_{a'=1}^{N} Z_{ia'} \bigvee\nolimits^{(a')}
+\Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^{m} Z_{ia}  \bigvee\nolimits^{(a)^T} W \sum_{a'=1}^{m} Z_{ia'} \bigvee\nolimits^{(a')}
 \\
-\Leftrightarrow \mathbf{C_i^T} \mathbf{C_j} &= \sum_{a=1}^N \sum_{a'=1}^N Z_{ia} Z_{ja'} \bigvee\nolimits^{(a)^T} W \bigvee\nolimits^{(a')} \label{eq:dot-zvw}
+\Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} \bigvee\nolimits^{(a)^T} W \bigvee\nolimits^{(a')} \label{eq:dot-zvw}
 \end{align}
 %
 %% Define Q
 %
-Define a new matrix $Q$ such that:
+Define a new $m \times m$ matrix $Q$ such that:
 \begin{equation}
 \label{eq:q-ij}
 Q_{ij} = \bigvee\nolimits^{(i)^T} W \bigvee\nolimits^{(j)}
 \end{equation}
 Substitute $Q$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain:
 \begin{align}
-\mathbf{C_i^T} \mathbf{C_j} &= \sum_{a=1}^N \sum_{a'=1}^N Z_{ia} Z_{ja'} Q_{aa'} \label{eq:dot-zq-sum} \\
-\Leftrightarrow \mathbf{C_i^T} \mathbf{C_j} &= \mathbf{Z_i^T} Q \mathbf{Z_j} \label{eq:dot-zq-vectorised}
+\mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} Q_{aa'} \label{eq:dot-zq-sum} \\
+\Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \mathbf{Z_i^T} Q \mathbf{Z_j} \label{eq:dot-zq-vectorised}
 \end{align}
 %
-%% Approximation explained.
+%% Storage and predictions
 %
-An approximation of the vectors $\mathbf{C_i} (\forall i \in v)$ can be obtained by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[1]. For directed graphs the Arnoldi Iteration[2] will be used instead. These algorithms perform well on large sparse matrices. In real datasets it is very often the case that the number of edges is orders of magnitude smaller than the number of vertices squared, resulting in sparse adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C_i}}$ to be an approximation of $\mathbf{C_i}$:
-\begin{equation}
-\label{eq:c-hat}
-\mathbf{\hat{C_i}} = W^{\sfrac{1}{2}} \sum_{a=1}^{m} Z_{ia} \bigvee\nolimits^{(a)}
-\end{equation}
-In implementation, the matrix $Z$ is only used to compute $\mathbf{\hat{C_i^T}}\mathbf{\hat{C_j}}$, therefore in the implementation it will be of size $N \times m$.
-
-
+From \emph{Equation~\ref{eq:dot-zq-vectorised}} it is deduced that it is only required to store the matrixes $Q$ and $Z$, which only takes $O(m^2 + Nm)$ memory, instead of $O(N^2)$ to store all $\mathbf{\hat{C}_i}$ vectors.
 \par
+To compute the similarity between two vertices, $i$ and $j$, use the norm formula from \emph{Equation~\ref{eq:dot-zq-vectorised}} and obtain:
+\begin{equation}
+\|\mathbf{\hat{C}_i^T} - \mathbf{\hat{C}_j}\|^2 = \mathbf{Z_i^T} Q \mathbf{Z_i} + \mathbf{Z_j^T} Q \mathbf{Z_j} - 2 \mathbf{Z_i^T} Q \mathbf{Z_j}
+\end{equation}
+After computing the matrices $Z$ and $Q$, the time complexity of computing the similarity between two nodes is therefore the same as multiplying three small matrices (of sizes $1 \times m$, $m \times m$ and $m \times 1$).
+%%%%%%%%%%%%%%%
+%% Vectorisation
+%%%%%%%%%%%%%%%
+\subsection*{Vectorisation}
+It is usually more efficient to have vectorised implementations (to use matrix operations in favour of iterative solutions) in programming languages like Matlab, Octave or R. In this subsection is presented a way of computing the matrices $Z$ and $Q$ using matrix operations. For this purpose, in this subsection, $\bigvee$ only contains the computed eigenvectors (is of size $N \times m$), and $\bigwedge$ only contains the computed eigenvalues (is of size $m \times m$).
+\par
+%
+%% Z
+%
+To vectorise the computation of $Z$ from \emph{Equation~\ref{eq:z-ij}}, define a new diagonal matrix $R$:
+\begin{equation}
+R = \begin{bmatrix}
+\frac{1}{1 - \mu \lambda_1} & 0  & \dots & 0 \\
+0 & \frac{1}{1 - \mu \lambda_2}  & \dots & 0 \\
+\vdots & \vdots & \ddots & \\
+0 & 0 & \dots & \frac{1}{1 - \mu \lambda_m}
+\end{bmatrix}
+\end{equation}
+And then define $Z$ as:
+\begin{equation}
+Z = W^{\sfrac{-1}{2}} \bigvee R
+\end{equation}
+%
+%% Q
+%
+A vectorised version of \emph{Equation~\ref{eq:q-ij}} (to compute $Q$):
+\begin{equation}
+Q = \bigvee\nolimits^T W \bigvee
+\end{equation}
 %
 %-------------------------------------------------------------------------------
 % LIMITATIONS
