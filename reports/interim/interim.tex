@@ -17,6 +17,7 @@
 \usepackage{fancyhdr}
 \usepackage{lastpage}
 \usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\graphicspath{ {img/} }
 \usepackage[T1]{fontenc}
 \usepackage[font=small, labelfont=bf]{caption}
 \usepackage{fourier}
@@ -80,7 +81,7 @@ MEng Computer Science with Artificial Intelligence
 % ABSTRACT
 %-------------------------------------------------------------------------------
 \section*{Abstract}
-\addcontentsline{toc}{section}{Introduction}Given a large graph, in the range of millions or billions of nodes, it is difficult to efficiently find similar nodes. Examples of applications of finding similar nodes in data represented as graphs are all around the web nowadays: \textit{people you may know} and \textit{who to follow} suggestions on social networks, or topics that may interest you on different websites.
+\addcontentsline{toc}{section}{Abstract}Given a large graph, in the range of millions or billions of nodes, it is difficult to efficiently find similar nodes. Examples of applications of finding similar nodes in data represented as graphs are all around the web nowadays: \textit{people you may know} and \textit{who to follow} suggestions on social networks, or topics that may interest you on different websites.
 \par
 This project will explore ways to obtain meaningful information of this nature from large datasets represented as graphs.
 \parThe goals of this project are developing efficient ways to find similar nodes in large graphs for different use cases and implementing an open-source software library to provide everyone with this functionality.
@@ -93,7 +94,7 @@ This project will explore ways to obtain meaningful information of this nature f
 %
 Plenty of datasets are or can be represented as graphs where vertices represent entities and edges represent relationships between entities. A problem of interest is to find entities that are similarly connected. Example instances of this problem are finding \textit{people you may know} in a social network, people with common interests from research publications repositories or identifying possible duplicates in a dataset.
 \par
-It is not computationally feasible to calculate the exact similarities between vertices of very large graphs. This project investigates a method to compute an approximation of similarities between nodes and attempt to evaluate its performance (accuracy) on different datasets.
+It is not computationally feasible to calculate the exact similarities between vertices of very large graphs. In this project, we investigate a method to compute an approximation of similarities between vertices and attempt to evaluate its performance (accuracy) on different datasets.
 \par
 
 %
@@ -106,14 +107,14 @@ It is not computationally feasible to calculate the exact similarities between v
 %
 The similarity algorithm is described in regards to the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
 %
-In order to derive an algorithm to find similarities between vertices in a graph, a measure of similarity between two vertices must be defined. $M$ is the adjacency matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let $D$ be a normalised adjacency matrix such that each column sums up to 1:
+In order to derive an algorithm to find similarities between vertices in a graph, a measure of similarity between two vertices must be defined. $M$ is the adjacency matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let $D$ be a normalised adjacency matrix such that each column sums up to $1$:
 %
 \begin{equation}
 \label{eq:initial-d}
 D_{i j} = \frac{1}{\sum_{j=1}^N M_{ij}}
 \end{equation}
 %
-Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matrix. Let $\mathbf{C_i}$ be a vector that represents how vertex $i$ is connected to the graph. In a brute-force approach, it can be computed as:
+Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matrix, and $\mathbf{C_i}$ a vector that represents how vertex $i$ is connected to the graph. In a brute-force approach, $\mathbf{C_i}$ can be computed as:
 %
 \begin{equation}
 \label{eq:brute-ci}
@@ -128,27 +129,27 @@ The similarity between two vertices $i$ and $j$ is the (squared) norm of the dif
 \|\mathbf{C_i} - \mathbf{C_j}\|^2
 \end{equation}
 %
-The brute-force approach was run on small randomly generated connected graphs (200 vertices) with 50 iterations and it gave meaningful results but it does not scale for large datasets. In the next section an algorithm that scales to large datasets is described.
+The brute-force approach was run on small randomly generated connected graphs (200 vertices) with 50 iterations and it gave meaningful results but it does not scale for large datasets. In the next section an algorithm that scales up to large datasets is described.
 %
 %-------------------------------------------------------------------------------
 % Approximative approach
 %-------------------------------------------------------------------------------
 %
-\section*{Approximative Method}
-\addcontentsline{toc}{section}{Approximative Method}
+\section*{Approximative Approach}
+\addcontentsline{toc}{section}{Approximative Approach}
 %
 %% Geometry 
 %
-Geometrically, if vectors $\mathbf{C_i}$ and $\mathbf{C_j}$ start from the origin, then $\mathbf{C_i}$, $\mathbf{C_j}$ and $\mathbf{a} = \mathbf{C_i}-\mathbf{C_j}$ describe a triangle. Let $\theta$ be the angle between $\mathbf{C_i}$ and $\mathbf{C_j}$. From the Law of Cosines:
+Geometrically, if vectors $\mathbf{C_i}$ and $\mathbf{C_j}$ start from the origin, then $\mathbf{C_i}$, $\mathbf{C_j}$ and $\mathbf{C_i}-\mathbf{C_j}$ describe a triangle. Let $\theta$ be the angle between $\mathbf{C_i}$ and $\mathbf{C_j}$. From the Law of Cosines:
 \begin{equation}
 \label{eq:cosinelaw}
-\|\mathbf{a}\|^2 = \|\mathbf{C_i}\|^2 + \|\mathbf{C_j}\|^2 - 2  \|\mathbf{C_i}\| \|\mathbf{C_j}\| \cos \ \theta
+\|\mathbf{C_i}-\mathbf{C_j}\|^2 = \|\mathbf{C_i}\|^2 + \|\mathbf{C_j}\|^2 - 2  \|\mathbf{C_i}\| \|\mathbf{C_j}\| \cos \ \theta
 \end{equation}
 %
-Take the dot product $\mathbf{C_i^T}\mathbf{C_j} = \| \mathbf{C_i} \| \| \mathbf{C_j} \| \cos \theta$. Observe that the angle between $\mathbf{C_i}$ and itself is 0 and $\cos0=1$, and obtain $\|\mathbf{C_i}\|^2 = \mathbf{C_i^T}\mathbf{C_i}$. Now \emph{Equation~\ref{eq:cosinelaw}} becomes:
+Take the dot product $\mathbf{C_i^T}\mathbf{C_j} = \| \mathbf{C_i} \| \| \mathbf{C_j} \| \cos \theta$. The angle between $\mathbf{C_i}$ and itself is $0$ and $\cos0=1$, thus $\|\mathbf{C_i}\|^2 = \mathbf{C_i^T}\mathbf{C_i}$. Now \emph{Equation~\ref{eq:cosinelaw}} becomes:
 \begin{equation}
 \label{eq:norm-equation}
-\|\mathbf{a}\|^2 = \mathbf{C_i^T}\mathbf{C_i} + \mathbf{C_j^T}\mathbf{C_j} - 2 \mathbf{C_i^T}\mathbf{C_j}
+\|\mathbf{C_i}-\mathbf{C_j}\|^2 = \mathbf{C_i^T}\mathbf{C_i} + \mathbf{C_j^T}\mathbf{C_j} - 2 \mathbf{C_i^T}\mathbf{C_j}
 \end{equation}
 %
 Therefore it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$ (for all $i, j \in v$) to compute the similarities between all vertices of the graph. Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory for a very large dataset if we use the brute-force approach.
@@ -170,7 +171,6 @@ Now \emph{Equation~\ref{eq:initial-d}} can be written as $D = WM$, thus
 \label{eq:newdt}
 D^t = (WM)^t
 \end{equation}
-%
 %
 Define a new matrix $A$:
 %
@@ -351,9 +351,9 @@ A choice had to be made on what tools and languages to use for the implementatio
 \par
 Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues. Internally, it uses the Lanczos Method for Hermitian matrices and the Arnoldi Iteration for non-Hermitian matrices.[3]
 \par
-For the implementation of both the approximative method and the brute-force algorithm, sparse matrices were used. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values. For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory.
+For the implementation of both the approximative approach and the brute-force algorithm, sparse matrices were used. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[4] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory.
 \par
-The approximative method was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}. q represents the matrix $Q$, z represents the matrix $Z$, adj represents the adjacency matrix, and i and j represent vertex numbers.
+The approximative approach was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}.
 \begin{table}[!ht]\footnotesize
    \centering
    \begin{tabular}{ll}
@@ -364,7 +364,7 @@ The approximative method was implemented in Matlab as a couple of Matlab functio
    randomGraph(nodes, vertices, directed) & Generates a random connected graph. \\
    readEprints() & Reads ePrints data from a pre-processed file.
    \end{tabular}
-   \caption{Implementation interface}
+   \caption{Implementation interface. Parameters: q represents the matrix $Q$, z represents the matrix $Z$, adj represents the adjacency matrix, and i and j represent vertex numbers.}
    \label{tbl:interface}
 \end{table}
 \par
@@ -375,10 +375,47 @@ The brute-force algorithm was implemented as a separate set of Matlab functions 
 %-------------------------------------------------------------------------------
 \section*{Evaluation}
 \addcontentsline{toc}{section}{Evaluation}
-A simple evaluation metric of how well the approximative method retains the most important information from the graph is to evaluate how different are the top similar vertices for the brute-force approach and the approximative method with different number of eigenvalues and eigenvectors used.
+A simple evaluation metric of how well the approximative approach retains the most important information from the graph is to evaluate how different are the top similar vertices for the brute-force approach and the approximative approach with different number of eigenvalues and eigenvectors used.
 \par
-A random connected graph of $N=200$ vertices and $350$ edges was generated. The similarities between all pairs of nodes were computed using both the brute-force approach and the approximative method, and nodes were sorted by their similarities to obtain $200$ tops (the higher the position in the top, the more similar the nodes are). Let $B_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the brute-force approach. Similarly let $T^{20}_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the approximative approach with 20 eigenvectors. Define the difference between the two methods to be 
-\begin{equation} d = \sum_{i=1}^N \sum_{j=1}^N \operatorname{abs}(B_{ij} - T_{ij}) \end{equation}
+A random connected graph of $N=200$ vertices and $350$ edges was generated. The similarities between all pairs of nodes were computed using both the brute-force approach and the approximative approach, and nodes were sorted by their similarities to obtain $200$ tops (the higher the position in the top, the more similar the nodes are). Let $B^m_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the brute-force approach with $m$ iterations. Similarly let $T^{m}_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the approximative approach with $m$ eigenvectors. Define the difference between two approaches to be: 
+\begin{equation} d(B^m, T^{m'}) = \frac{1}{N^3} \sum_{i=1}^N \sum_{j=1}^N \operatorname{abs}(B^m_{ij} - T^{m'}_{ij}) \end{equation}
+%
+The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The difference d was evaluated between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 5 to 195$ eigenvectors. We can observe that if we use the majority of eigenvalues, the difference is insignificant. It is computationally unfeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum. The local minimum might differ from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated graph with $500$ vertices and $700$ edges. The first local minimum of d() was at around 100 eigenvectors with a difference of approx. $0.2$, and at $40$ eigenvectors the difference is $0.2297$, and at $20$ eigenvectors the difference is $0.2557$.
+\begin{figure}[tpbh]
+\centering
+        \begin{subfigure}[b]{0.6\textwidth}
+	        \includegraphics[width=\textwidth]{no-of-eigenvectors}
+        		\caption{A plot of the differences on a range of eigenvalues.}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \def\arraystretch{1.5}
+           \begin{tabular}{|c|c|}
+	   \hline
+	   Parameters & Value of d() \\
+	   \hline
+	   $d(B^{20}, T^{10})$ & 0.2501 \\
+	   \hline
+	   $d(B^{20}, T^{20})$ & 0.2257   \\ 
+	   \hline
+   	   $d(B^{20}, T^{30})$ & 0.2243   \\ 
+	   \hline
+	   $d(B^{20}, T^{40})$ & 0.2208   \\ 
+	\hline
+	   $d(B^{20}, T^{50})$ & 0.2150 \\
+	   \hline
+	   $d(B^{20}, T^{100})$ & 0.2453\\
+	   \hline
+	    $d(B^{20}$, $T^{199})$ & 0.0325 \\
+	    \hline
+	   \end{tabular}
+	   \caption{Table of some of the values.}
+	   \label{tbl:comparisons}
+	  \label{fig:no-of-eigenvectors}
+        \end{subfigure}%
+        \caption{Difference of results between brute-force and approximative approaches.}
+\end{figure}
 %
 %-------------------------------------------------------------------------------
 % LIMITATIONS
@@ -405,6 +442,8 @@ The current implementation of this algorithm has various limitations which are d
 [2]: Lehoucq, Richard B., and Danny C. Sorensen. "Deflation techniques for an implicitly restarted Arnoldi iteration." SIAM Journal on Matrix Analysis and Applications 17.4 (1996): 789-821.
 
 [3]: "Matlab 2014b Documentation." Largest Eigenvalues and Eigenvectors of Matrix. The MathWorks, Inc., 3 Oct. 2014. Web. Accessed 07 Dec. 2014.\newline <http://uk.mathworks.com/help/matlab/ref/eigs.html>.
+
+[4]: Gilbert, John R., Cleve Moler, and Robert Schreiber. "Sparse matrices in MATLAB: design and implementation." SIAM Journal on Matrix Analysis and Applications 13.1 (1992): 333-356.
 \end{document}
 
 %-------------------------------------------------------------------------------
