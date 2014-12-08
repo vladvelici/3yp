@@ -27,6 +27,8 @@
 \usepackage{url, lipsum}
 \usepackage{amsmath}
 \usepackage{xfrac}
+\usepackage{pgfgantt}
+\usepackage{pdflscape}
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1.2em}
 
@@ -461,8 +463,43 @@ The current implementation of this algorithm has various limitations which are d
 \paragraph*{Ignored relationship types} In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain these weights from the dataset.
 %
 \paragraph*{Not distributed} What if the dataset is too large to fit into main memory? The algorithm is currently only designed to run on one machine. Methods of distributing the algorithm on more than one machine over a network will be investigated in the future.
-%
-\paragraph*{Weights of edges} To compute similarities between nodes in real datasets we often need to consider more features. Each feature can be described as a type of relationship that leads to edges of different weights in the graph. Nothing is currently implemented to help learn the optimal weights from data to maximise the performance of the algorithm.
+%-------------------------------------------------------------------------------
+% FUTURE PLANS
+%-------------------------------------------------------------------------------
+\section*{Future plans}
+\addcontentsline{toc}{section}{Future plans}
+The highest priority improvements are: develop a good evaluation method, add support for directed graphs, and use different edge weights for different types of relationships. A detailed plan can be observed in the Gantt Chart in ....
+
+\begin{landscape}
+
+\begin{figure}[ftbp]
+\begin{center}
+
+\begin{ganttchart}[vgrid=true, hgrid=true, y unit chart=1.5em, y unit title=1.4em, title height=1]{1}{32}
+\gantttitle{Semester 1}{17} \gantttitle{Semester 2}{15} \\
+\gantttitlelist{1,...,32}{1} \\
+\ganttbar{Agreed project \& brief}{1}{2} \\
+\ganttbar{Implemented brute-force}{3}{3} \\
+\ganttbar{Understanding math.}{4}{9} \\
+\ganttbar{Implementing approx.}{8}{10} \\
+\ganttbar{Evaluation ideas}{10}{11} \\
+\ganttbar{Write progress report}{11}{11} \\
+\ganttmilestone{Progress report}{11} \\
+\ganttbar{Research evaluation}{12}{19} \\
+\ganttbar{Directed graphs support}{18}{21} \\
+\ganttbar{Learn weights algorithm}{21}{25} \\
+\ganttbar{Real datasets demo}{26}{28} \\
+\ganttbar{Write final report}{28}{30} \\
+\ganttmilestone{Final report}{30} \\
+\ganttbar{Prepare Viva}{31}{32} \\
+\ganttmilestone{Viva}{32}
+\end{ganttchart}
+\end{center}
+\caption{Gantt Chart}
+\end{figure}
+
+\end{landscape}
+
 
 %-------------------------------------------------------------------------------
 % REFERENCES
