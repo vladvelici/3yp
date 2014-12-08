@@ -105,7 +105,7 @@ It is not computationally feasible to calculate the exact similarities between v
 \section*{Brute-Force Approach}
 \addcontentsline{toc}{section}{Brute-Force Approach}
 %
-The similarity algorithm is described in regards to the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
+The similarity algorithm is described regarding the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
 %
 In order to derive an algorithm to find similarities between vertices in a graph, a measure of similarity between two vertices must be defined. $M$ is the adjacency matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let $D$ be a normalised adjacency matrix such that each column sums up to $1$:
 %
@@ -121,7 +121,7 @@ Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matr
 \mathbf{C_i} = \sum_{t=0}^\infty \mu^t D^t \mathbf{\delta_i}
 \end{equation}
 %
-Where $\mu \in (0,1)$ is a penalising factor. $\mu$ controls how much the far connections are considered into the similarities. Therefore a large $\mu$ enforces consideration of very far connections whereas a small $\mu$ considers far connections less.
+Where $\mu \in (0,1)$ is a penalising factor. $\mu$ controls how much the far connections are considered into the similarities. Therefore, a large $\mu$ enforces consideration of very far connections whereas a small $\mu$ considers far connections less.
 %
 The similarity between two vertices $i$ and $j$ is the (squared) norm of the difference between $\mathbf{C_i}$ and $\mathbf{C_j}$:
 %
@@ -152,7 +152,7 @@ Take the dot product $\mathbf{C_i^T}\mathbf{C_j} = \| \mathbf{C_i} \| \| \mathbf
 \|\mathbf{C_i}-\mathbf{C_j}\|^2 = \mathbf{C_i^T}\mathbf{C_i} + \mathbf{C_j^T}\mathbf{C_j} - 2 \mathbf{C_i^T}\mathbf{C_j}
 \end{equation}
 %
-Therefore it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$ (for all $i, j \in v$) to compute the similarities between all vertices of the graph. Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory for a very large dataset if we use the brute-force approach.
+Therefore, it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$ (for all $i, j \in v$) to compute the similarities between all vertices of the graph. Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory for a very large dataset if we use the brute-force approach.
 %
 \par
 %
@@ -309,7 +309,7 @@ To compute the similarity between two vertices, $i$ and $j$, use the norm formul
 \begin{equation}
 \|\mathbf{\hat{C}_i^T} - \mathbf{\hat{C}_j}\|^2 = \mathbf{Z_i^T} Q \mathbf{Z_i} + \mathbf{Z_j^T} Q \mathbf{Z_j} - 2 \mathbf{Z_i^T} Q \mathbf{Z_j}
 \end{equation}
-After computing the matrices $Z$ and $Q$, the time complexity of computing the similarity between two nodes is therefore the same as multiplying three small matrices (of sizes $1 \times m$, $m \times m$ and $m \times 1$).
+After computing the matrices $Z$ and $Q$, the time complexity of computing the similarity between two nodes is the same as multiplying three small matrices (of sizes $1 \times m$, $m \times m$ and $m \times 1$).
 %%%%%%%%%%%%%%%
 %% Vectorisation
 %%%%%%%%%%%%%%%
@@ -420,7 +420,7 @@ The equation is normalised by $N^3$ because the maximum value we can get lies in
 	\label{fig:no-of-eigenvectors}
 \end{figure}
 %
-The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The difference d was evaluated between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 5 to 195$ eigenvectors. We can observe that if we use the majority of eigenvalues, the value of $d()$ is very small. It is computationally unfeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum (on this small dataset). The local minimum might differ from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated connected graph with $500$ vertices and $700$ edges. The first local minimum of $d()$ was at around 100 eigenvectors with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the values of $d()$ obtained are $0.2297$ and $0.2557$, respectively.
+The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The difference d was evaluated between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 5 to 195$ eigenvectors. We can observe that if we use the majority of eigenvalues, the value of $d()$ is very small. It is computationally infeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum (on this small dataset). The local minimum might differ from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated connected graph with $500$ vertices and $700$ edges. The first local minimum of $d()$ was at around 100 eigenvectors with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the values of $d()$ obtained are $0.2297$ and $0.2557$, respectively.
 %
 %
 % -----
@@ -440,7 +440,7 @@ A subjective method of evaluation on real data is attempting to visualise the al
 %
 None of the evaluation methods described above give an objective, efficient and automatic evaluation metric. In this subsection we discuss a few possible evaluation methods of the algorithm.
 \par
-To objectively evaluate how well the outputs of the algorithm reflect the reality of the dataset it is being used on, we need to carefully define the goals of the algorithm in regards the the dataset. We only look for datasets where the \textit{similarities} between entities can be obtained exclusively from the graph structure. We need labelled (known \textit{similarities} between entities) datasets that have only one relationship type from which we can exclusively compute \textit{similarities} between nodes.
+To objectively evaluate how well the outputs of the algorithm reflect the reality of the dataset it is being used on, we need to carefully define the goals of the algorithm in respect of the dataset. We only look for datasets where the \textit{similarities} between entities can be obtained exclusively from the graph structure. We need labelled (known \textit{similarities} between entities) datasets that have only one relationship type from which we can exclusively compute \textit{similarities} between nodes.
 \par
 If the dataset used for evaluation has more than one type of relationship (more features), the evaluation is subjective to the choice of the weights for each relationship type. The reference similarities (from dataset or obtained by other means) might be based on different weights of each feature of the dataset, therefore using equal weights in the graph representation will likely lead to a poorer performance and biased evaluation. 
 \par
@@ -448,7 +448,7 @@ Given some datasets that fit the requirements from above, we can run our algorit
 \par
 A similar way is to compute similarities using another algorithm (call it reference algorithm) and only one feature of a dataset. Use the same feature to build a graph structure, then compare the results of our algorithm with the results of the reference algorithm used.
 \par
-Given a labelled dataset that fits the requirements from above, we can run our algorithm and compare the results with the reference similarities. A single dataset can result in biased evaluations therefore more such datasets are required. The downside is that datasets with known similarities between entities are not very common, and because the term \textit{similarity} is ambiguous (e.g. why is an entity \textit{similar} to another? In regards to which features?). Given an unlabelled dataset, we can obtain a labelled dataset using other algorithms and techniques, but the comparison will be in regards to the labelling method used.
+Given a labelled dataset that fits the requirements from above, we can run our algorithm and compare the results with the reference similarities. A single dataset can result in biased evaluations, therefore more such datasets are required. The downside is that datasets with known similarities between entities are not very common, and because the term \textit{similarity} is ambiguous (e.g. why is an entity \textit{similar} to another? In respect to which features?). Given an unlabelled dataset, we can obtain a labelled dataset using other algorithms and techniques, but the evaluation will be in respect to the labelling method used.
 \par
 An online evaluation is a way to evaluate the system by getting feedback from users. In this case, we would deploy the algorithm on a experimentation website and display the results to live users, while making sure to track the way users interact with the outputs of the algorithm.
 %-------------------------------------------------------------------------------
