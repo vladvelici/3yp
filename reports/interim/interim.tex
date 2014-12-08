@@ -41,7 +41,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \setlength\headheight{15pt}
-\fancyhead[L]{vsv1g12@soton.ac.uk}
+\fancyhead[L]{Similar nodes in large graphs}
 \fancyhead[R]{Vlad Velici}
 \fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
 %-------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ MEng Computer Science with Artificial Intelligence
 \par
 This project will explore ways to obtain meaningful information of this nature from large datasets represented as graphs.
 \parThe goals of this project are developing efficient ways to find similar nodes in large graphs for different use cases and implementing an open-source software library to provide everyone with this functionality.
-
+\newpage
 %-------------------------------------------------------------------------------
 % INTRODUCTION
 %-------------------------------------------------------------------------------
@@ -375,22 +375,25 @@ The brute-force algorithm was implemented as a separate set of Matlab functions 
 %-------------------------------------------------------------------------------
 \section*{Evaluation}
 \addcontentsline{toc}{section}{Evaluation}
+\subsection*{Comparison of approximative and brute-force approaches}
+\addcontentsline{toc}{subsection}{Comparison of approximative and brute-force approaches}
 A simple evaluation metric of how well the approximative approach retains the most important information from the graph is to evaluate how different are the top similar vertices for the brute-force approach and the approximative approach with different number of eigenvalues and eigenvectors used.
 \par
-A random connected graph of $N=200$ vertices and $350$ edges was generated. The similarities between all pairs of nodes were computed using both the brute-force approach and the approximative approach, and nodes were sorted by their similarities to obtain $200$ tops (the higher the position in the top, the more similar the nodes are). Let $B^m_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the brute-force approach with $m$ iterations. Similarly let $T^{m}_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the approximative approach with $m$ eigenvectors. Define the difference between two approaches to be: 
+For a dataset of $N$ vertices, let $B^m_{ij}$ be the position of vertex $j$ in the top similar vertices of vertex $i$ for the brute-force approach with $m$ iterations. Similarly let $T^{m}_{ij}$ be the position of vertex $j$ in the top similar vertices of vertex $i$ for the approximative approach with $m$ eigenvectors. Define the difference between two such tops to be: 
 \begin{equation} d(B^m, T^{m'}) = \frac{1}{N^3} \sum_{i=1}^N \sum_{j=1}^N \operatorname{abs}(B^m_{ij} - T^{m'}_{ij}) \end{equation}
 %
-The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The difference d was evaluated between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 5 to 195$ eigenvectors. We can observe that if we use the majority of eigenvalues, the difference is insignificant. It is computationally unfeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum. The local minimum might differ from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated graph with $500$ vertices and $700$ edges. The first local minimum of d() was at around 100 eigenvectors with a difference of approx. $0.2$, and at $40$ eigenvectors the difference is $0.2297$, and at $20$ eigenvectors the difference is $0.2557$.
-\begin{figure}[tpbh]
-\centering
+The equation is normalised by $N^3$ because the maximum value we can get lies in the interval $(N^2, N^3)$.
+%
+\begin{figure}[tpb]
+        \centering
         \begin{subfigure}[b]{0.6\textwidth}
 	        \includegraphics[width=\textwidth]{no-of-eigenvectors}
         		\caption{A plot of the differences on a range of eigenvalues.}
         \end{subfigure}%
         ~
         \begin{subfigure}[b]{0.4\textwidth}
-        \centering
-        \def\arraystretch{1.5}
+           \centering
+           \def\arraystretch{1.5}
            \begin{tabular}{|c|c|}
 	   \hline
 	   Parameters & Value of d() \\
@@ -402,7 +405,7 @@ The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The c
    	   $d(B^{20}, T^{30})$ & 0.2243   \\ 
 	   \hline
 	   $d(B^{20}, T^{40})$ & 0.2208   \\ 
-	\hline
+	   \hline
 	   $d(B^{20}, T^{50})$ & 0.2150 \\
 	   \hline
 	   $d(B^{20}, T^{100})$ & 0.2453\\
@@ -412,11 +415,42 @@ The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The c
 	   \end{tabular}
 	   \caption{Table of some of the values.}
 	   \label{tbl:comparisons}
-	  \label{fig:no-of-eigenvectors}
         \end{subfigure}%
         \caption{Difference of results between brute-force and approximative approaches.}
+	\label{fig:no-of-eigenvectors}
 \end{figure}
 %
+The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The difference d was evaluated between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 5 to 195$ eigenvectors. We can observe that if we use the majority of eigenvalues, the value of $d()$ is very small. It is computationally unfeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum (on this small dataset). The local minimum might differ from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated connected graph with $500$ vertices and $700$ edges. The first local minimum of $d()$ was at around 100 eigenvectors with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the values of $d()$ obtained are $0.2297$ and $0.2557$, respectively.
+%
+%
+% -----
+% Evaluation of the algorithm itself
+% -----
+%
+\par
+Although the evaluation metric described above might be useful to compare the two approaches directly, it does not tell anything about how well the algorithm achieves its goal of finding similar entities in a real dataset. Even if the computation of the brute-force approach would be feasible on large datasets for comparison, it would still not verify the underlying intuition of this algorithm.
+%
+\subsection*{Visualisation}
+\addcontentsline{toc}{subsection}{Visualisation}
+%
+A subjective method of evaluation on real data is attempting to visualise the algorithm output on real data and deduce whether it gives sensitive results. This method has the disadvantage of being subjective but is nonetheless a start of the journey of building an evaluation method for the algorithm.
+%
+\subsection*{Discussion of further evaluation}
+\addcontentsline{toc}{subsection}{Discussion of further evaluation}
+%
+None of the evaluation methods described above give an objective, efficient and automatic evaluation metric. In this subsection we discuss a few possible evaluation methods of the algorithm.
+\par
+To objectively evaluate how well the outputs of the algorithm reflect the reality of the dataset it is being used on, we need to carefully define the goals of the algorithm in regards the the dataset. We only look for datasets where the \textit{similarities} between entities can be obtained exclusively from the graph structure. We need labelled (known \textit{similarities} between entities) datasets that have only one relationship type from which we can exclusively compute \textit{similarities} between nodes.
+\par
+If the dataset used for evaluation has more than one type of relationship (more features), the evaluation is subjective to the choice of the weights for each relationship type. The reference similarities (from dataset or obtained by other means) might be based on different weights of each feature of the dataset, therefore using equal weights in the graph representation will likely lead to a poorer performance and biased evaluation. 
+\par
+Given some datasets that fit the requirements from above, we can run our algorithm and compare the results with the reference similarities. In reality datasets have many features and a complex graph structure with relationships having different weights, therefore this evaluation method cannot be done in practice.
+\par
+A similar way is to compute similarities using another algorithm (call it reference algorithm) and only one feature of a dataset. Use the same feature to build a graph structure, then compare the results of our algorithm with the results of the reference algorithm used.
+\par
+Given a labelled dataset that fits the requirements from above, we can run our algorithm and compare the results with the reference similarities. A single dataset can result in biased evaluations therefore more such datasets are required. The downside is that datasets with known similarities between entities are not very common, and because the term \textit{similarity} is ambiguous (e.g. why is an entity \textit{similar} to another? In regards to which features?). Given an unlabelled dataset, we can obtain a labelled dataset using other algorithms and techniques, but the comparison will be in regards to the labelling method used.
+\par
+An online evaluation is a way to evaluate the system by getting feedback from users. In this case, we would deploy the algorithm on a experimentation website and display the results to live users, while making sure to track the way users interact with the outputs of the algorithm.
 %-------------------------------------------------------------------------------
 % LIMITATIONS
 %-------------------------------------------------------------------------------
@@ -445,66 +479,3 @@ The current implementation of this algorithm has various limitations which are d
 
 [4]: Gilbert, John R., Cleve Moler, and Robert Schreiber. "Sparse matrices in MATLAB: design and implementation." SIAM Journal on Matrix Analysis and Applications 13.1 (1992): 333-356.
 \end{document}
-
-%-------------------------------------------------------------------------------
-% SNIPPETS
-%-------------------------------------------------------------------------------
-
-%\begin{figure}[!ht]
-%   \centering
-%   \includegraphics[width=0.8\textwidth]{file_name}
-%   \caption{}
-%   \centering
-%   \label{label:file_name}
-%\end{figure}
-
-%\begin{figure}[!ht]
-%   \centering
-%   \includegraphics[width=0.8\textwidth]{graph}
-%   \caption{Blood pressure ranges and associated level of hypertension (American Heart Association, 2013).}
-%   \centering
-%   \label{label:graph}
-%\end{figure}
-
-%\begin{wrapfigure}{r}{0.30\textwidth}
-%   \vspace{-40pt}
-%   \begin{center}
-%       \includegraphics[width=0.29\textwidth]{file_name}
-%   \end{center}
-%   \vspace{-20pt}
-%   \caption{}
-%   \label{label:file_name}
-%\end{wrapfigure}
-
-%\begin{wrapfigure}{r}{0.45\textwidth}
-%   \begin{center}
-%       \includegraphics[width=0.29\textwidth]{manometer}
-%   \end{center}
-%   \caption{Aneroid sphygmomanometer with stethoscope (Medicalexpo, 2012).}
-%   \label{label:manometer}
-%\end{wrapfigure}
-
-%\begin{table}[!ht]\footnotesize
-%   \centering
-%   \begin{tabular}{cccccc}
-%   \toprule
-%   \multicolumn{2}{c} {Pearson's correlation test} & \multicolumn{4}{c} {Independent t-test} \\
-%   \midrule    
-%   \multicolumn{2}{c} {Gender} & \multicolumn{2}{c} {Activity level} & \multicolumn{2}{c} {Gender} \\
-%   \midrule
-%   Males & Females & 1st level & 6th level & Males & Females \\
-%   \midrule
-%   \multicolumn{2}{c} {BMI vs. SP} & \multicolumn{2}{c} {Systolic pressure} & \multicolumn{2}{c} {Systolic Pressure} \\
-%   \multicolumn{2}{c} {BMI vs. DP} & \multicolumn{2}{c} {Diastolic pressure} & \multicolumn{2}{c} {Diastolic pressure} \\
-%   \multicolumn{2}{c} {BMI vs. MAP} & \multicolumn{2}{c} {MAP} & \multicolumn{2}{c} {MAP} \\
-%   \multicolumn{2}{c} {W:H ratio vs. SP} & \multicolumn{2}{c} {BMI} & \multicolumn{2}{c} {BMI} \\
-%   \multicolumn{2}{c} {W:H ratio vs. DP} & \multicolumn{2}{c} {W:H ratio} & \multicolumn{2}{c} {W:H ratio} \\
-%   \multicolumn{2}{c} {W:H ratio vs. MAP} & \multicolumn{2}{c} {\% Body fat} & \multicolumn{2}{c} {\% Body fat} \\
-%   \multicolumn{2}{c} {} & \multicolumn{2}{c} {Height} & \multicolumn{2}{c} {Height} \\
-%   \multicolumn{2}{c} {} & \multicolumn{2}{c} {Weight} & \multicolumn{2}{c} {Weight} \\
-%   \multicolumn{2}{c} {} & \multicolumn{2}{c} {Heart rate} & \multicolumn{2}{c} {Heart rate} \\
-%   \bottomrule
-%   \end{tabular}
-%   \caption{Parameters that were analysed and related statistical test performed for current study. BMI - body mass index; SP - systolic pressure; DP - diastolic pressure; MAP - mean arterial pressure; W:H ratio - waist to hip ratio.}
-%   \label{label:tests}
-%\end{table}
