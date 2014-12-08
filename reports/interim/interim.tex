@@ -77,6 +77,15 @@ MEng Computer Science with Artificial Intelligence
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
+% ABSTRACT
+%-------------------------------------------------------------------------------
+\section*{Abstract}
+\addcontentsline{toc}{section}{Introduction}Given a large graph, in the range of millions or billions of nodes, it is difficult to efficiently find similar nodes. Examples of applications of finding similar nodes in data represented as graphs are all around the web nowadays: \textit{people you may know} and \textit{who to follow} suggestions on social networks, or topics that may interest you on different websites.
+\par
+This project will explore ways to obtain meaningful information of this nature from large datasets represented as graphs.
+\parThe goals of this project are developing efficient ways to find similar nodes in large graphs for different use cases and implementing an open-source software library to provide everyone with this functionality.
+
+%-------------------------------------------------------------------------------
 % INTRODUCTION
 %-------------------------------------------------------------------------------
 \section*{Introduction}
@@ -84,7 +93,9 @@ MEng Computer Science with Artificial Intelligence
 %
 Plenty of datasets are or can be represented as graphs where vertices represent entities and edges represent relationships between entities. A problem of interest is to find entities that are similarly connected. Example instances of this problem are finding \textit{people you may know} in a social network, people with common interests from research publications repositories or identifying possible duplicates in a dataset.
 \par
-It is easy to find exact similarities between vertices in small graphs by performing pairwise comparisons. Such an algorithm is too slow for large datasets of millions of vertices. This project investigates a method to compute an approximation of similarities between nodes and attempt to evaluate its performance on different datasets.
+It is not computationally feasible to calculate the exact similarities between vertices of very large graphs. This project investigates a method to compute an approximation of similarities between nodes and attempt to evaluate its performance (accuracy) on different datasets.
+\par
+
 %
 %-------------------------------------------------------------------------------
 % BRUTE FORCE
@@ -111,10 +122,10 @@ Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matr
 %
 Where $\mu \in (0,1)$ is a penalising factor. $\mu$ controls how much the far connections are considered into the similarities. Therefore a large $\mu$ enforces consideration of very far connections whereas a small $\mu$ considers far connections less.
 %
-The similarity between two vertices $i$ and $j$ is the norm of the difference between $\mathbf{C_i}$ and $\mathbf{C_j}$:
+The similarity between two vertices $i$ and $j$ is the (squared) norm of the difference between $\mathbf{C_i}$ and $\mathbf{C_j}$:
 %
 \begin{equation}
-s(i,j) = \|\mathbf{C_i} - \mathbf{C_j}\|
+\|\mathbf{C_i} - \mathbf{C_j}\|^2
 \end{equation}
 %
 The brute-force approach was run on small randomly generated connected graphs (200 vertices) with 50 iterations and it gave meaningful results but it does not scale for large datasets. In the next section an algorithm that scales to large datasets is described.
@@ -358,6 +369,16 @@ The approximative method was implemented in Matlab as a couple of Matlab functio
 \end{table}
 \par
 The brute-force algorithm was implemented as a separate set of Matlab functions with a very similar interface.
+%
+%-------------------------------------------------------------------------------
+% EVALUATION
+%-------------------------------------------------------------------------------
+\section*{Evaluation}
+\addcontentsline{toc}{section}{Evaluation}
+A simple evaluation metric of how well the approximative method retains the most important information from the graph is to evaluate how different are the top similar vertices for the brute-force approach and the approximative method with different number of eigenvalues and eigenvectors used.
+\par
+A random connected graph of $N=200$ vertices and $350$ edges was generated. The similarities between all pairs of nodes were computed using both the brute-force approach and the approximative method, and nodes were sorted by their similarities to obtain $200$ tops (the higher the position in the top, the more similar the nodes are). Let $B_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the brute-force approach. Similarly let $T^{20}_{ij}$ be the position of node $j$ in the top similar nodes of node $i$ for the approximative approach with 20 eigenvectors. Define the difference between the two methods to be 
+\begin{equation} d = \sum_{i=1}^N \sum_{j=1}^N \operatorname{abs}(B_{ij} - T_{ij}) \end{equation}
 %
 %-------------------------------------------------------------------------------
 % LIMITATIONS
