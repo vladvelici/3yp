@@ -433,27 +433,25 @@ Although the evaluation metric described above might be useful to compare the tw
 \subsection*{Visualisation}
 \addcontentsline{toc}{subsection}{Visualisation}
 %
-A subjective method of evaluation on real data is attempting to visualise the algorithm output on real data and deduce whether it gives sensitive results. This method has the disadvantage of being subjective but is nonetheless a start of the journey of building an evaluation method for the algorithm.
+A subjective method of evaluation on real data is attempting to visualise the algorithm output on real data and deduce whether it gives sensitive results. This method has the disadvantage of being subjective and it cannot scale to very large graphs.
 %
 \subsection*{Discussion of further evaluation}
 \addcontentsline{toc}{subsection}{Discussion of further evaluation}
 %
 None of the evaluation methods described above give an objective, efficient and automatic evaluation metric. In this subsection we discuss a few possible evaluation methods of the algorithm.
 \par
-To objectively evaluate how well the outputs of the algorithm reflect the reality of the dataset it is being used on, we need to carefully define the goals of the algorithm in respect of the dataset. We only look for datasets where the \textit{similarities} between entities can be obtained exclusively from the graph structure. We need labelled (known \textit{similarities} between entities) datasets that have only one relationship type from which we can exclusively compute \textit{similarities} between nodes.
+To objectively evaluate how well the outputs of the algorithm reflect the reality of the dataset it is being used on, we need to carefully define the goals of the algorithm in respect of the dataset. We want labelled datasets where the natural \textit{similarities} between entities is known and depends exclusively on the graph structure. We do not want to evaluate how well the weights of different relationship types are defined, thus the evaluation dataset must have only one relationship type.
 \par
-If the dataset used for evaluation has more than one type of relationship (more features), the evaluation is subjective to the choice of the weights for each relationship type. The reference similarities (from dataset or obtained by other means) might be based on different weights of each feature of the dataset, therefore using equal weights in the graph representation will likely lead to a poorer performance and biased evaluation. 
+Given some datasets that fit the requirements from above, we can run our algorithm and compare the results with the reference similarities. In reality datasets have many features and natural \textit{similarities} between entities depend on many features, thus this type of evaluation is not practical.
 \par
-Given some datasets that fit the requirements from above, we can run our algorithm and compare the results with the reference similarities. In reality datasets have many features and a complex graph structure with relationships having different weights, therefore this evaluation method cannot be done in practice.
+For specific tasks we can evaluate the performance of our algorithm by adding or removing some edges from the graph. For instance, if we want to find duplicates we can create a dummy vertex by duplicating an existing one and randomly removing some of its edges. We then evaluate whether the dummy vertex is very similar to the original vertex.
 \par
-A similar way is to compute similarities using another algorithm (call it reference algorithm) and only one feature of a dataset. Use the same feature to build a graph structure, then compare the results of our algorithm with the results of the reference algorithm used.
-\par
-Given a labelled dataset that fits the requirements from above, we can run our algorithm and compare the results with the reference similarities. A single dataset can result in biased evaluations, therefore more such datasets are required. The downside is that datasets with known similarities between entities are not very common, and because the term \textit{similarity} is ambiguous (e.g. why is an entity \textit{similar} to another? In respect to which features?). Given an unlabelled dataset, we can obtain a labelled dataset using other algorithms and techniques, but the evaluation will be in respect to the labelling method used.
-\par
-An online evaluation is a way to evaluate the system by getting feedback from users. In this case, we would deploy the algorithm on a experimentation website and display the results to live users, while making sure to track the way users interact with the outputs of the algorithm.
+Implementing the evaluation method described above is included in the future plans of this project, along with investigating more methods of evaluation.
+%
 %-------------------------------------------------------------------------------
 % LIMITATIONS
 %-------------------------------------------------------------------------------
+%
 \section*{Limitations of Current Implementation}
 \addcontentsline{toc}{section}{Limitations of the Current Implementation}
 The current implementation of this algorithm has various limitations which are discussed along with possible improvements.
@@ -461,8 +459,10 @@ The current implementation of this algorithm has various limitations which are d
 \paragraph*{Only undirected graphs} Directed graphs are not currently supported. In practice, datasets have meaningful unidirectional relationships (e.g. in a social network person A follows person B, but B does not follow A), and often datasets are represented as directed graphs rather than undirected graphs. The algorithm can be adapted to support both directed and undirected graphs but it will have the disadvantage of requiring to compute $V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
 %
 \paragraph*{Ignored relationship types} In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain these weights from the dataset.
-
+%
 \paragraph*{Not distributed} What if the dataset is too large to fit into main memory? The algorithm is currently only designed to run on one machine. Methods of distributing the algorithm on more than one machine over a network will be investigated in the future.
+%
+\paragraph*{Weights of edges} To compute similarities between nodes in real datasets we often need to consider more features. Each feature can be described as a type of relationship that leads to edges of different weights in the graph. Nothing is currently implemented to help learn the optimal weights from data to maximise the performance of the algorithm.
 
 %-------------------------------------------------------------------------------
 % REFERENCES
