@@ -123,15 +123,13 @@ Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matr
 \mathbf{C_i} = \sum_{t=0}^\infty \mu^t D^t \mathbf{\delta_i}
 \end{equation}
 %
-Where $\mu \in (0,1)$ is a penalising factor. $\mu$ controls how much the far connections are considered into the similarities. Therefore, a large $\mu$ enforces consideration of very far connections whereas a small $\mu$ considers far connections less.
-%
-The similarity between two vertices $i$ and $j$ is the (squared) norm of the difference between $\mathbf{C_i}$ and $\mathbf{C_j}$:
+Where $\mu \in (0,1)$ is a penalising factor. The similarity between two vertices $i$ and $j$ is the (squared) norm of the difference between $\mathbf{C_i}$ and $\mathbf{C_j}$:
 %
 \begin{equation}
 \|\mathbf{C_i} - \mathbf{C_j}\|^2
 \end{equation}
 %
-The brute-force approach was run on small randomly generated connected graphs (200 vertices) with 50 iterations and it gave meaningful results but it does not scale for large datasets. In the next section an algorithm that scales up to large datasets is described.
+The brute-force approach was run on a small graph designed by hand with 50 iterations and it gave meaningful results (vertices connected in a similar way have a small $\|\mathbf{C_i} - \mathbf{C_j}\|^2$) but it does not scale for large datasets. In the next section an algorithm that scales up to large datasets is described.
 %
 %-------------------------------------------------------------------------------
 % Approximative approach
@@ -154,7 +152,7 @@ Take the dot product $\mathbf{C_i^T}\mathbf{C_j} = \| \mathbf{C_i} \| \| \mathbf
 \|\mathbf{C_i}-\mathbf{C_j}\|^2 = \mathbf{C_i^T}\mathbf{C_i} + \mathbf{C_j^T}\mathbf{C_j} - 2 \mathbf{C_i^T}\mathbf{C_j}
 \end{equation}
 %
-Therefore, it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$ (for all $i, j \in v$) to compute the similarities between all vertices of the graph. Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory for a very large dataset if we use the brute-force approach.
+Therefore, it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$ (for all $i, j \in v$) to compute the similarities between all vertices of the graph. Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory for a very large dataset, so we will make a trade-off between the accuracy of the result and the computational complexity.
 %
 \par
 %
@@ -190,13 +188,13 @@ D^t = W^{\sfrac{1}{2}} A^t W^{\sfrac{-1}{2}}
 \end{equation}
 %
 %
-The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute because $W$ is a diagonal matrix. Apply the matrix operation only on the diagonal elements and obtain $(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
+The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute because $W$ is a diagonal matrix. Apply the operation only on the diagonal elements and obtain $(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
 %
 \par
 %
 %% Defining eigen*matrixes.
 %
-Let $\lambda_i$ be the $i^{th}$ eigenvalue and $\bigvee^{(i)}$ be the $i^{th}$ eigenvector ($\forall i \in \{ 1, 2, ..., N \}$). $\bigvee$ is a matrix of all computed eigenvectors (such that $\bigvee^{(i)}$ is the $i^{th}$ column of $\bigvee$), and $\bigwedge$ is a diagonal matrix of all computed eigenvalues:
+Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\bigvee^{(i)}$ be the $i^{th}$ eigenvector of $A$ ($\forall i \in \{ 1, 2, ..., N \}$). $\bigvee$ is a matrix of all $N$ eigenvectors (such that $\bigvee^{(i)}$ is the $i^{th}$ column of $\bigvee$), and $\bigwedge$ is a diagonal matrix of all $N$ eigenvalues:
 \begin{align}
 \bigvee      &=  \begin{bmatrix}
 \vert & \vert &  & \vert \\
@@ -317,7 +315,7 @@ After computing the matrices $Z$ and $Q$, the time complexity of computing the s
 %%%%%%%%%%%%%%%
 \subsection*{Vectorisation}
 \addcontentsline{toc}{subsection}{Vectorisation}
-It is usually more efficient to have vectorised implementations (to use matrix operations in favour of iterative solutions) in programming languages like Matlab, Octave or R. In this subsection is presented a way of computing the matrices $Z$ and $Q$ using matrix operations. For this purpose, in this subsection, $\bigvee$ only contains the computed eigenvectors (is of size $N \times m$), and $\bigwedge$ only contains the computed eigenvalues (is of size $m \times m$).
+It is usually more efficient to have vectorised implementations (to use matrix operations in favour of iterative solutions) in programming languages like Matlab, Octave or R. In this subsection is presented a way of computing the matrices $Z$ and $Q$ using matrix operations. For this purpose, in this subsection, $\bigvee$ only contains the leading $m$ eigenvectors (is of size $N \times m$), and $\bigwedge$ only contains the leading $m$ eigenvalues (is of size $m \times m$).
 \par
 %
 %% Z
@@ -338,7 +336,7 @@ Z = W^{\sfrac{-1}{2}} \bigvee R
 %
 %% Q
 %
-A vectorised version of \emph{Equation~\ref{eq:q-ij}} (to compute $Q$):
+A vectorised version of \emph{Equation~\ref{eq:q-ij}} (to compute $Q$) is:
 \begin{equation}
 Q = \bigvee\nolimits^T W \bigvee
 \end{equation}
@@ -349,13 +347,13 @@ Q = \bigvee\nolimits^T W \bigvee
 \section*{Implementation}
 \addcontentsline{toc}{section}{Implementation}
 %
-A choice had to be made on what tools and languages to use for the implementation of this algorithm. It involves linear algebra so programming languages that support such operations or have good libraries for this purpose were candidates. Matlab was chosen for this task because it has very strong linear algebra features built-in, it is easy and fast to try different experiments (can also be used interactively) and programs are usually smaller in size (lines of code) than their variants in C++ or other languages. At a later stage when the algorithm is closer to its final version, porting it to a language like C++ will be considered.
+A choice had to be made on what tools and languages to use for the implementation of this algorithm. It involves linear algebra so programming languages that support such operations or have good libraries for this purpose were candidates. Matlab was chosen for this task because it has very strong linear algebra features built-in, it is easy and fast to try different experiments (can also be used interactively) and programs are usually smaller in size (lines of code) than their variants in C++ or other languages. At a later stage when the algorithm is closer to its final version, porting it to a language like Go or C++ will be considered.
 \par
 Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues. Internally, it uses the Lanczos Method for Hermitian matrices and the Arnoldi Iteration for non-Hermitian matrices.[3]
 \par
-For the implementation of both the approximative approach and the brute-force algorithm, sparse matrices were used. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[4] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory.
+Sparse matrices were used for the implementation of both the approximative and the brute-force approaches. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[4] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory. Sparse matrices are faster at linear algebra operations.
 \par
-The approximative approach was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}.
+The approximative approach was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}. Some helper functions are not included in the table.
 \begin{table}[!ht]\footnotesize
    \centering
    \begin{tabular}{ll}
@@ -363,8 +361,7 @@ The approximative approach was implemented in Matlab as a couple of Matlab funct
    sim2(q,z,i,j) & Computes the similarity between vertices i and j. \\
    simlist(q,z,i) & Computes the similarity between vertex i and all other vertices. \\
    top(q,z,i) & Uses simlist(q,z,i) and sorts the results. \\
-   randomGraph(nodes, vertices, directed) & Generates a random connected graph. \\
-   readEprints() & Reads ePrints data from a pre-processed file.
+   randomGraph(nodes, vertices, directed) & Generates a random connected graph.
    \end{tabular}
    \caption{Implementation interface. Parameters: q represents the matrix $Q$, z represents the matrix $Z$, adj represents the adjacency matrix, and i and j represent vertex numbers.}
    \label{tbl:interface}
@@ -422,7 +419,8 @@ The equation is normalised by $N^3$ because the maximum value we can get lies in
 	\label{fig:no-of-eigenvectors}
 \end{figure}
 %
-The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The difference d was evaluated between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 5 to 195$ eigenvectors. We can observe that if we use the majority of eigenvalues, the value of $d()$ is very small. It is computationally infeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum (on this small dataset). The local minimum might differ from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated connected graph with $500$ vertices and $700$ edges. The first local minimum of $d()$ was at around 100 eigenvectors with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the values of $d()$ obtained are $0.2297$ and $0.2557$, respectively.
+\par
+The value of $d()$ was evaluated on a randomly generated connected graph with $200$ vertices and $350$ edges, between the brute-force approach with $m=20$ iterations and the approximative approach with $m' = 10$ to $199$ eigenvectors. The choice of the penalising factor $\mu=0.5$ was used for all the runs. The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. We can observe that if we use the majority of eigenvalues, the value of $d()$ is very small. It is computationally infeasible to do that on a large dataset thus we will aim for a number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference seems to be at a local minimum (for this graph). The local minimum differs from dataset to dataset depending mainly on the size of the dataset. For completeness, the experiment was run on a randomly generated connected graph with $500$ vertices and $700$ edges. The first local minimum of $d()$ was at around 100 eigenvectors with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the values of $d()$ obtained are $0.2297$ and $0.2557$, respectively.
 %
 %
 % -----
@@ -430,12 +428,12 @@ The results can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. The c
 % -----
 %
 \par
-Although the evaluation metric described above might be useful to compare the two approaches directly, it does not tell anything about how well the algorithm achieves its goal of finding similar entities in a real dataset. Even if the computation of the brute-force approach would be feasible on large datasets for comparison, it would still not verify the underlying intuition of this algorithm.
+Although the evaluation metric described above might be useful to compare the two approaches directly, it does not tell anything about how well the algorithm achieves its goal of finding similar entities in a real dataset. We will now examine ways to evaluate the performance of the algorithm on real problems.
 %
 \subsection*{Visualisation}
 \addcontentsline{toc}{subsection}{Visualisation}
 %
-A subjective method of evaluation on real data is attempting to visualise the algorithm output on real data and deduce whether it gives sensitive results. This method has the disadvantage of being subjective and it cannot scale to very large graphs.
+A subjective method of evaluation on real data is attempting to visualise the algorithm output on real data and deduce whether it gives sensitive results. This method has the disadvantage of being subjective and it cannot scale to very large graphs, but it might give a broad idea of what the results are and help fine-tune the algorithm on specific problems.
 %
 \subsection*{Discussion of further evaluation}
 \addcontentsline{toc}{subsection}{Discussion of further evaluation}
@@ -444,7 +442,7 @@ None of the evaluation methods described above give an objective, efficient and 
 \par
 To objectively evaluate how well the outputs of the algorithm reflect the reality of the dataset it is being used on, we need to carefully define the goals of the algorithm in respect of the dataset. We want labelled datasets where the natural \textit{similarities} between entities is known and depends exclusively on the graph structure. We do not want to evaluate how well the weights of different relationship types are defined, thus the evaluation dataset must have only one relationship type.
 \par
-Given some datasets that fit the requirements from above, we can run our algorithm and compare the results with the reference similarities. In reality datasets have many features and natural \textit{similarities} between entities depend on many features, thus this type of evaluation is not practical.
+Given some datasets that fit the above requirements, we can run our algorithm and compare the results with the reference (natural) similarities. In reality, datasets have many features and natural \textit{similarities} between entities depend on many features, thus this type of evaluation is not practical.
 \par
 For specific tasks we can evaluate the performance of our algorithm by adding or removing some edges from the graph. For instance, if we want to find duplicates we can create a dummy vertex by duplicating an existing one and randomly removing some of its edges. We then evaluate whether the dummy vertex is very similar to the original vertex.
 \par
@@ -462,10 +460,10 @@ The current implementation of this algorithm has various limitations which are d
 Directed graphs are not currently supported. In practice, datasets have meaningful unidirectional relationships (e.g. in a social network person A follows person B, but B does not follow A), and often datasets are represented as directed graphs rather than undirected graphs. The algorithm can be adapted to support both directed and undirected graphs but it will have the disadvantage of requiring to compute $V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
 %
 \par
-In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain these weights from the dataset.
+In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain (learn) these weights from the dataset.
 %
 \par
-What if the dataset is too large to fit into main memory? The algorithm is currently designed to run on only one machine, but finding ways to distribute it over multiple machines will help run it on even larger datasets.
+What if the dataset is too large to fit into main memory? The algorithm is currently designed to run only on one machine, but finding ways to distribute it over multiple machines will help run it on even larger datasets.
 %-------------------------------------------------------------------------------
 % FUTURE PLANS
 %-------------------------------------------------------------------------------
@@ -473,13 +471,13 @@ What if the dataset is too large to fit into main memory? The algorithm is curre
 \addcontentsline{toc}{section}{Future plans}
 The highest priority improvements are: develop a good evaluation method, add support for directed graphs, and use different edge weights for different types of relationships. A detailed plan can be observed in the Gantt Chart in \emph{Figure~\ref{fig:gan}}.
 \par
-In this case an evaluation method is not trivial to design and build but it is crucial to the further development and fine-tuning of the algorithm. Researching an evaluation model has the highest priority in the list of tasks.
+An evaluation method is not trivial to design and build for this algorithm, but it is crucial to the validation, further development and fine-tuning of the algorithm. Researching an evaluation model has the highest priority in the list of tasks.
 \par
 Plenty of datasets on which this algorithm can be applied describe directed graphs with multiple types of relationships. The relevant tasks are the next tasks in the Gantt Chart.
 \par
 A demo on one or more datasets will be built. The first step into getting feedback and evaluating how the algorithm performs on real data is to build an interface where users can interact with the results.
 \par
-A small research on how to make the algorithm run on a distributed system will be done. Also, if the time allows, the code will be ported to a language like Go or C++ and released as an open-source project.
+A small research on how to make the algorithm run on multiple machines will be done. Also, if the time allows, the code will be ported to a language like Go or C++ and released as an open-source project.
 \begin{landscape}
 \begin{figure}[ft]
 \begin{center}
