@@ -109,7 +109,7 @@ It is not computationally feasible to calculate the exact similarities between v
 %
 The similarity algorithm is described regarding the undirected graph $G(v, \epsilon)$ with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
 %
-In order to derive an algorithm to find similarities between vertices in a graph, a measure of similarity between two vertices must be defined. $M$ is the adjacency matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let $D$ be a normalised adjacency matrix such that each column sums up to $1$:
+In order to derive an algorithm to find similarities between vertices in a graph, a measure of similarity between two vertices must be defined. $M$ is the adjacency matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let $D$ be a normalised adjacency matrix such that each row sums up to $1$:
 %
 \begin{equation}
 \label{eq:initial-d}
@@ -458,23 +458,31 @@ Implementing the evaluation method described above is included in the future pla
 \addcontentsline{toc}{section}{Limitations of the Current Implementation}
 The current implementation of this algorithm has various limitations which are discussed along with possible improvements.
 %
-\paragraph*{Only undirected graphs} Directed graphs are not currently supported. In practice, datasets have meaningful unidirectional relationships (e.g. in a social network person A follows person B, but B does not follow A), and often datasets are represented as directed graphs rather than undirected graphs. The algorithm can be adapted to support both directed and undirected graphs but it will have the disadvantage of requiring to compute $V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
+\par
+Directed graphs are not currently supported. In practice, datasets have meaningful unidirectional relationships (e.g. in a social network person A follows person B, but B does not follow A), and often datasets are represented as directed graphs rather than undirected graphs. The algorithm can be adapted to support both directed and undirected graphs but it will have the disadvantage of requiring to compute $V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
 %
-\paragraph*{Ignored relationship types} In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain these weights from the dataset.
+\par
+In the real world datasets might have different types of relationships between entities. Some relationship types might be more relevant than others in finding a specific result. For instance, in a social network two people being friends might be more relevant for recommending new friends than two people following the same topic. The current implementation of the algorithm can compute similarities if it is given a weighted (symmetric) adjacency matrix but it does not have a way to automatically obtain these weights from the dataset.
 %
-\paragraph*{Not distributed} What if the dataset is too large to fit into main memory? The algorithm is currently only designed to run on one machine. Methods of distributing the algorithm on more than one machine over a network will be investigated in the future.
+\par
+What if the dataset is too large to fit into main memory? The algorithm is currently designed to run on only one machine, but finding ways to distribute it over multiple machines will help run it on even larger datasets.
 %-------------------------------------------------------------------------------
 % FUTURE PLANS
 %-------------------------------------------------------------------------------
 \section*{Future plans}
 \addcontentsline{toc}{section}{Future plans}
-The highest priority improvements are: develop a good evaluation method, add support for directed graphs, and use different edge weights for different types of relationships. A detailed plan can be observed in the Gantt Chart in ....
-
+The highest priority improvements are: develop a good evaluation method, add support for directed graphs, and use different edge weights for different types of relationships. A detailed plan can be observed in the Gantt Chart in \emph{Figure~\ref{fig:gan}}.
+\par
+In this case an evaluation method is not trivial to design and build but it is crucial to the further development and fine-tuning of the algorithm. Researching an evaluation model has the highest priority in the list of tasks.
+\par
+Plenty of datasets on which this algorithm can be applied describe directed graphs with multiple types of relationships. The relevant tasks are the next tasks in the Gantt Chart.
+\par
+A demo on one or more datasets will be built. The first step into getting feedback and evaluating how the algorithm performs on real data is to build an interface where users can interact with the results.
+\par
+A small research on how to make the algorithm run on a distributed system will be done. Also, if the time allows, the code will be ported to a language like Go or C++ and released as an open-source project.
 \begin{landscape}
-
-\begin{figure}[ftbp]
+\begin{figure}[ft]
 \begin{center}
-
 \begin{ganttchart}[vgrid=true, hgrid=true, y unit chart=1.5em, y unit title=1.4em, title height=1]{1}{32}
 \gantttitle{Semester 1}{17} \gantttitle{Semester 2}{15} \\
 \gantttitlelist{1,...,32}{1} \\
@@ -495,10 +503,11 @@ The highest priority improvements are: develop a good evaluation method, add sup
 \ganttmilestone{Viva}{32}
 \end{ganttchart}
 \end{center}
-\caption{Gantt Chart}
+\caption{Gantt Chart of done and planned tasks over weeks.}
+\label{fig:gan}
 \end{figure}
-
 \end{landscape}
+
 
 
 %-------------------------------------------------------------------------------
