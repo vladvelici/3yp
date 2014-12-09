@@ -210,7 +210,7 @@ Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\vee^{(i)}$ be the $i^{th
 %
 %% Eigenvalue decomposition
 %
-The eigendecomposition of the matrix A is $A = \vee \Lambda \vee^{-1}$. The graph $G$ is an undirected graph which makes $A$ a real symmetric matrix, thus $\vee^{-1} = \vee^{T}$. The eigendecomposition of the matrix $A$ is therefore:
+The diagonalisation of the matrix A is $A = \vee \Lambda \vee^{-1}$. The graph $G$ is an undirected graph which makes $A$ a real symmetric matrix, thus $\vee^{-1} = \vee^{T}$ [1]. The diagonalisation of the matrix $A$ is therefore:
 \begin{align}
 A &= \vee \Lambda \vee^{T} \\
 \Rightarrow A^t &= \big(\vee \Lambda \vee^{T}\big)^t = \vee \Lambda^t \vee^{T} \\
@@ -257,7 +257,7 @@ Substitute \emph{Equation~\ref{eq:observe-scalar}} and \emph{Equation~\ref{eq:ge
 %
 %% Approximation explained.
 %
-An approximation of the vectors $\mathbf{C_i} (\forall i \in v)$ can be obtained by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[1]. For directed graphs the Arnoldi Iteration[2] will be used instead. These algorithms perform well on large sparse matrices. In real datasets it is very often the case that the number of edges is orders of magnitude smaller than the number of vertices squared, resulting in sparse adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C}_i}$ to be an approximation of $\mathbf{C_i}$:
+An approximation of the vectors $\mathbf{C_i} (\forall i \in v)$ can be obtained by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using the Lanczos Method for real symmetric matrices[2]. For directed graphs the Arnoldi Iteration[3] will be used instead. These algorithms perform well on large sparse matrices. In real datasets it is very often the case that the number of edges is orders of magnitude smaller than the number of vertices squared, resulting in sparse adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C}_i}$ to be an approximation of $\mathbf{C_i}$:
 \begin{equation}
 \label{eq:c-hat}
 \mathbf{\hat{C}_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{m} \frac{1}{1 - \mu \lambda_a} \vee^{(a)} \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
@@ -349,9 +349,9 @@ Q = \vee^T W \vee
 %
 A choice had to be made on what tools and languages to use for the implementation of this algorithm. It involves linear algebra so programming languages that support such operations or have good libraries for this purpose were candidates. Matlab was chosen for this task because it has very strong linear algebra features built-in, it is easy and fast to try different experiments (can also be used interactively) and programs are usually smaller in size (lines of code) than their variants in C++ or other languages. At a later stage when the algorithm is closer to its final version, porting it to a language like Go or C++ will be considered.
 \par
-Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues[3]. Internally, it uses the software package ARPACK which implements implicitly restarted Arnoldi methods.[4]
+Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues[4]. Internally, it uses the software package ARPACK which implements implicitly restarted Arnoldi methods.[5]
 \par
-Sparse matrices were used for the implementation of both the approximative and the brute-force approaches. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[5] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory. Sparse matrices are faster at linear algebra operations.
+Sparse matrices were used for the implementation of both the approximative and the brute-force approaches. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[6] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory. Sparse matrices are faster at linear algebra operations.
 \par
 The approximative approach was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}. Some helper functions are not included in the table.
 \begin{table}[!ht]\footnotesize
@@ -514,14 +514,15 @@ A small research on how to make the algorithm run on multiple machines will be d
 \newpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
+[1]: Strang, Gilbert. Eigenvalues and Eigenvectors (p 258-338). "Introduction to linear algebra." Cambridge Publication (2003).
 
-[1]: Calvetti, Daniela, L. Reichel, and Danny Chris Sorensen. "An implicitly restarted Lanczos method for large symmetric eigenvalue problems." Electronic Transactions on Numerical Analysis 2.1 (1994): 21.
+[2]: Calvetti, Daniela, L. Reichel, and Danny Chris Sorensen. "An implicitly restarted Lanczos method for large symmetric eigenvalue problems." Electronic Transactions on Numerical Analysis 2.1 (1994): 21.
 
-[2]: Lehoucq, Richard B., and Danny C. Sorensen. "Deflation techniques for an implicitly restarted Arnoldi iteration." SIAM Journal on Matrix Analysis and Applications 17.4 (1996): 789-821.
+[3]: Lehoucq, Richard B., and Danny C. Sorensen. "Deflation techniques for an implicitly restarted Arnoldi iteration." SIAM Journal on Matrix Analysis and Applications 17.4 (1996): 789-821.
 
-[3]: "Matlab 2014b Documentation." Largest Eigenvalues and Eigenvectors of Matrix. The MathWorks, Inc., 3 Oct. 2014. Web. Accessed 07 Dec. 2014.\newline <http://uk.mathworks.com/help/matlab/ref/eigs.html>.
+[4]: "Matlab 2014b Documentation." Largest Eigenvalues and Eigenvectors of Matrix. The MathWorks, Inc., 3 Oct. 2014. Web. Accessed 07 Dec. 2014.\newline <http://uk.mathworks.com/help/matlab/ref/eigs.html>.
 
-[4]: Lehoucq, Richard B., Danny C. Sorensen, and Chao Yang. ARPACK users' guide: solution of large-scale eigenvalue problems with implicitly restarted Arnoldi methods. Vol. 6. Siam, 1998.
+[5]: Lehoucq, Richard B., Danny C. Sorensen, and Chao Yang. ARPACK users' guide: solution of large-scale eigenvalue problems with implicitly restarted Arnoldi methods. Vol. 6. Siam, 1998.
 
-[5]: Gilbert, John R., Cleve Moler, and Robert Schreiber. "Sparse matrices in MATLAB: design and implementation." SIAM Journal on Matrix Analysis and Applications 13.1 (1992): 333-356.
+[6]: Gilbert, John R., Cleve Moler, and Robert Schreiber. "Sparse matrices in MATLAB: design and implementation." SIAM Journal on Matrix Analysis and Applications 13.1 (1992): 333-356.
 \end{document}
