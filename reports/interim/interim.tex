@@ -192,7 +192,7 @@ The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute beca
 %
 \par
 %
-%% Defining eigen*matrixes.
+%% Defining eigen*matrices.
 %
 Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\bigvee^{(i)}$ be the $i^{th}$ eigenvector of $A$ ($\forall i \in \{ 1, 2, ..., N \}$). $\bigvee$ is a matrix of all $N$ eigenvectors (such that $\bigvee^{(i)}$ is the $i^{th}$ column of $\bigvee$), and $\bigwedge$ is a diagonal matrix of all $N$ eigenvalues:
 \begin{align}
@@ -303,7 +303,7 @@ $\mathbf{Z_i}$ is the $i^{th}$ row of the matrix $Z$. Substitute $Q$ into \emph{
 %
 %% Storage and predictions
 %
-From \emph{Equation~\ref{eq:dot-zq-vectorised}} it is deduced that it is only required to store the matrixes $Q$ and $Z$, which only takes $O(m^2 + Nm)$ memory, instead of $O(N^2)$ to store all $\mathbf{\hat{C}_i}$ vectors.
+From \emph{Equation~\ref{eq:dot-zq-vectorised}} it is deduced that it is only required to store the matrices $Q$ and $Z$, which only takes $O(m^2 + Nm)$ memory, instead of $O(N^2)$ to store all $\mathbf{\hat{C}_i}$ vectors.
 \par
 To compute the similarity between two vertices, $i$ and $j$, use the norm formula from \emph{Equation~\ref{eq:dot-zq-vectorised}} and obtain:
 \begin{equation}
