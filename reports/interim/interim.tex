@@ -349,9 +349,9 @@ Q = \bigvee\nolimits^T W \bigvee
 %
 A choice had to be made on what tools and languages to use for the implementation of this algorithm. It involves linear algebra so programming languages that support such operations or have good libraries for this purpose were candidates. Matlab was chosen for this task because it has very strong linear algebra features built-in, it is easy and fast to try different experiments (can also be used interactively) and programs are usually smaller in size (lines of code) than their variants in C++ or other languages. At a later stage when the algorithm is closer to its final version, porting it to a language like Go or C++ will be considered.
 \par
-Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues. Internally, it uses the Lanczos Method for Hermitian matrices and the Arnoldi Iteration for non-Hermitian matrices.[3]
+Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors and eigenvalues[3]. Internally, it uses the software package ARPACK which implements implicitly restarted Arnoldi methods.[4]
 \par
-Sparse matrices were used for the implementation of both the approximative and the brute-force approaches. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[4] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory. Sparse matrices are faster at linear algebra operations.
+Sparse matrices were used for the implementation of both the approximative and the brute-force approaches. A sparse matrix in Matlab only stores the non-zero values of a matrix, therefore a sparse matrix only uses memory for the positions where it holds values.[5] For instance, to store the adjacency matrix of a very large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory whereas using a sparse matrix only takes $O(|\epsilon|)$ memory. Sparse matrices are faster at linear algebra operations.
 \par
 The approximative approach was implemented in Matlab as a couple of Matlab functions. The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}. Some helper functions are not included in the table.
 \begin{table}[!ht]\footnotesize
@@ -521,5 +521,7 @@ A small research on how to make the algorithm run on multiple machines will be d
 
 [3]: "Matlab 2014b Documentation." Largest Eigenvalues and Eigenvectors of Matrix. The MathWorks, Inc., 3 Oct. 2014. Web. Accessed 07 Dec. 2014.\newline <http://uk.mathworks.com/help/matlab/ref/eigs.html>.
 
-[4]: Gilbert, John R., Cleve Moler, and Robert Schreiber. "Sparse matrices in MATLAB: design and implementation." SIAM Journal on Matrix Analysis and Applications 13.1 (1992): 333-356.
+[4]: Lehoucq, Richard B., Danny C. Sorensen, and Chao Yang. ARPACK users' guide: solution of large-scale eigenvalue problems with implicitly restarted Arnoldi methods. Vol. 6. Siam, 1998.
+
+[5]: Gilbert, John R., Cleve Moler, and Robert Schreiber. "Sparse matrices in MATLAB: design and implementation." SIAM Journal on Matrix Analysis and Applications 13.1 (1992): 333-356.
 \end{document}
