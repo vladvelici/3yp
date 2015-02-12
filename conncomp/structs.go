@@ -52,6 +52,15 @@ func (g *Graph) EdgeList() []*Edge {
 	return res
 }
 
+// List of nodes
+func (g *Graph) NodeList() []*Node {
+	res := make([]*Node, 0, len(g.Nodes))
+	for _, node := range g.Nodes {
+		res = append(res, node)
+	}
+	return res
+}
+
 // Add a directed edge, taking care of connected components.
 // Panics if either from or to are nil.
 func (g *Graph) directedEdge(from, to *Node) {
@@ -104,78 +113,24 @@ func (g *Graph) ConnectedGraphs() []*Graph {
 	return result
 }
 
-type Mst struct {
-	Edges map[int]map[int]interface{}
-}
-
-func (m Mst) Add(from, to int) {
-	f := m.Edges[from]
-	if f == nil {
-		m.Edges[from] = make(map[int]interface{})
-	}
-	m.Edges[from][to] = nil
-}
-
-// Minimum spanning tree computation.
-func (g *Graph) Mst() []*Edge {
-	var root *Node
-	for _, node := range g.Nodes {
-		root = node
-		break
-	}
-
-	if root == nil {
-		return nil
-	}
-
-	index := make(tr_index)
-	res := make([]*Edge, 0)
-
-}
-
 // Remove random edges, keeping track of them.
-//
-// It does not remove critical edges. Computes the minimum spanning tree and only removes
-// random edges that are not part of it.
-//
-// If it fails 10 times in a row, it randomly cancels
+// There might not be n edges that can be removed.
 func (g *Graph) RemoveRandomEdges(n int) []*Edge {
 	var result []*Edge
-	edges := g.EdgeList()
-	noEdges := len(edges)
+
 	cutout := 0
+	nodeList := g.NodeList()
+
 	for i := 0; i < n; {
 		if cutout >= 10 {
 			return result
 		}
-		edgIndex := rand.Intn(noEdges)
-		edge := edges[edgIndex]
+		rmv := rand.Intn(len(nodeList))
+		node := nodeList[rmv]
 
-		if !IsPathRestricted(g.Nodes[edge.From], g.Nodes[edge.To], edge) {
-			cutout++
-			continue
+		if len(node.Neibourghs) == 1 {
 		}
+
 		cutout = 0
-		// remove edge
-		g.Nodes[4]
 	}
-
-}
-
-// Removes the inverse edge of edg.
-func rmvUndirFromList(lst []*Edge, edg *Edge) []*Edge {
-	from := edg.To
-	to := edg.From
-	for i, e := range lst {
-		if e.From == from && e.To == to {
-			return rmvElementFromList(lst, i)
-		}
-	}
-}
-
-// Removes the edge at position el, by moving the end in that position...
-func rmvElementFromList(lst []*Edge, el int) []*Edge {
-	last := len(lst) - 1
-	lst[el], lst[last] = lst[last], nil
-	return lst[:len(lst)]
 }
