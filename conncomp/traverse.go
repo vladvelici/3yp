@@ -33,7 +33,7 @@ func IsPathRestricted(from, to *Node, restriction *Edge) bool {
 	index := make(tr_index)
 
 	todo := list.New()
-	todo.PushBack(root)
+	todo.PushBack(from)
 
 	for todo.Len() > 0 {
 		el := todo.Front()
@@ -64,13 +64,13 @@ func IsPathRestricted(from, to *Node, restriction *Edge) bool {
 }
 
 // Depth first search keeping track of parents of nodes... Written to implement the minimum spanning tree.
-func DfsEdge(root *Node, visit func(*Node), visited func(*Node) bool, f func(from, to *Node), keepgoing func() bool) {
+func DfsEdge(root *Node, visit func(*Node), visited func(*Node) bool, f func(from, to *Node)) {
 	todo := list.New()
 	parents := list.New()
 	todo.PushBack(root)
 	parents.PushBack(nil)
 
-	for todo.Len() > 0 && keepgoing() {
+	for todo.Len() > 0 {
 		el := todo.Back()
 		par := parents.Back()
 		node := el.Value.(*Node)

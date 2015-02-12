@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 // Type to represent an edge set.
 type Edge struct {
 	From, To int
@@ -35,7 +37,7 @@ func NewGraph() *Graph {
 func (g *Graph) fetch(node int) *Node {
 	f, ok := g.Nodes[node]
 	if !ok || f == nil {
-		f = NewNode(id, -1)
+		f = NewNode(node, -1)
 		g.Nodes[node] = f
 	}
 	return f
@@ -58,9 +60,10 @@ func (g *Graph) directedEdge(from, to *Node) {
 	if _, ok := from.Neibourghs[to.Id]; ok {
 		return
 	}
-	from.Neibourghs[to.Id] = append(from.Neibourghs[to.Id], to)
+	from.Neibourghs[to.Id] = to
 }
 
+// Add an undirected edge to the graph.
 func (g *Graph) AddEdge(fromId, toId int) {
 	from := g.fetch(fromId)
 	to := g.fetch(toId)
@@ -68,11 +71,12 @@ func (g *Graph) AddEdge(fromId, toId int) {
 	g.directedEdge(to, from)
 }
 
+// Add a node to the graph. Used internally for connected components.
 func (g *Graph) addNode(node *Node) {
 	g.Nodes[node.Id] = node
 }
 
-// Internal type used for traversals
+// Internal type used for traversals.
 type tr_index map[int]interface{}
 
 // Set node as visited.
@@ -92,7 +96,7 @@ func (g *Graph) ConnectedGraphs() []*Graph {
 
 	index := make(tr_index)
 
-	for id, node := range g.Nodes {
+	for _, node := range g.Nodes {
 		if index.visited(node) {
 			continue
 		}
@@ -104,20 +108,35 @@ func (g *Graph) ConnectedGraphs() []*Graph {
 	return result
 }
 
-type Mst struct {
-	Edges map[int]map[int]interface{}
+// Minimum spanning tree. Acually an undirected edge hash set.
+type Mst map[int]map[int]interface{}
+
+// from always less than to; from<to
+func (m Mst) Add(from, to int) {
+	if from > to {
+		from, to = to, from
+	}
+	f := m[from]
+	if f == nil {
+		m[from] = make(map[int]interface{})
+	}
+	m[from][to] = nil
 }
 
-func (m Mst) Add(from, to int) {
-	f := m.Edges[from]
-	if f == nil {
-		m.Edges[from] = make(map[int]interface{})
+// Check if the Mst has the edge.
+func (m Mst) Has(from, to int) bool {
+	if from > to {
+		from, to = to, from
 	}
-	m.Edges[from][to] = nil
+	if f, ok := m[from]; ok && f != nil {
+		_, ok2 := f[to]
+		return ok2
+	}
+	return false
 }
 
 // Minimum spanning tree computation.
-func (g *Graph) Mst() []*Edge {
+func (g *Graph) Mst() Mst {
 	var root *Node
 	for _, node := range g.Nodes {
 		root = node
@@ -129,8 +148,13 @@ func (g *Graph) Mst() []*Edge {
 	}
 
 	index := make(tr_index)
-	res := make([]*Edge, 0)
+	res := make(Mst)
 
+	DfsEdge(root, index.visit, index.visited, func(from, to *Node) {
+		res.Add(from.Id, to.Id)
+	})
+
+	return res
 }
 
 // Remove random edges, keeping track of them.
@@ -138,44 +162,48 @@ func (g *Graph) Mst() []*Edge {
 // It does not remove critical edges. Computes the minimum spanning tree and only removes
 // random edges that are not part of it.
 //
-// If it fails 10 times in a row, it randomly cancels
-func (g *Graph) RemoveRandomEdges(n int) []*Edge {
-	var result []*Edge
-	edges := g.EdgeList()
-	noEdges := len(edges)
-	cutout := 0
-	for i := 0; i < n; {
-		if cutout >= 10 {
+// Uses reservoir sampling.
+func (g *Graph) RemoveRandomEdges(n int, restrictions Mst) []*Edge {
+	result := make([]*Edge, 0, n)
+
+	defer func() {
+		// do the work of actually removing those edges
+		for _, edge := range result {
+			delete(g.Nodes[edge.From].Neibourghs, edge.To)
+			delete(g.Nodes[edge.To].Neibourghs, edge.From)
+		}
+	}()
+
+	ch := make(chan *Edge)
+	go func(channel chan *Edge, ignore Mst) {
+		seen := make(Mst)
+		for _, node := range g.Nodes {
+			for to, _ := range node.Neibourghs {
+				if seen.Has(node.Id, to) || ignore.Has(node.Id, to) {
+					continue
+				}
+				channel <- &Edge{node.Id, to}
+				seen.Add(node.Id, to)
+			}
+		}
+		close(channel)
+	}(ch, restrictions)
+
+	for i := 0; i < n; i++ {
+		edge, ok := <-ch
+		if !ok {
 			return result
 		}
-		edgIndex := rand.Intn(noEdges)
-		edge := edges[edgIndex]
-
-		if !IsPathRestricted(g.Nodes[edge.From], g.Nodes[edge.To], edge) {
-			cutout++
-			continue
-		}
-		cutout = 0
-		// remove edge
-		g.Nodes[4]
+		result = append(result, edge)
 	}
 
-}
-
-// Removes the inverse edge of edg.
-func rmvUndirFromList(lst []*Edge, edg *Edge) []*Edge {
-	from := edg.To
-	to := edg.From
-	for i, e := range lst {
-		if e.From == from && e.To == to {
-			return rmvElementFromList(lst, i)
+	for node := range ch {
+		n++
+		rnd := rand.Intn(n)
+		if rnd < len(result) {
+			result[rnd] = node
 		}
 	}
-}
 
-// Removes the edge at position el, by moving the end in that position...
-func rmvElementFromList(lst []*Edge, el int) []*Edge {
-	last := len(lst) - 1
-	lst[el], lst[last] = lst[last], nil
-	return lst[:len(lst)]
+	return result
 }
