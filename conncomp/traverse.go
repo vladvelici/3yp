@@ -74,7 +74,10 @@ func DfsEdge(root *Node, visit func(*Node), visited func(*Node) bool, f func(fro
 		el := todo.Back()
 		par := parents.Back()
 		node := el.Value.(*Node)
-		parNode := par.Value.(*Node)
+		var parNode *Node
+		if par.Value != nil {
+			parNode = par.Value.(*Node)
+		}
 		todo.Remove(el)
 		parents.Remove(par)
 

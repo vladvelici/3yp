@@ -9,13 +9,15 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // Define flags.
 var (
-	flagRemove = flag.Int("remove", 0, "Number of edges to remove from each graph.")
-	flagGraph  = flag.String("graph", "-", "Input file for an edge list csv.")
-	flagOutput = flag.String("o", "processed", "Output file base name. This program actually outputs many files, depending on the number of connected components in the graph.")
+	flagRemove  = flag.Int("remove", 0, "Number of edges to remove from each graph.")
+	flagGraph   = flag.String("graph", "-", "Input file for an edge list csv.")
+	flagOutput  = flag.String("o", "processed", "Output file base name. This program actually outputs many files, depending on the number of connected components in the graph.")
+	flagVerbose = flag.Bool("verbose", false, "Whether to print lots of debug information on stdout.")
 )
 
 func main() {
@@ -35,6 +37,8 @@ func main() {
 
 	csvReader := csv.NewReader(inputStream)
 
+	graph := NewGraph()
+
 	for {
 		from, to, err := record(csvReader)
 		if err == io.EOF {
@@ -44,8 +48,78 @@ func main() {
 			fmt.Println("error ", err)
 			return
 		}
-		fmt.Printf("Read pair\t %d - %d\n", from, to)
+		if *flagVerbose {
+			fmt.Printf("Reading pair\t %d - %d\n", from, to)
+		}
+		graph.AddEdge(from, to)
 	}
+
+	fmt.Fprintf(os.Stderr, "Finished reading graph.\n")
+
+	connectedGraphs := graph.ConnectedGraphs()
+
+	fmt.Fprintf(os.Stderr, "Found %d connected graphs. Now processing them one by one... \n", len(connectedGraphs))
+	var wg sync.WaitGroup
+	for i, g := range connectedGraphs {
+		wg.Add(1)
+		go func(g *Graph, filename string, i, total int) {
+			defer wg.Done()
+			oneGraph(g, filename, i, total)
+		}(g, *flagOutput+strconv.Itoa(i+1), i+1, len(connectedGraphs)+1)
+	}
+	wg.Wait()
+}
+
+func oneGraph(g *Graph, filename string, i, total int) {
+	if *flagVerbose {
+		fmt.Println("Starting graph #", i)
+	}
+
+	var (
+		outputEdgesFilename   = filename + "_edges.csv"
+		outputRemovedFilename = filename + "_removed.csv"
+	)
+
+	// opening output files...
+	outputEdges, err := os.Create(outputEdgesFilename)
+	if err != nil {
+		fmt.Printf("Graph #%d: Unable to open 'edges' output file %s. ( %s )", i, outputEdgesFilename, err)
+		return
+	}
+	outputRemoved, err := os.Create(outputRemovedFilename)
+	if err != nil {
+		fmt.Printf("Graph #%d: Unable to open 'removed' output file %s. ( %s )", i, outputRemovedFilename, err)
+		return
+	}
+
+	spanningTree := g.Mst()
+	fmt.Fprintf(os.Stderr, "Computed spanning tree for graph %d.\n", i)
+
+	removed := g.RemoveRandomEdges(*flagRemove, spanningTree)
+	fmt.Fprintf(os.Stderr, "Some random edges removed for graph #%d.\n", i)
+
+	for _, edge := range removed {
+		if *flagVerbose {
+			fmt.Printf("%d, %d, \"removed\"\n", edge.From, edge.To)
+		}
+		_, err = fmt.Fprintf(outputRemoved, "%d, %d\n", edge.From, edge.To)
+		if err != nil {
+			fmt.Printf("Graph #%d: Error printing removed edge. (%s)", i, err)
+		}
+	}
+
+	allEdges := g.EdgeList()
+	for _, edge := range allEdges {
+		if *flagVerbose {
+			fmt.Printf("%d, %d, \"remaining\"\n", edge.From, edge.To)
+		}
+		_, err = fmt.Fprintf(outputEdges, "%d, %d\n", edge.From, edge.To)
+		if err != nil {
+			fmt.Printf("Graph #%d: Error printing remaining edge. (%s)", i, err)
+		}
+	}
+
+	fmt.Fprintf(os.Stderr, "Finished processing graph number %d of %d.\n", i, total)
 }
 
 func record(r *csv.Reader) (int, int, error) {
