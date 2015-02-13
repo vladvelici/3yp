@@ -65,7 +65,7 @@ func main() {
 		go func(g *Graph, filename string, i, total int) {
 			defer wg.Done()
 			oneGraph(g, filename, i, total)
-		}(g, *flagOutput+strconv.Itoa(i+1), i+1, len(connectedGraphs)+1)
+		}(g, *flagOutput+strconv.Itoa(i+1), i+1, len(connectedGraphs))
 	}
 	wg.Wait()
 }
