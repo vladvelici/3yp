@@ -14,7 +14,7 @@ w = diag(neighinv);
 wHalf = diag(sqrt(neighinv));
 
 A = wHalf * adj * wHalf;
-[vec, val] = eigs(A,m);
+[vec, val] = eigs(A,[],m);
 
 disp('Eigenvectors computed.');
 
