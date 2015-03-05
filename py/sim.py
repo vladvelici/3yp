@@ -7,6 +7,10 @@ class Sim:
         self.q = q
         self.z = z
 
+    def __len__(self):
+        """Returns the number of nodes provided in this method."""
+        return self.z.shape[0]
+
     def score(self, a, b):
         """Compute the score between a and b."""
         norma = self.z[a,:] * self.q * self.z[a,:].transpose()
@@ -59,8 +63,8 @@ class Simp(Sim):
         self.z = s.z
         self.provider = provider
 
-    def sim(self, a, b):
-        return Sim.sim(self, self.provider.node(a), self.provider.node(b))
+    def score(self, a, b):
+        return Sim.score(self, self.provider.node(a), self.provider.node(b))
 
 def prov(s, provider):
     """Promotes the given Sim (s) to simp.Simp using the provider."""

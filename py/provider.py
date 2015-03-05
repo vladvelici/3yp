@@ -67,7 +67,7 @@ class EdgeList:
     def adj(self):
         """Get the adjacency matrix."""
         if self._adj is None:
-            _makeadj()
+            self._makeadj()
         return self._adj
 
 _demo_graph = [("a","b"), ("a","c"), ("a","d"), ("d","e"),
