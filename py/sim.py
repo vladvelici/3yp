@@ -32,9 +32,6 @@ def train(adj, mu, k):
 
     A = wHalf * adj * wHalf
 
-    print("Here's A:")
-    print(A.toarray())
-
     val, vec = linalg.eigsh(A, k=k, which="LM")
     val = np.power(1-val*mu, -1)
     val = sparse.diags([val], [0])
@@ -68,14 +65,14 @@ class Simp(Sim):
 def prov(s, provider):
     """Promotes the given Sim (s) to simp.Simp using the provider."""
     s.provider = provider
-    s.__class__ = simp
+    s.__class__ = Simp
     return s
 
 def trainp(provider, mu, k):
     """Train with a provider instead of adjancency matrix."""
     adj = provider.adj()
-    return prov(sim.train(adj, mu, k), provider)
+    return prov(train(adj, mu, k), provider)
 
 def load(path, provider):
     """Load and prov convenience function."""
-    return prov(sim.load(path), provider)
+    return prov(load(path), provider)

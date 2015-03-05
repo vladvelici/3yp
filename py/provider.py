@@ -1,5 +1,6 @@
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
+import numpy as np
 
 class Simple:
     """Reduntant adjacency matrix provider."""
@@ -32,6 +33,9 @@ class EdgeList:
         self._edgelist = edgelist
         self._mkindex()
 
+    def __len__(self):
+        return self._nextId
+
     def _mkindex(self):
         """Create a node index by iterating over all the edges."""
         for edge in self._edgelist:
@@ -39,7 +43,17 @@ class EdgeList:
             self.node(edge[1])
 
     def _makeadj(self):
-        pass
+        rows = [0] * len(self._edgelist)
+        cols = [0] * len(self._edgelist)
+
+        for i, edge in enumerate(self._edgelist):
+            rows[i] = self.node(edge[0])
+            cols[i] = self.node(edge[1])
+
+        adj = coo_matrix((np.ones(len(rows)), (rows, cols)),
+            shape=(len(self), len(self)), dtype=float)
+
+        self._adj = csr_matrix(adj)
 
     def node(self, n):
         """Return an interger ID for node str."""
@@ -53,5 +67,8 @@ class EdgeList:
     def adj(self):
         """Get the adjacency matrix."""
         if self._adj is None:
-            _makead()
+            _makeadj()
         return self._adj
+
+_demo_graph = [("a","b"), ("a","c"), ("a","d"), ("d","e"),
+               ("b","a"), ("c","a"), ("d","a"), ("e","d")];
