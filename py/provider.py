@@ -1,6 +1,7 @@
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 import numpy as np
+import csv, sys
 
 class Simple:
     """Reduntant adjacency matrix provider."""
@@ -77,3 +78,23 @@ class EdgeList:
         if self._adj is None:
             self._makeadj()
         return self._adj
+
+def csv_stream(stream):
+    """Reads a CSV stream to a list of edges (not EdgeList object).
+
+    Use EdgeList(csv_stream(stream)) to obtain an EdgeList object.
+    """
+    reader = csv.reader(stream)
+    res = []
+    for row in reader:
+        if len(row) < 2:
+            raise Exception("Parsing CSV: Too few values in the row.", row, len(row))
+        res.append((row[0], row[1]))
+    return res
+
+def csv_file(path):
+    """Convenience method to obtain an edge list from a CSV file path.
+
+    Use EdgeList(csv_file(path)) to get an EdgeList object."""
+    with open(path, newline='') as f:
+        return csv_stream(f)
