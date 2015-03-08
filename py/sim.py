@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.sparse as sparse
 import scipy.sparse.linalg as linalg
+import tarfile
+import tempfile
 
 class Sim:
     def __init__(self, q, z):
@@ -21,8 +23,11 @@ class Sim:
 
     def save(self, path):
         """Save Sim object to file."""
-        with open(path, mode='wb') as f:
-            np.savez(f, q=self.q, z=self.z)
+        if type(path) == str:
+            with open(path, mode='wb') as f:
+                np.savez(f, q=self.q, z=self.z)
+        else:
+            np.savez(path, q=self.q, z=self.z)
 
 def train(adj, mu, k):
     """Use the adjacency matrix to compute matrices Q and Z.
@@ -79,6 +84,36 @@ class Simp(Sim):
     def score(self, a, b):
         return Sim.score(self, self.provider[a], self.provider[b])
 
+    def _save(self, f):
+        simf = tempfile.TemporaryFile()
+        Sim.save(self, simf)
+        simf_size = simf.tell()
+        simf.seek(0)
+
+        provf = tempfile.TemporaryFile()
+        self.provider.save(provf)
+        provf_size = provf.tell()
+        provf.seek(0)
+
+        with tarfile.open(None, 'w', f) as tf:
+            simti = tarfile.TarInfo(name="simqz")
+            simti.size = simf_size
+            tf.addfile(tarinfo=simti, fileobj=simf)
+
+            provti = tarfile.TarInfo(name="provindex")
+            provti.size = provf_size
+            tf.addfile(tarinfo=provti,fileobj=provf)
+
+        provf.close()
+        simf.close()
+
+    def save(self, path):
+        if type(path) == str:
+            with open(path, "wb") as f:
+                self._save(f)
+        else:
+            self._save(path)
+
 def prov(s, provider):
     """Promotes the given Sim (s) to simp.Simp using the provider."""
     s.provider = provider
@@ -93,3 +128,14 @@ def trainp(provider, mu, k):
 def load(path, provider):
     """Load and prov convenience function."""
     return prov(load(path), provider)
+
+def _loadp(f):
+    with tarfile(None, 'r', f) as tf:
+        pass
+
+def loadp(path):
+    if type(path) == str:
+        with open(path, "rb") as f:
+            _loadp(f)
+    else:
+        _loadp(path)
