@@ -58,13 +58,25 @@ def load(path):
 ## With provider
 
 class Simp(Sim):
+    """Extend the class Sim to accept a provider instead of directly an
+    adjacency matrix.
+
+    The role of a provider is to create an adjacency matrix and have a mapping
+    from nodes in the original (meaningful) format (e.g. strings or nodes in
+    an actual graph) to nonnegative integers (representing the row or col index
+    of the node in the adjacency matrix).
+
+    provider.adj() -> returns a scipy.sparse (preferably csr) symmetric matrix.
+    provider[meaningful_node_id] -> returns an unique numeric id for the node.
+
+    """
     def __init__(self, q, z, provider):
         self.q = s.q
         self.z = s.z
         self.provider = provider
 
     def score(self, a, b):
-        return Sim.score(self, self.provider.node(a), self.provider.node(b))
+        return Sim.score(self, self.provider[a], self.provider[b])
 
 def prov(s, provider):
     """Promotes the given Sim (s) to simp.Simp using the provider."""
