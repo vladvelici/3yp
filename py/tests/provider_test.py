@@ -1,5 +1,6 @@
 import unittest
 import provider
+import tempfile
 
 _demo_graph = [("a","b"), ("a","c"), ("a","d"), ("d","e"),
                ("b","a"), ("c","a"), ("d","a"), ("e","d")];
@@ -27,3 +28,13 @@ class ListProviderTest(unittest.TestCase):
         adj = el.adj()
         self.assertEqual((5,5),adj.shape)
         self.assertEqual(provider.csr_matrix, type(adj))
+
+    def test_persistence(self):
+        el = provider.EdgeList(edgelist=_demo_graph)
+        with tempfile.TemporaryFile() as tmpf:
+            el.save(tmpf)
+            tmpf.seek(0)
+            el2 = provider.load(tmpf)
+            self.assertEqual(len(el), len(el2))
+            self.assertEqual(el2["a"], 0)
+            self.assertEqual(el2["b"], 1)

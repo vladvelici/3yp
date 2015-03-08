@@ -1,7 +1,7 @@
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 import numpy as np
-import csv, sys
+import csv, sys, pickle
 
 class EdgeList:
     """Instantiated by a list of edges. Usually from CSV files.
@@ -22,7 +22,7 @@ class EdgeList:
 
         The node->id index is computed using the given inverted index.
         """
-        if args['edgelist']:
+        if "edgelist" in args:
             self._edgelist = args['edgelist']
         else:
             self._edgelist = []
@@ -80,10 +80,13 @@ class EdgeList:
 
     ## Persistence:
 
-    def save(self, path):
+    def save(self, where):
         """EdgeList is not saved. It should (already) be persisted somewhere."""
-        with open(path, "wb") as f:
-            pickle.dump(self._inverted_index, f)
+        if type(where) == str:
+            with open(where, "wb") as f:
+                pickle.dump(self._inverted_index, f)
+        else:
+            pickle.dump(self._inverted_index, where)
 
     ## Implement the provider description for sim.Simp:
 
@@ -98,12 +101,16 @@ class EdgeList:
             self._makeadj()
         return self._adj
 
-def load(path):
+def load(where):
     """This loads the index file for the double dictonary (node->id, id->node),
     but does not load the adjacency matrix or edge list. This means the EdgeList
     returned by this method is not usable to train new graphs but only to """
-    with open(path, "rb") as f:
-        inv_index = pickle.load(f)
+    if type(where) == str:
+        with open(where, "rb") as f:
+            inv_index = pickle.load(f)
+            return EdgeList(invindex=inv_index)
+    else:
+        inv_index = pickle.load(where)
         return EdgeList(invindex=inv_index)
 
 
