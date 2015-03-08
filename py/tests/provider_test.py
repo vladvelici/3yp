@@ -9,7 +9,7 @@ class ListProviderTest(unittest.TestCase):
         pass
 
     def test_index(self):
-        el = provider.EdgeList(_demo_graph)
+        el = provider.EdgeList(edgelist=_demo_graph)
         self.assertEqual(el["a"], 0)
         self.assertEqual(el["b"], 1)
         self.assertEqual(len(el), 5)
@@ -17,13 +17,13 @@ class ListProviderTest(unittest.TestCase):
     def test_len(self):
         # is actually the same test as test_index, just to see if there's an
         # instantiation error.
-        el2 = provider.EdgeList(_demo_graph)
+        el2 = provider.EdgeList(edgelist=_demo_graph)
         self.assertEqual(el2["a"], 0)
         self.assertEqual(el2["b"], 1)
         self.assertEqual(len(el2), 5)
 
     def test_adj(self):
-        el = provider.EdgeList(_demo_graph)
+        el = provider.EdgeList(edgelist=_demo_graph)
         adj = el.adj()
         self.assertEqual((5,5),adj.shape)
         self.assertEqual(provider.csr_matrix, type(adj))

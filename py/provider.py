@@ -3,40 +3,45 @@ from scipy.sparse import csr_matrix
 import numpy as np
 import csv, sys
 
-class Simple:
-    """Reduntant adjacency matrix provider."""
-    def __init__(self, adj):
-        self.adj = adj
-
-    def __len__(self):
-        """Return the number of nodes."""
-        return self.adj.shape[0]
-
-    def __getitem__(self, key):
-        """Assumes the key is the index in the adjacency matrix."""
-        return key
-
-    def adj(self):
-        """Returns the adjacency given at instantiation."""
-        return self.adj
-
 class EdgeList:
-    """Reads a CSV file of edges in format:
-    node_one, node_two[, ignored attributes]
+    """Instantiated by a list of edges. Usually from CSV files.
 
     The node names from the csv files are treated as strings,
     and assigned unique consecutive numbers starting form 0.
     """
 
-    def __init__(self, edgelist):
-        self._index = {}
-        self._nextId = 0
-        self._edgelist = edgelist
+    def __init__(self, **args):
+        """
+        Accepted arguments:
+            edgelist = list of edges (can be empty if not requred to compute
+                       adjacency matrix [e.g. to train])
+            invindex = inverted index of nodes (can be empty if edgelist provided)
+
+        The inverted index needed is an array of nodes, where the first node
+        has ID 0, the second one has ID 1, etc.
+
+        The node->id index is computed using the given inverted index.
+        """
+        if args['edgelist']:
+            self._edgelist = args['edgelist']
+        else:
+            self._edgelist = []
+
         self._adj = None
-        self._mkindex()
+
+        self._index = {}
+        if "invindex" in args:
+            self._inverted_index = args["invindex"]
+
+            ## Compute the normal node->id index
+            for intid, name in enumerate(self._inverted_index):
+                self._index[name] = intid
+        else:
+            self._inverted_index = []
+            self._mkindex()
 
     def __len__(self):
-        return self._nextId
+        return len(self._inverted_index)
 
     def _mkindex(self):
         """Create a node index by iterating over all the edges."""
@@ -63,10 +68,24 @@ class EdgeList:
         defined."""
         if n in self._index:
             return self._index[n]
-        self._index[n] = self._nextId
-        r = self._nextId
-        self._nextId = self._nextId+1
+        r = len(self._inverted_index)
+        self._index[n] = r
+        self._inverted_index.append(n)
         return r
+
+    ## Inverted index lookup:
+    def inverted(self, id):
+        """Given self[node]=id, then self.inverted(id)=node."""
+        return self._inverted_index[id]
+
+    ## Persistence:
+
+    def save(self, path):
+        """EdgeList is not saved. It should (already) be persisted somewhere."""
+        with open(path, "wb") as f:
+            pickle.dump(self._inverted_index, f)
+
+    ## Implement the provider description for sim.Simp:
 
     def __getitem__(self, node):
         """Return the ID for node. Raises an exception if the node is not
@@ -78,6 +97,15 @@ class EdgeList:
         if self._adj is None:
             self._makeadj()
         return self._adj
+
+def load(path):
+    """This loads the index file for the double dictonary (node->id, id->node),
+    but does not load the adjacency matrix or edge list. This means the EdgeList
+    returned by this method is not usable to train new graphs but only to """
+    with open(path, "rb") as f:
+        inv_index = pickle.load(f)
+        return EdgeList(invindex=inv_index)
+
 
 def csv_stream(stream):
     """Reads a CSV stream to a list of edges (not EdgeList object).
