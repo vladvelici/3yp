@@ -12,7 +12,8 @@ class Sim:
         return self.z.shape[0]
 
     def score(self, a, b):
-        """Compute the score between a and b."""
+        """Compute the score between a and b. The score is the eucliden
+        distance between the similarity vectors of the nodes. (c_a and c_b)"""
         norma = self.z[a,:] * self.q * self.z[a,:].transpose()
         normb = self.z[b,:] * self.q * self.z[b,:].transpose()
         ab = self.z[a,:] * self.q * self.z[b,:].transpose()
