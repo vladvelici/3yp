@@ -21,3 +21,9 @@ class ListProviderTest(unittest.TestCase):
         self.assertEqual(el2["a"], 0)
         self.assertEqual(el2["b"], 1)
         self.assertEqual(len(el2), 5)
+
+    def test_adj(self):
+        el = provider.EdgeList(_demo_graph)
+        adj = el.adj()
+        self.assertEqual((5,5),adj.shape)
+        self.assertEqual(provider.csr_matrix, type(adj))
