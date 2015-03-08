@@ -7,6 +7,10 @@ class Simple:
     def __init__(self, adj):
         self.adj = adj
 
+    def __len__(self):
+        """Return the number of nodes."""
+        return self.adj.shape[0]
+
     def adj(self):
         """Returns the adjacency given at instantiation."""
         return self.adj
@@ -43,6 +47,7 @@ class EdgeList:
             self.node(edge[1])
 
     def _makeadj(self):
+        """Create and save the adjacency matrix from the list of edges."""
         rows = [0] * len(self._edgelist)
         cols = [0] * len(self._edgelist)
 
