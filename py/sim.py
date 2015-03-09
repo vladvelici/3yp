@@ -7,12 +7,15 @@ import provider
 
 class Sim:
     def __init__(self, q, z):
-        self.q = q
-        self.z = z
+        self.q = np.matrix(q)
+        self.z = np.matrix(z)
 
     def __len__(self):
         """Returns the number of nodes provided in this method."""
         return self.z.shape[0]
+
+    def nodelist(self):
+        return range(len(self))
 
     def score(self, a, b):
         """Compute the score between a and b. The score is the eucliden
@@ -81,15 +84,19 @@ class Simp(Sim):
 
     provider.adj() -> returns a scipy.sparse (preferably csr) symmetric matrix.
     provider[meaningful_node_id] -> returns an unique numeric id for the node.
+    provider.nodelist() -> gives a list of nodes (meaningful names)
 
     """
     def __init__(self, q, z, provider):
-        self.q = s.q
-        self.z = s.z
+        self.q = np.matrix(s.q)
+        self.z = np.matrix(s.z)
         self.provider = provider
 
     def score(self, a, b):
         return Sim.score(self, self.provider[a], self.provider[b])
+
+    def nodelist(self):
+        return self.provider.nodelist()
 
     def _save(self, f):
         simf = tempfile.TemporaryFile()
