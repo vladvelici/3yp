@@ -32,9 +32,8 @@ class EdgeList:
         self._index = {}
         if "invindex" in args:
             self._inverted_index = args["invindex"]
-
             ## Compute the normal node->id index
-            for intid, name in enumerate(self._inverted_index):
+            for intid, name in enumerate(args["invindex"]):
                 self._index[name] = intid
         else:
             self._inverted_index = []

@@ -3,6 +3,7 @@ import scipy.sparse as sparse
 import scipy.sparse.linalg as linalg
 import tarfile
 import tempfile
+import provider
 
 class Sim:
     def __init__(self, q, z):
@@ -53,13 +54,19 @@ def train(adj, mu, k):
 
     return Sim(q, z)
 
+def _load(f):
+    data = np.load(f)
+    if not('q' in data and 'z' in data):
+        raise Exception("File doesn't have q and z.")
+    return Sim(data['q'], data['z'])
+
 def load(path):
-    """Load Sim object from file."""
-    with open(path, 'rb') as f:
-        data = np.load(f)
-        if not('q' in data and 'z' in data):
-            raise Exception("File doesn't have q and z.")
-        return Sim(data['q'], data['z'])
+    """Load Sim object from file. It returns a Sim object."""
+    if type(path) == str:
+        with open(path, 'rb') as f:
+            return _load(f)
+    else:
+        return _load(path)
 
 ## With provider
 
@@ -125,17 +132,26 @@ def trainp(provider, mu, k):
     adj = provider.adj()
     return prov(train(adj, mu, k), provider)
 
-def load(path, provider):
-    """Load and prov convenience function."""
+def loadprov(path, provider):
+    """Load and prov convenience function. Returns a Simp object using the
+    Sim object loaded from path and the provider passed to this function."""
     return prov(load(path), provider)
 
 def _loadp(f):
-    with tarfile(None, 'r', f) as tf:
-        pass
+    with tarfile.open(None, 'r', f) as tf:
+        f_prov = tf.extractfile("provindex")
+        f_sim = tf.extractfile("simqz")
+        obj_prov = provider.load(f_prov)
+        return loadprov(f_sim, obj_prov)
 
 def loadp(path):
+    """Load tar file containing EdgeList provider and Sim matrices.
+
+    Returns a Simp object with an EdgeList provider linked to it. Note that
+    the train() method will not work as there is no edgelist stored (so cannot
+    obtain the adjacency matrix)"""
     if type(path) == str:
         with open(path, "rb") as f:
-            _loadp(f)
+            return _loadp(f)
     else:
-        _loadp(path)
+        return _loadp(path)
