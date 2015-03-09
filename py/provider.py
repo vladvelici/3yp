@@ -3,6 +3,40 @@ from scipy.sparse import csr_matrix
 import numpy as np
 import csv, sys, pickle
 
+def mkadj(edgelist, offset=0):
+    """Return an adjacency matrix from a list of edges. There should be N nodes
+    from 0 to N-1, and the format of edgelist is:
+
+    [(1,2), (0,1), (2,1)] (meaning the directed edges 1->2, 0->1, 2->1)
+
+    For an undirected graph, revert the pairs and append them at the end of the
+    edge list.
+
+    The offset is used to increase the compatibility with CSV files parsed for Matlab.
+    It is added to the node id in the edgelist before using that ID. For compatibility
+    with Matlab, use an offest of -1 (in Matlab, indices start at 1, not 0).
+
+    Returns a sparse adjacency matrix of type csr_matrix.
+    """
+    rows = [0] * len(edgelist)
+    cols = [0] * len(edgelist)
+
+    maxNode = -1
+
+    for i, edge in enumerate(edgelist):
+        rows[i] = int(edge[0]) + offset
+        cols[i] = int(edge[1]) + offset
+
+        if maxNode < rows[i]:
+            maxNode = rows[i]
+        if maxNode < cols[i]:
+            maxNode = cols[i]
+
+    adj = coo_matrix((np.ones(len(rows)), (rows, cols)),
+        shape=(maxNode+1, maxNode+1), dtype=float)
+
+    return csr_matrix(adj)
+
 class EdgeList:
     """Instantiated by a list of edges. Usually from CSV files.
 
@@ -71,6 +105,9 @@ class EdgeList:
         self._index[n] = r
         self._inverted_index.append(n)
         return r
+
+    def nodelist(self):
+        return self._inverted_index
 
     ## Inverted index lookup:
     def inverted(self, id):
