@@ -69,9 +69,6 @@ def train(args):
         adj = pr.mkadj(edgelist, args.offset)
         s = sim.train(adj, args.mu, args.k)
 
-    print(type(s))
-    print("%e" % s.score(0,1))
-
     s.save(args.output)
 
 ### SIMILARITY
@@ -85,7 +82,6 @@ def read_index(path):
 def similarity(args):
     s = read_index(args.index)
 
-    print(type(s))
     nodes = args.nodes
     if len(nodes) == 0:
         nodes = s.nodelist()
@@ -94,7 +90,6 @@ def similarity(args):
         to = args.to
         if to is None:
             to = s.nodelist()
-
         for a in nodes:
             for b in to:
                 score = s.score(a,b)
@@ -104,13 +99,17 @@ def similarity(args):
         for node in nodes:
             top = []
             for b in all_nodes:
-                if b == node:
+                if str(b) == str(node):
                     continue
                 score = s.score(node,b)
                 top.append((b, score))
             top = sorted(top, key=lambda it: it[1])
             top = top[:args.top]
-            print("TODO")
+            print(node, end="")
+            print("\t", end="")
+            for t in top:
+                print("(%s, %e)" % t, end="\t")
+            print()
 
 ### INFO
 
