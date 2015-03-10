@@ -5,6 +5,9 @@ import provider as pr
 import sys
 import argparse
 import tarfile
+import simcache
+import math
+import random
 
 def main():
     parser = argparse.ArgumentParser()
@@ -42,6 +45,12 @@ def main():
     p_sim.add_argument("--top", help="Compute top similar nodes, sort by similarity.",
                             type=int, default=0)
 
+    p_eval = sbp.add_parser("eval", help="Evaluate algorithm using a list of (should predict) edges.")
+    p_eval.add_argument("index", help="Index or graph file.")
+    p_eval.add_argument("edges", help="Edges file.")
+    p_eval.add_argument("--format", "-f", default="csv", choices=["csv"], help="Edges file format.")
+    p_eval.add_argument("--verbose", "-v", action="store_true", help="Verbose output.")
+    p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
 
     args = parser.parse_args()
     if args.action == 'sim':
@@ -50,6 +59,8 @@ def main():
         train(args)
     elif args.action == 'info':
         info(args)
+    elif args.action == 'eval':
+        evaluate(args)
 
 ### TRAIN
 
@@ -110,6 +121,108 @@ def similarity(args):
             for t in top:
                 print("(%s, %e)" % t, end="\t")
             print()
+
+### EVALUATE
+
+def evaluate(args):
+    index = read_index(args.index)
+
+    edges = []
+    if args.format == 'csv':
+        edges = pr.csv_file(args.edges)
+
+    sc = simcache.Undirected(index)
+
+    total_position = 0.0
+    total_score = 0.0
+    total_relative_score = 0.0
+
+    rand_total_position = 0.0
+    rand_total_score = 0.0
+    rand_total_relative_score = 0.0
+
+    allnodes = index.nodelist()
+    if args.verbose:
+        print("(a\tb)\ttrg B\tpos\tscr\trel scr")
+    for i, pair in enumerate(edges):
+        top = []
+        a = pair[0]
+        targetb = pair[1]
+
+        # dangeours-ish code
+        randomtarget = random.sample(allnodes, 1)[0]
+        while str(randomtarget) == str(a):
+            randomtarget = random.sample(allnodes, 1)[0]
+
+        if not args.offset == 0:
+            a = int(a) + args.offset
+            targetb = int(targetb) + args.offset
+
+        foundpair = None
+        randpair = None
+        for b in allnodes:
+            if str(b) == str(a):
+                continue
+            el = (b, sc.score(a,b))
+            top.append(el)
+            if str(b).strip() == str(targetb).strip():
+                foundpair = el
+            if str(b) == str(randomtarget):
+                randpair = el
+        top = sorted(top, key=lambda it: it[1])
+
+        position = top.index(foundpair)
+        score = foundpair[1]
+        relative_score = (score - top[0][1]) ** 2
+
+        total_position = total_position + position
+        total_score = total_score + score
+        total_relative_score = total_relative_score + relative_score
+
+        #if not (randpair is None):
+        rand_pos = top.index(randpair)
+        rand_score = randpair[1]
+        rand_relative = (rand_score - top[0][1]) ** 2
+
+        #if not (randpair is None):
+        rand_total_position = rand_total_position + rand_pos
+        rand_total_score = rand_total_score + rand_score
+        rand_total_relative_score = rand_total_relative_score + rand_relative
+
+        if args.verbose:
+            print("%s\t%s\t%s\t%d\t%e\t%e" % (a, targetb, foundpair[0], position, score, relative_score))
+        else:
+            progress = (i+1.0)*100/len(edges)
+            print("\r%.2f %%" % progress, end="       ")
+
+    no_nodes = len(allnodes)
+    total_position = total_position / no_nodes
+    total_score = total_score / no_nodes
+    total_relative_score = math.sqrt(total_relative_score) / no_nodes
+
+    rand_total_position = rand_total_position / no_nodes
+    rand_total_score = rand_total_score / no_nodes
+    rand_total_relative_score = math.sqrt(rand_total_relative_score) / no_nodes
+
+    if not args.verbose:
+        print("")
+
+    print("Top position offset:\t %e" % total_position)
+    print("Total score:\t\t %e" % total_score)
+    print("Total relative score:\t %e" % total_relative_score)
+    print("")
+
+    print("Rand Top position offset:\t %e" % rand_total_position)
+    print("Rand Total score:\t\t %e" % rand_total_score)
+    print("Rand Total relative score:\t %e" % rand_total_relative_score)
+
+    print("")
+    print("Differences (expected - random)")
+    print("top position offest:\t %e" % (total_position - rand_total_position))
+    print("Total score:\t\t %e" % (total_score - rand_total_score))
+    print("Total relative score:\t %e" % (total_relative_score - rand_total_relative_score))
+    print("\nTotals are normalised by the number of nodes (%d)." % no_nodes)
+
 
 ### INFO
 
