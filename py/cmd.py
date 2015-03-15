@@ -8,6 +8,7 @@ import tarfile
 import simcache
 import math
 import random
+import evalf
 
 def main():
     parser = argparse.ArgumentParser()
@@ -50,7 +51,6 @@ def main():
     p_eval.add_argument("index", help="Index or graph file.")
     p_eval.add_argument("edges", help="Edges file.")
     p_eval.add_argument("--format", "-f", default="csv", choices=["csv"], help="Edges file format.")
-    p_eval.add_argument("--verbose", "-v", action="store_true", help="Verbose output.")
     p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
     p_eval.add_argument("--cache", action="store_true", help="Use an undirected cache. Undirected graphs only.")
 
@@ -133,95 +133,34 @@ def evaluate(args):
     if args.format == 'csv':
         edges = pr.csv_file(args.edges)
 
-    sc = index
-    if args.cache:
-        sc = simcache.Undirected(index)
+    def show_progress(edge, position, score, relative_score, i):
+        progress = (i+1.0)*100/len(edges)
+        print("\r%.2f %%" % progress, end="       ")
 
-    total_position = 0.0
-    total_score = 0.0
-    total_relative_score = 0.0
+    res = evalf.evaluate(
+        index=index,
+        edges=edges,
+        cache=args.cache,
+        offset=args.offset,
+        eachFunc=show_progress
+    )
 
-    rand_total_position = 0.0
-    rand_total_score = 0.0
-    rand_total_relative_score = 0.0
-
-    allnodes = index.nodelist()
-    if args.verbose:
-        print("(a\tb)\ttrg B\tpos\tscr\trel scr")
-    for i, pair in enumerate(edges):
-        a = pair[0]
-        targetb = pair[1]
-
-        if not args.offset == 0:
-            a = int(a) + args.offset
-            targetb = int(targetb) + args.offset
-
-        # dangeours-ish code
-        randomtarget = random.sample(allnodes, 1)[0]
-        while str(randomtarget) == str(a):
-            randomtarget = random.sample(allnodes, 1)[0]
-
-        position = 0
-        rand_pos = 0
-        score = sc.score(a,targetb)
-        rand_score = sc.score(a,randomtarget)
-        best = score
-
-        for b in allnodes:
-            if a == b or str(b) == str(a):
-                continue
-            scr = sc.score(a,b)
-            if scr < score:
-                position = position + 1
-            if scr < rand_score:
-                rand_pos = rand_pos + 1
-            if scr < best:
-                best = scr
-
-        relative_score = (score - best) ** 2
-        rand_relative = (rand_score - best) ** 2
-
-        total_position = total_position + position
-        total_score = total_score + score
-        total_relative_score = total_relative_score + relative_score
-
-        rand_total_position = rand_total_position + rand_pos
-        rand_total_score = rand_total_score + rand_score
-        rand_total_relative_score = rand_total_relative_score + rand_relative
-
-        if args.verbose:
-            print("%s\t%s\t%s\t%d\t%e\t%e" % (a, targetb, foundpair[0], position, score, relative_score))
-        else:
-            progress = (i+1.0)*100/len(edges)
-            print("\r%.2f %%" % progress, end="       ")
-
-    no_nodes = len(allnodes)
-    total_position = total_position / (no_nodes*len(edges))
-    total_score = total_score / len(edges)
-    total_relative_score = total_relative_score / len(edges)
-
-    rand_total_position = rand_total_position / (no_nodes * len(edges))
-    rand_total_score = rand_total_score / len(edges)
-    rand_total_relative_score = rand_total_relative_score / len(edges)
-
-    if not args.verbose:
-        print("")
-
-    print("Top position offset:\t %e" % total_position)
-    print("Total score:\t\t %e" % total_score)
-    print("Total relative score:\t %e" % total_relative_score)
+    print(end="\r")
+    print("Top position offset:\t %e" % res.position)
+    print("Total score:\t\t %e" % res.score)
+    print("Total relative score:\t %e" % res.relative)
     print("")
 
-    print("Rand Top position offset:\t %e" % rand_total_position)
-    print("Rand Total score:\t\t %e" % rand_total_score)
-    print("Rand Total relative score:\t %e" % rand_total_relative_score)
+    print("Rand Top position offset:\t %e" % res.rand_position)
+    print("Rand Total score:\t\t %e" % res.rand_score)
+    print("Rand Total relative score:\t %e" % res.rand_relative)
 
     print("")
     print("Differences (random - expected)")
-    print("top position offset:\t %e" % (rand_total_position - total_position))
-    print("Total score:\t\t %e" % (rand_total_score - total_score))
-    print("Total relative score:\t %e" % (rand_total_relative_score - total_relative_score))
-    print("\nEdges to predict:\t%d\nNo of nodes:\t%d." % (len(edges), no_nodes))
+    print("top position offset:\t %e" % res.diff_position)
+    print("Total score:\t\t %e" % res.diff_score)
+    print("Total relative score:\t %e" % res.diff_relative)
+    print("\nEdges to predict:\t%d\nNo of nodes:\t%d." % (res.edges, res.nodes))
 
 
 ### INFO
