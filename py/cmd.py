@@ -126,12 +126,6 @@ def similarity(args):
 
 ### EVALUATE
 
-def _find(first, lst):
-    for index, pair in enumerate(lst):
-        if pair[0] == first or str(pair[0]) == str(first):
-            return pair, index
-    raise Exception("Not (%s, -) found in list." % str(first))
-
 def evaluate(args):
     index = read_index(args.index)
 
