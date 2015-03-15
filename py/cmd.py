@@ -198,11 +198,11 @@ def evaluate(args):
     no_nodes = len(allnodes)
     total_position = total_position / (no_nodes*len(edges))
     total_score = total_score / len(edges)
-    total_relative_score = math.sqrt(total_relative_score) / len(edges)
+    total_relative_score = total_relative_score / len(edges)
 
     rand_total_position = rand_total_position / (no_nodes * len(edges))
     rand_total_score = rand_total_score / len(edges)
-    rand_total_relative_score = math.sqrt(rand_total_relative_score) / len(edges)
+    rand_total_relative_score = rand_total_relative_score / len(edges)
 
     if not args.verbose:
         print("")
