@@ -25,6 +25,7 @@ def main():
                             default=6, dest="k", type=int)
     p_train.add_argument("--penalise", "-mu", help="Penalisation factor",
                             default=0.5, dest="mu", type=float)
+    p_train.add_argument("--long", help="Don't use Cholesky decomposition.", action="store_true")
     p_train.add_argument("--direct", "-d", help="Use the input values as int node ids.",
                             action="store_true")
     p_train.add_argument("--offset", default=0, type=int,
@@ -75,10 +76,10 @@ def train(args):
     if not args.direct:
         prov = pr.EdgeList(edgelist=edgelist)
         print("Length of provider: %d" % len(prov))
-        s = sim.trainp(prov, args.mu, args.k)
+        s = sim.trainp(prov, args.mu, args.k, args.long)
     else:
         adj = pr.mkadj(edgelist, args.offset)
-        s = sim.train(adj, args.mu, args.k)
+        s = sim.train(adj, args.mu, args.k, args.long)
 
     s.save(args.output)
 
@@ -242,6 +243,10 @@ def info_sim(args):
 
     print("Normal (plain q, z) index file with %d nodes." % len(s))
     print("Node names range from 0 to %d." % (len(s)-1))
+    if s.z is None:
+        print("Index is in short format (for Q=L^T*L, stores L^T * Z^T).")
+    else:
+        print("Index in in long format (stores both Q and Z).")
     if args.q:
         print("")
         print("Matrix Q:")
@@ -260,12 +265,16 @@ def info_tar(args):
         return None
 
     print("tar index file with %s nodes." % len(s.provider))
+    if s.z is None:
+        print("Index is in short format (for Q=L^T*L, stores L^T * Z^T).")
+    else:
+        print("Index in in long format (stores both Q and Z).")
     print("")
     if args.q:
         print("Matrix Q:")
         print(s.q)
         print("")
-    if args.z:
+    if args.z and s.z is not None:
         print("Matriz Z:")
         print(s.z)
         print("")

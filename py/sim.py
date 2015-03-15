@@ -1,40 +1,67 @@
 import numpy as np
 import scipy.sparse as sparse
 import scipy.sparse.linalg as linalg
+from scipy.linalg import cholesky
 import tarfile
 import tempfile
 import provider
 
 class Sim:
-    def __init__(self, q, z):
+    def __init__(self, q, z=None):
         self.q = np.matrix(q)
-        self.z = np.matrix(z)
+        if z is None:
+            self.z = None
+        else:
+            self.z = np.matrix(z)
 
     def __len__(self):
         """Returns the number of nodes provided in this method."""
+        if self.z is None:
+            return self.q.shape[1]
         return self.z.shape[0]
 
     def nodelist(self):
         return range(len(self))
 
+    def _dotprod(self, a, b):
+        a=int(a)
+        b=int(b)
+        pm = None
+        if self.z is None:
+            pm = self.q[:,a].T * self.q[:, b]
+        else:
+            pm = self.z[a,:] * self.q * self.z[b,:].transpose()
+        return pm[0,0]
+
     def score(self, a, b):
         """Compute the score between a and b. The score is the eucliden
         distance between the similarity vectors of the nodes. (c_a and c_b)"""
-        norma = self.z[a,:] * self.q * self.z[a,:].transpose()
-        normb = self.z[b,:] * self.q * self.z[b,:].transpose()
-        ab = self.z[a,:] * self.q * self.z[b,:].transpose()
-        return norma.item((0,0)) + normb.item((0,0)) - 2 * ab.item((0,0))
+        norma = self._dotprod(a,a)
+        normb = self._dotprod(b,b)
+        ab = self._dotprod(a,b)
+        return norma + normb - 2 * ab
 
     def save(self, path):
         """Save Sim object to file."""
         if type(path) == str:
             with open(path, mode='wb') as f:
-                np.savez(f, q=self.q, z=self.z)
+                self.save(f)
+            return
+        if self.z is None:
+            np.savez(path, q=self.q)
         else:
             np.savez(path, q=self.q, z=self.z)
 
-def train(adj, mu, k):
-    """Use the adjacency matrix to compute matrices Q and Z.
+def train(adj, mu, k, qandz=False):
+    """Training for undirected graphs (symmetric adjacency matrix).
+
+    Use the adjacency matrix to compute similarity matrices.
+    It computes matrix Q and Z if the last argument is set to true. Default is
+    false.
+
+    If qandz is set to False (the default), it computes the matrix W using
+    Cholesky decomposition. This will speed up pairwise comparisons but may or
+    may not lose some precision.
 
     It returns a Sim object.
     """
@@ -55,21 +82,28 @@ def train(adj, mu, k):
     z = sparse.diags(np.sqrt(neigh).transpose().tolist(), [0]) * vec * val
     q = vec.transpose() * w * vec
 
-    return Sim(q, z)
+    if qandz:
+        return Sim(q, z)
 
-def _load(f):
-    data = np.load(f)
-    if not('q' in data and 'z' in data):
-        raise Exception("File doesn't have q and z.")
-    return Sim(data['q'], data['z'])
+    q = cholesky(q, lower=True, overwrite_a=True, check_finite=False)
+    q = np.matrix(q)
+    omega = q.T * z.T
+    return Sim(omega)
 
 def load(path):
     """Load Sim object from file. It returns a Sim object."""
     if type(path) == str:
         with open(path, 'rb') as f:
-            return _load(f)
+            return load(f)
     else:
-        return _load(path)
+        data = np.load(path)
+        if not 'q' in data:
+            raise Exception("File doesn't have Q.")
+        q = data['q']
+        z = None
+        if 'z' in data:
+            z = data['z']
+        return Sim(q,z)
 
 ## With provider
 
@@ -134,10 +168,10 @@ def prov(s, provider):
     s.__class__ = Simp
     return s
 
-def trainp(provider, mu, k):
+def trainp(provider, mu, k, qandz=False):
     """Train with a provider instead of adjancency matrix."""
     adj = provider.adj()
-    return prov(train(adj, mu, k), provider)
+    return prov(train(adj, mu, k, qandz), provider)
 
 def loadprov(path, provider):
     """Load and prov convenience function. Returns a Simp object using the
