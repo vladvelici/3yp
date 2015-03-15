@@ -72,6 +72,9 @@ def train(args):
     edgelist = []
     if args.format == 'csv':
         edgelist = pr.csv_file(args.input)
+    else:
+        print("Format not supported. :(")
+        return
 
     s = None
     if not args.direct:
@@ -132,6 +135,8 @@ def evaluate(args):
     edges = []
     if args.format == 'csv':
         edges = pr.csv_file(args.edges)
+    else:
+        print("Format not supported. :(")
 
     def show_progress(edge, position, score, relative_score, i):
         progress = (i+1.0)*100/len(edges)
