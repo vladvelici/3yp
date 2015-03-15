@@ -160,7 +160,7 @@ def csv_stream(stream):
     for row in reader:
         if len(row) < 2:
             raise Exception("Parsing CSV: Too few values in the row.", row, len(row))
-        res.append((row[0], row[1]))
+        res.append((row[0].strip(), row[1].strip()))
     return res
 
 def csv_file(path):
