@@ -3,6 +3,7 @@ import sim
 import tarfile
 from collections import namedtuple
 import random
+import simcache
 
 def read_index(path):
     if tarfile.is_tarfile(path):
@@ -22,6 +23,33 @@ EvalResult = namedtuple("EvalResult", [
     'diff_position',
     'diff_score',
     'diff_relative'])
+
+def _train_and_eval(edgelist, offset, mu, k, edges, eachFunc):
+    index = None
+    if offset is None:
+        prov = pr.EdgeList(edgelist=edgelist)
+        print("Length of provider: %d" % len(prov))
+        index = sim.trainp(prov, mu, k)
+    else:
+        adj = pr.mkadj(edgelist, offset)
+        index = sim.train(adj, mu, k)
+
+    return evaluate(
+        index=index,
+        edges=edges,
+        cache=True,
+        offset=offset,
+        eachFunc=eachFunc
+    )
+
+# direct=true for any numeric offset. Set to None for direct=false
+def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None):
+    """Returns a list of (mu, k, EvalResult)"""
+    res = []
+    for mu in range_mu:
+        for k in range_k:
+            res.append((mu, k, _train_and_eval(input, offset, mu, k, edges, eachFunc)))
+    return res
 
 def evaluate(index, edges, cache, offset, eachFunc=None):
     sc = index

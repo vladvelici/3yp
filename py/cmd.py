@@ -48,11 +48,23 @@ def main():
                             type=int, default=0)
 
     p_eval = sbp.add_parser("eval", help="Evaluate index using a list of (should predict) edges.")
-    p_eval.add_argument("index", help="Index or graph file.")
+    p_eval.add_argument("index", help="Index file.")
     p_eval.add_argument("edges", help="Edges file.")
     p_eval.add_argument("--format", "-f", default="csv", choices=["csv"], help="Edges file format.")
     p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
     p_eval.add_argument("--cache", action="store_true", help="Use an undirected cache. Undirected graphs only.")
+
+    p_trev = sbp.add_parser("trev", help="Train and evaluate on a range of mu and k.")
+    p_trev.add_argument("input", help="Graph file for training.")
+    p_trev.add_argument("edges", help="Eval edges file.")
+    p_trev.add_argument("--format", "-f", help="Format for input file.", choices=["csv"], default='csv')
+    p_trev.add_argument("--formatedge", help="Format for edges file.", choices=["csv"], default='csv')
+    p_trev.add_argument("--offset", type=int, default=0, help="Offset to use, treat nodes are ints. Only works if --direct is set.")
+    p_trev.add_argument("--direct", help="Assume nodes are ints. Assumes min(node_id+offset)=0.", action="store_true")
+    p_trev.add_argument("--eigenvalues", "-k", help="List of k (no. of eigenvalues to use).",
+                            nargs='+', type=int, dest="k")
+    p_trev.add_argument("--penalise", "-mu", help="List of penalisation factors (mu).",
+                        nargs='+', type=float, dest="mu")
 
     args = parser.parse_args()
     if args.action == 'sim':
@@ -63,6 +75,8 @@ def main():
         info(args)
     elif args.action == 'eval':
         evaluate(args)
+    elif args.action == 'trev':
+        train_eval(args)
 
 ### TRAIN
 
@@ -126,6 +140,41 @@ def similarity(args):
             for t in top:
                 print("(%s, %e)" % t, end="\t")
             print()
+
+### TRAIN AND EVALUATE
+
+def train_eval(args):
+    edgelist = []
+    if args.format == 'csv':
+        edgelist = pr.csv_file(args.input)
+    else:
+        print("Input format not supported. :(")
+        return
+
+    edges = []
+    if args.formatedge == 'csv':
+        edges = pr.csv_file(args.edges)
+    else:
+        print("Eval edges format not supported. :(")
+
+    if not args.direct:
+        args.offset = None
+
+    results = evalf.train_and_evaluate(
+        input = edgelist,
+        offset = args.offset,
+        range_k = args.k,
+        range_mu = args.mu,
+        edges = edges)
+
+    print("mu\tk\tposition\tscore   \trelative\tdiff pos\tdiff scr\tdiff rel")
+    for res in results:
+        r = res[2]
+        print("%.2f\t%d\t%e\t%e\t%e\t%e\t%e\t%e" % (res[0], res[1],
+            r.position, r.score, r.relative,
+            r.diff_position, r.diff_score, r.diff_relative))
+
+
 
 ### EVALUATE
 
