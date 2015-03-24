@@ -52,19 +52,8 @@ class Sim:
         else:
             np.savez(path, q=self.q, z=self.z)
 
-def train(adj, mu, k, qandz=False):
-    """Training for undirected graphs (symmetric adjacency matrix).
-
-    Use the adjacency matrix to compute similarity matrices.
-    It computes matrix Q and Z if the last argument is set to true. Default is
-    false.
-
-    If qandz is set to False (the default), it computes the matrix W using
-    Cholesky decomposition. This will speed up pairwise comparisons but may or
-    may not lose some precision.
-
-    It returns a Sim object.
-    """
+def train_undirected(adj, mu, k, qandz=False):
+    """Train for undirected graphs. Same as train(...) but without the extra check."""
     neigh = adj.sum(1)
     neighInv = np.power(neigh, -1)
 
@@ -89,6 +78,54 @@ def train(adj, mu, k, qandz=False):
     q = np.matrix(q)
     omega = q.T * z.T
     return Sim(omega)
+
+def train_directed(adj, mu, k, qandz=False):
+    """Train for directed graphs. Same as train(...) but without the extra check.
+    For directed graphs, the number of eigenvalues used might be changed. This is due
+    to getting complex numbers.
+
+    If a complex eigenvalue, v, is found, then the algorithm makes sure that v* (the 
+    complex conjugate of v) is also computed and used. As there will only be two calls
+    to scipy.sparse.linalg.eigs(), one for left and one for right eigenvectors, all
+    the complex eigenvalues for which the complex conjugate is missing will simply be
+    discarded. This usually means that at most one eigenvalue is discarded but it is
+    not guaranteed.
+    """
+    pass
+
+
+def is_symmetric(adj):
+    e = adj.nonzero()
+    for i in range(len(e[0])):
+        if adj[e[0][i], e[1][i]] != adj[e[1][i], e[0][i]]:
+            return False
+    return True
+
+def train(adj, mu, k, qandz=False):
+    """Training for undirected graphs (symmetric adjacency matrix).
+
+    Use the adjacency matrix to compute similarity matrices.
+    It computes matrix Q and Z if the last argument is set to true. Default is
+    false.
+
+    If qandz is set to False (the default), it computes the matrix W using
+    Cholesky decomposition. This will speed up pairwise comparisons but may or
+    may not lose some precision.
+
+    This function, before training, is checking whether the graph is undirected or directed
+    by checking if the adj matrix is symmetric or not. (symmetric adjacency matrix means
+    undirected graph).
+
+    For speed, consider directly using the functions train_directed and train_undirected.
+
+    It returns a Sim object.
+    """
+
+    if is_symmetric(adj):
+        return train_undirected(adj, mu, k, qandz)
+    return train_directed(adj, mu, k, qandz)
+
+
 
 def load(path):
     """Load Sim object from file. It returns a Sim object."""

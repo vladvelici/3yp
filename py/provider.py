@@ -140,7 +140,8 @@ class EdgeList:
 def load(where):
     """This loads the index file for the double dictonary (node->id, id->node),
     but does not load the adjacency matrix or edge list. This means the EdgeList
-    returned by this method is not usable to train new graphs but only to """
+    returned by this method is not usable to train new graphs but only to make
+    adjacency matrices with it, or/and use as a provider."""
     if type(where) == str:
         with open(where, "rb") as f:
             inv_index = pickle.load(f)
