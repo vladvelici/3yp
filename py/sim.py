@@ -77,6 +77,7 @@ def train_undirected(adj, mu, k, qandz=False):
     q = cholesky(q, lower=True, overwrite_a=True, check_finite=False)
     q = np.matrix(q)
     omega = q.T * z.T
+
     return Sim(omega)
 
 def train_directed(adj, mu, k, qandz=False):
@@ -91,8 +92,37 @@ def train_directed(adj, mu, k, qandz=False):
     discarded. This usually means that at most one eigenvalue is discarded but it is
     not guaranteed.
     """
-    pass
+    val, vec = linalg.eigs(adj, k=k, which="LM")
+    
+    # check for complex conjugates
+    i=0
+    keep=[]
+    while i<len(val):
+        if val[i].imag == 0:
+            keep.append(i)
+        elif i != len(val)-1 and val[i+1].conj() == val[i]:
+            keep.append(i)
+            keep.append(i+1)
+        i+=1
 
+    val = val[keep]
+    vec = vec[:,keep]
+    vec = np.matrix(vec)
+
+    # do the cleanup, assuming the same order (need to double-check on that)
+    vall, vecl = linalg.eigs(adj.T, k=k, which="LM")
+    vecl = vecl[:, keep]
+    vecl = np.matrix(vecl)
+
+    z = vecl * sparse.diags((1 / (1 - (mu * val))), 0)
+    z = np.matrix(z)
+
+    if qandz:
+        return Sim(vec.T * vec, z)
+
+    omega = vec * z
+
+    return Sim(omega)
 
 def is_symmetric(adj):
     e = adj.nonzero()
