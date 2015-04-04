@@ -20,6 +20,8 @@ def main():
     p_train.add_argument("--format", "-f", default="csv",
                             choices=["csv"],
                             help="Input file format.")
+    p_train.add_argument("--type", "-t", help="Type of the graph.",
+                            default="auto", choices=["a", "auto", "d", "directed", "u", "undirected"])
     p_train.add_argument("--output", "-o", help="Output path for matrices q,z.",
                             required=True)
     p_train.add_argument("--eigenvalues", "-k", help="Number of eigenvalues to use",
@@ -57,6 +59,8 @@ def main():
     p_trev = sbp.add_parser("trev", help="Train and evaluate on a range of mu and k.")
     p_trev.add_argument("input", help="Graph file for training.")
     p_trev.add_argument("edges", help="Eval edges file.")
+    p_trev.add_argument("--type", "-t", help="Type of the graph.",
+                        default="auto", choices=["a", "auto", "d", "directed", "u", "undirected"])
     p_trev.add_argument("--format", "-f", help="Format for input file.", choices=["csv"], default='csv')
     p_trev.add_argument("--formatedge", help="Format for edges file.", choices=["csv"], default='csv')
     p_trev.add_argument("--offset", type=int, default=0, help="Offset to use, treat nodes are ints. Only works if --direct is set.")
@@ -80,9 +84,7 @@ def main():
 
 ### TRAIN
 
-def train(args):
-    """Perform training from a graph file. Use the values provided."""
-
+def _train(args):
     edgelist = []
     if args.format == 'csv':
         edgelist = pr.csv_file(args.input)
@@ -94,12 +96,28 @@ def train(args):
     if not args.direct:
         prov = pr.EdgeList(edgelist=edgelist)
         print("Length of provider: %d" % len(prov))
-        s = sim.trainp(prov, args.mu, args.k, args.long)
+        if args.type == "auto" or args.type == "a":
+            s = sim.trainp(prov, args.mu, args.k, args.long)
+        elif args.type == "directed" or args.type == "d":
+            s = sim.trainp_directed(prov, args.mu, args.k, args.long)
+        else:
+            s = sim.trainp_undirected(prov, args.mu, args.k, args.long)
     else:
         adj = pr.mkadj(edgelist, args.offset)
-        s = sim.train(adj, args.mu, args.k, args.long)
+        if args.type == "auto" or args.type == "a":
+            s = sim.train(adj, args.mu, args.k, args.long)
+        elif args.type == "directed" or args.type == "d":
+            s = sim.train_directed(adj, args.mu, args.k, args.long)
+        else:
+            s = sim.train_undirected(adj, args.mu, args.k, args.long)
 
-    s.save(args.output)
+    return s
+
+def train(args):
+    """Perform training from a graph file. Use the values provided."""
+    s = _train(args)
+    if s is not None:
+        s.save(args.output)
 
 ### SIMILARITY
 
@@ -165,7 +183,8 @@ def train_eval(args):
         offset = args.offset,
         range_k = args.k,
         range_mu = args.mu,
-        edges = edges)
+        edges = edges,
+        directed = args.type)
 
     print("mu\tk\tposition\tscore   \trelative\tdiff pos\tdiff scr\tdiff rel")
     for res in results:

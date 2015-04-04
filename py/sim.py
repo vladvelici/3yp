@@ -127,7 +127,7 @@ def train_directed(adj, mu, k, qandz=False):
 
     if qandz:
         return Sim(vec.T * vec, z)
-    
+
     print("sim.train_directed: Directed decomposition not implemented. Using long version.")
     return Sim(vec.T * vec, z)
 
@@ -246,6 +246,17 @@ def trainp(provider, mu, k, qandz=False):
     """Train with a provider instead of adjancency matrix."""
     adj = provider.adj()
     return prov(train(adj, mu, k, qandz), provider)
+
+def trainp_directed(provdier, mu, k, qandz=False):
+    """Train directed graph with a provider."""
+    adj = provider.adj()
+    return prov(train_directed(adj, mu, k, qandz), provider)
+
+def trainp_undirected(provider, mu, k, qandz=False):
+    """Train undirected graph with a provider."""
+    adj = provider.adj()
+    return prov(train_undirected(adj, mu, k, qandz), provider)
+
 
 def loadprov(path, provider):
     """Load and prov convenience function. Returns a Simp object using the

@@ -5,6 +5,37 @@ from collections import namedtuple
 import random
 import simcache
 
+class Offset_provider:
+    """Provider for offests and direct edgelists.
+    Mostly used as a adj matrix cache.
+    """
+
+    def __init__(edgelist, offset):
+        self.offset = offset
+        self._adj = pr.mkadj(edgelist, offset)
+
+    def __len__(self):
+        return len(self._adj.shape[0])
+
+    def _node(self, n):
+        """Return an interger ID for node. Just add offset to n."""
+        return self.offset + int(n)
+
+    def nodelist(self):
+        return range(self.offset, len(self) + self.offset)
+
+    ## No persistence required.
+    ## Implement the provider description for sim.Simp:
+
+    def __getitem__(self, node):
+        """Return the ID for node. Raises an exception if the node is not
+        found."""
+        return self.offset + int(node)
+
+    def adj(self):
+        """Get the adjacency matrix."""
+        return self._adj
+
 def read_index(path):
     if tarfile.is_tarfile(path):
         return sim.loadp(path)
@@ -24,34 +55,46 @@ EvalResult = namedtuple("EvalResult", [
     'diff_score',
     'diff_relative'])
 
-def _train_and_eval(edgelist, offset, mu, k, edges, eachFunc):
-    index = None
-    if offset is None:
-        prov = pr.EdgeList(edgelist=edgelist)
-        print("Length of provider: %d" % len(prov))
-        index = sim.trainp(prov, mu, k)
-    else:
-        adj = pr.mkadj(edgelist, offset)
-        index = sim.train(adj, mu, k)
+def _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc):
+    index = trainfunc(prov, mu, k, True)
 
     return evaluate(
         index=index,
         edges=edges,
         cache=True,
-        offset=offset,
         eachFunc=eachFunc
     )
 
 # direct=true for any numeric offset. Set to None for direct=false
-def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None):
+def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, directed="auto"):
     """Returns a list of (mu, k, EvalResult)"""
+
+    prov = None
+    if offset is None:
+        prov = pr.EdgeList(edgelist=input)
+    else:
+        prov = Offset_provider(input, offset)
+        for i, _ in enumerate(edges):
+            edges[i][0] = int(edges[i][0]) + offset
+            edges[i][1] = int(edges[i][1]) + offset
+
+    trainfunc = None
+    if directed == "d" or directed == "directed":
+        trainfunc = sim.trainp_directed
+    elif directed == "u" or directed == "undirected":
+        trainfunc = sim.trainp_undirected
+    elif sim.is_symmetric(prov.adj()):
+        trainfunc = sim.trainp_undirected
+    else:
+        trainfunc = sim.trainp_directed
+
     res = []
     for mu in range_mu:
         for k in range_k:
-            res.append((mu, k, _train_and_eval(input, offset, mu, k, edges, eachFunc)))
+            res.append((mu, k, _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc)))
     return res
 
-def evaluate(index, edges, cache, offset, eachFunc=None):
+def evaluate(index, edges, cache, eachFunc=None):
     sc = index
     if cache:
         sc = simcache.Undirected(index)
@@ -68,10 +111,6 @@ def evaluate(index, edges, cache, offset, eachFunc=None):
     for i, pair in enumerate(edges):
         a = pair[0]
         targetb = pair[1]
-
-        if not offset == 0:
-            a = int(a) + offset
-            targetb = int(targetb) + offset
 
         # dangeours-ish code
         randomtarget = random.sample(allnodes, 1)[0]
