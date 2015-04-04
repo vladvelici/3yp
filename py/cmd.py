@@ -5,7 +5,6 @@ import provider as pr
 import sys
 import argparse
 import tarfile
-import simcache
 import math
 import random
 import evalf

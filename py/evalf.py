@@ -97,7 +97,7 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, d
 def evaluate(index, edges, cache, eachFunc=None):
     sc = index
     if cache:
-        sc = simcache.Undirected(index)
+        sc = simcache.undirected(index)
 
     total_position = 0.0
     total_score = 0.0
