@@ -6,6 +6,8 @@ import tarfile
 import tempfile
 import provider
 
+COMPLEX_TOLERANCE = 1e15
+
 class Sim:
     def __init__(self, q, z=None):
         self.q = np.matrix(q)
@@ -31,7 +33,13 @@ class Sim:
             pm = self.q[:,a].T * self.q[:, b]
         else:
             pm = self.z[a,:] * self.q * self.z[b,:].transpose()
-        return pm[0,0]
+        res = pm[0,0]
+        if np.iscomplex(res):
+            if abs(res.imag) < COMPLEX_TOLERANCE:
+                return res.real
+            else:
+                return res # this should not happen. complex and big.
+        return np.real(res).tolist() # python hackery. complex type but real no.
 
     def score(self, a, b):
         """Compute the score between a and b. The score is the eucliden
@@ -85,7 +93,7 @@ def train_directed(adj, mu, k, qandz=False):
     For directed graphs, the number of eigenvalues used might be changed. This is due
     to getting complex numbers.
 
-    If a complex eigenvalue, v, is found, then the algorithm makes sure that v* (the 
+    If a complex eigenvalue, v, is found, then the algorithm makes sure that v* (the
     complex conjugate of v) is also computed and used. As there will only be two calls
     to scipy.sparse.linalg.eigs(), one for left and one for right eigenvectors, all
     the complex eigenvalues for which the complex conjugate is missing will simply be
@@ -93,7 +101,7 @@ def train_directed(adj, mu, k, qandz=False):
     not guaranteed.
     """
     val, vec = linalg.eigs(adj, k=k, which="LM")
-    
+
     # check for complex conjugates
     i=0
     keep=[]
@@ -119,10 +127,9 @@ def train_directed(adj, mu, k, qandz=False):
 
     if qandz:
         return Sim(vec.T * vec, z)
-
-    omega = vec * z
-
-    return Sim(omega)
+    
+    print("sim.train_directed: Directed decomposition not implemented. Using long version.")
+    return Sim(vec.T * vec, z)
 
 def is_symmetric(adj):
     e = adj.nonzero()
@@ -263,3 +270,14 @@ def loadp(path):
             return _loadp(f)
     else:
         return _loadp(path)
+
+def scoremat(s):
+    """Return the matrix of scores of all possible nodes.
+    This function was written for testing purposes only."""
+    m = []
+    for i in s.nodelist():
+        row = []
+        for j in s.nodelist():
+            row.append(s.score(i,j))
+        m.append(row)
+    return np.array(m)
