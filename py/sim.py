@@ -26,8 +26,8 @@ class Sim:
         return range(len(self))
 
     def _dotprod(self, a, b):
-        a=int(a)
-        b=int(b)
+        a=nid(a)
+        b=nid(b)
         pm = None
         if self.z is None:
             pm = self.q[:,a].T * self.q[:, b]
@@ -40,6 +40,9 @@ class Sim:
             else:
                 return res # this should not happen. complex and big.
         return np.real(res).tolist() # python hackery. complex type but real no.
+
+    def nid(self, a):
+        return int(a)
 
     def score(self, a, b):
         """Compute the score between a and b. The score is the eucliden
@@ -200,8 +203,8 @@ class Simp(Sim):
         self.z = np.matrix(s.z)
         self.provider = provider
 
-    def score(self, a, b):
-        return Sim.score(self, self.provider[a], self.provider[b])
+    def nid(self, a):
+        return self.provider[a]
 
     def nodelist(self):
         return self.provider.nodelist()
