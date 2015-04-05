@@ -8,12 +8,16 @@ import tarfile
 import math
 import random
 import evalf
+import heuristics
+import simcache
+
 
 def main():
     parser = argparse.ArgumentParser()
 
     sbp = parser.add_subparsers(dest="action", help="Action to run.")
 
+    ## TRAIN
     p_train = sbp.add_parser("train", help="Train a similarity index.")
     p_train.add_argument("input", help="Path to input file.")
     p_train.add_argument("--format", "-f", default="csv",
@@ -33,12 +37,14 @@ def main():
     p_train.add_argument("--offset", default=0, type=int,
         help="Offset for node ids in direct mode. Set to -1 for Matlab compatibility")
 
+    ## ACTION
     p_info = sbp.add_parser("info", help="Get info about an index file.")
     p_info.add_argument("index", help="Path to index file.")
     p_info.add_argument("--nodes", help="Show all nodes", action="store_true")
     p_info.add_argument("-q", help="Print matrix Q.", action="store_true")
     p_info.add_argument("-z", help="Print matriz Z.", action="store_true")
 
+    ## SIMILARITY
     p_sim = sbp.add_parser("sim", help="Compute similarity between given edges.")
     p_sim.add_argument("index", help="Similartiy index saved by train.")
     p_sim.add_argument("nodes", help="Node(s) from which to compute similarity.",
@@ -48,13 +54,25 @@ def main():
     p_sim.add_argument("--top", help="Compute top similar nodes, sort by similarity.",
                             type=int, default=0)
 
+    ## TOP
+    p_top = sbp.add_parser("top", help="Compute tops for nodes.")
+    p_top.add_argument("index", help="Similarity index saved by train.")
+    p_top.add_argument("nodes", help="Nodes from which to compute similarity.", nargs="*")
+    p_top.add_argument("--limit", "-l", help="Limit the number of total results", type=int, default=0)
+    p_top.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
+    p_top.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
+
+    ## EVALUATION
     p_eval = sbp.add_parser("eval", help="Evaluate index using a list of (should predict) edges.")
     p_eval.add_argument("index", help="Index file.")
     p_eval.add_argument("edges", help="Edges file.")
     p_eval.add_argument("--format", "-f", default="csv", choices=["csv"], help="Edges file format.")
     p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
     p_eval.add_argument("--cache", action="store_true", help="Use an undirected cache. Undirected graphs only.")
+    p_eval.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
+    p_eval.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
 
+    ## TRAIN AND EVALUATE
     p_trev = sbp.add_parser("trev", help="Train and evaluate on a range of mu and k.")
     p_trev.add_argument("input", help="Graph file for training.")
     p_trev.add_argument("edges", help="Eval edges file.")
@@ -68,6 +86,7 @@ def main():
                             nargs='+', type=int, dest="k")
     p_trev.add_argument("--penalise", "-mu", help="List of penalisation factors (mu).",
                         nargs='+', type=float, dest="mu")
+    p_trev.add_argument("--depth", "-d", help="Depth for maxdepth heuristic.", type=int, default=0)
 
     args = parser.parse_args()
     if args.action == 'sim':
@@ -80,6 +99,8 @@ def main():
         evaluate(args)
     elif args.action == 'trev':
         train_eval(args)
+    elif args.action == 'top':
+        top(args)
 
 ### TRAIN
 
@@ -158,6 +179,45 @@ def similarity(args):
                 print("(%s, %e)" % t, end="\t")
             print()
 
+### TOP
+
+def fromToHeuristic(to):
+    def h(fr):
+        for a in fr:
+            for b in to:
+                yield((a,b))
+    return h
+
+def top(args):
+    s = read_index(args.index)
+    s = simcache.undirected(s)
+    heu = None
+    if len(args.graph) > 0:
+        edges = pr.csv_file(args.graph)
+        h = heuristics.Maxdepth(edges, args.depth)
+        heu = h.top
+    else:
+        heu = fromToHeuristic(s.nodelist())
+
+    gen = None
+    if len(args.nodes) > 0:
+        gen = heu(args.nodes)
+    else:
+        gen = heu(s.nodelist())
+
+    top = []
+    for edge in gen:
+        score = s.score(edge[0], edge[1])
+        top.append((edge[0], edge[1], score))
+
+    top = sorted(top, key=lambda it: it[2])
+    if args.limit > 0:
+        top = top[:args.limit]
+
+    for entry in top:
+        print("%s\t%s\t%e" % entry)
+
+
 ### TRAIN AND EVALUATE
 
 def train_eval(args):
@@ -177,13 +237,19 @@ def train_eval(args):
     if not args.direct:
         args.offset = None
 
+    heu = None
+    if args.depth > 0:
+        h = heuristics.Maxdepth(edgelist, args.depth)
+        heu = h.top
+
     results = evalf.train_and_evaluate(
         input = edgelist,
         offset = args.offset,
         range_k = args.k,
         range_mu = args.mu,
         edges = edges,
-        directed = args.type)
+        directed = args.type,
+        heu = heu)
 
     print("mu\tk\tposition\tscore   \trelative\tdiff pos\tdiff scr\tdiff rel")
     for res in results:
@@ -209,12 +275,19 @@ def evaluate(args):
         progress = (i+1.0)*100/len(edges)
         print("\r%.2f %%" % progress, end="       ")
 
+    heu = None
+    if len(args.graph) > 0:
+        graphcsv = pr.csv_file(args.graph)
+        h = heuristics.Maxdepth(graphcsv, args.depth)
+        heu = h.top
+
     res = evalf.evaluate(
         index=index,
         edges=edges,
         cache=args.cache,
         offset=args.offset,
-        eachFunc=show_progress
+        eachFunc=show_progress,
+        heu=heu
     )
 
     print(end="\r")

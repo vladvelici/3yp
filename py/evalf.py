@@ -55,18 +55,19 @@ EvalResult = namedtuple("EvalResult", [
     'diff_score',
     'diff_relative'])
 
-def _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc):
+def _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc, heu):
     index = trainfunc(prov, mu, k, True)
 
     return evaluate(
         index=index,
         edges=edges,
         cache=True,
-        eachFunc=eachFunc
+        eachFunc=eachFunc,
+        heu=heu
     )
 
 # direct=true for any numeric offset. Set to None for direct=false
-def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, directed="auto"):
+def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, directed="auto", heu=None):
     """Returns a list of (mu, k, EvalResult)"""
 
     prov = None
@@ -88,13 +89,29 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, d
     else:
         trainfunc = sim.trainp_directed
 
+    if heu is not None:
+        ## The heuristic will run every time giving the same results. Cache it.
+        heudict = {}
+        for pair in heu([i for i,_ in edges]):
+            if not pair[0] in heudict:
+                heudict[pair[0]] = [pair[1]]
+            else:
+                heudict[pair[0]].append(pair[1])
+        def heuf(nodes):
+            if not isinstance(nodes, list):
+                nodes = [nodes]
+            for f in nodes:
+                for to in heudict[f]:
+                    yield(f, to)
+        heu = heuf
+
     res = []
     for mu in range_mu:
         for k in range_k:
-            res.append((mu, k, _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc)))
+            res.append((mu, k, _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc, heu)))
     return res
 
-def evaluate(index, edges, cache, eachFunc=None):
+def evaluate(index, edges, cache, eachFunc=None, heu=None):
     sc = index
     if cache:
         sc = simcache.undirected(index)
@@ -123,7 +140,11 @@ def evaluate(index, edges, cache, eachFunc=None):
         rand_score = sc.score(a,randomtarget)
         best = score
 
-        for b in allnodes:
+        enum = enumerate(allnodes)
+        if heu is not None:
+            enum = heu(a)
+
+        for _, b in enum:
             if a == b or str(b) == str(a):
                 continue
             scr = sc.score(a,b)
