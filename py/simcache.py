@@ -26,7 +26,6 @@ def dotprod(s):
     base = type(s)
     class Dotprod(base):
         def _dotprod(self, a, b):
-            print("the new dotprod")
             a = str(a)
             b = str(b)
             if b > a:
@@ -40,7 +39,6 @@ def dotprod(s):
                 score = base._dotprod(self, a, b)
                 self._dpcache[a][b] = score
                 return score
-            print("dotprod cache hit.")
             return self._dpcache[a][b]
 
     s.__class__ = Dotprod

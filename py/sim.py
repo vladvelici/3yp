@@ -26,8 +26,8 @@ class Sim:
         return range(len(self))
 
     def _dotprod(self, a, b):
-        a=nid(a)
-        b=nid(b)
+        a=self.nid(a)
+        b=self.nid(b)
         pm = None
         if self.z is None:
             pm = self.q[:,a].T * self.q[:, b]
