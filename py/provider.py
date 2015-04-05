@@ -137,6 +137,53 @@ class EdgeList:
             self._makeadj()
         return self._adj
 
+
+class Offset:
+    """Provider for offests and direct edgelists.
+    Mostly used as a adj matrix cache.
+    """
+
+    def __init__(self, edgelist, offset):
+        self.offset = offset
+        if edgelist is not None:
+            self._adj = mkadj(edgelist, offset)
+
+    def __len__(self):
+        return self._adj.shape[0]
+
+    def nodelist(self):
+        return range(-self.offset, len(self) - self.offset)
+
+    def save(self, where):
+        """EdgeList is not saved. It should (already) be persisted somewhere."""
+        if type(where) == str:
+            with open(where, "wb") as f:
+                self.save(f)
+        else:
+            pickle.dump({
+                "type": "offset",
+                "offset": self.offset,
+                "length": len(self)
+            }, where)
+
+    ## Inverted index lookup (might not be required, but for completeness)
+    def inverted(self, node):
+        return int(node) - self.offset
+
+    ## Implement the provider description for sim.Simp:
+
+    def __getitem__(self, node):
+        """Return the ID for node. Raises an exception if the node is not
+        found."""
+        v = int(node) + self.offset
+        if v < 0 or v >= len(self):
+            raise KeyError("node[%s]+offset[%d]=%d is out of bounds." % (node, self.offset, v))
+        return v
+
+    def adj(self):
+        """Get the adjacency matrix."""
+        return self._adj
+
 def load(where):
     """This loads the index file for the double dictonary (node->id, id->node),
     but does not load the adjacency matrix or edge list. This means the EdgeList
@@ -144,11 +191,16 @@ def load(where):
     adjacency matrices with it, or/and use as a provider."""
     if type(where) == str:
         with open(where, "rb") as f:
-            inv_index = pickle.load(f)
-            return EdgeList(invindex=inv_index)
+            load(f)
     else:
-        inv_index = pickle.load(where)
-        return EdgeList(invindex=inv_index)
+        found = pickle.load(where)
+        # guessing the type.
+        if isinstance(found, dict) and "type" in found and found["type"] == "offset":
+            o = Offset(None, found["offset"])
+            o._adj = csr_matrix((found["length"], found["length"])) # fake empty adj
+            return o
+        else:
+            return EdgeList(invindex=found)
 
 
 def csv_stream(stream):

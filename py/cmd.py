@@ -112,24 +112,21 @@ def _train(args):
         print("Format not supported. :(")
         return
 
-    s = None
+    prov = None
     if not args.direct:
         prov = pr.EdgeList(edgelist=edgelist)
-        print("Length of provider: %d" % len(prov))
-        if args.type == "auto" or args.type == "a":
-            s = sim.trainp(prov, args.mu, args.k, args.long)
-        elif args.type == "directed" or args.type == "d":
-            s = sim.trainp_directed(prov, args.mu, args.k, args.long)
-        else:
-            s = sim.trainp_undirected(prov, args.mu, args.k, args.long)
+        print("Length of EdgeList provider: %d" % len(prov))
     else:
-        adj = pr.mkadj(edgelist, args.offset)
-        if args.type == "auto" or args.type == "a":
-            s = sim.train(adj, args.mu, args.k, args.long)
-        elif args.type == "directed" or args.type == "d":
-            s = sim.train_directed(adj, args.mu, args.k, args.long)
-        else:
-            s = sim.train_undirected(adj, args.mu, args.k, args.long)
+        prov = pr.Offset(edgelist, args.offset)
+        print("Using Offset provider.")
+
+    s = None
+    if args.type == "auto" or args.type == "a":
+        s = sim.trainp(prov, args.mu, args.k, args.long)
+    elif args.type == "directed" or args.type == "d":
+        s = sim.trainp_directed(prov, args.mu, args.k, args.long)
+    else:
+        s = sim.trainp_undirected(prov, args.mu, args.k, args.long)
 
     return s
 

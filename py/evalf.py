@@ -5,37 +5,6 @@ from collections import namedtuple
 import random
 import simcache
 
-class Offset_provider:
-    """Provider for offests and direct edgelists.
-    Mostly used as a adj matrix cache.
-    """
-
-    def __init__(edgelist, offset):
-        self.offset = offset
-        self._adj = pr.mkadj(edgelist, offset)
-
-    def __len__(self):
-        return len(self._adj.shape[0])
-
-    def _node(self, n):
-        """Return an interger ID for node. Just add offset to n."""
-        return self.offset + int(n)
-
-    def nodelist(self):
-        return range(self.offset, len(self) + self.offset)
-
-    ## No persistence required.
-    ## Implement the provider description for sim.Simp:
-
-    def __getitem__(self, node):
-        """Return the ID for node. Raises an exception if the node is not
-        found."""
-        return self.offset + int(node)
-
-    def adj(self):
-        """Get the adjacency matrix."""
-        return self._adj
-
 def read_index(path):
     if tarfile.is_tarfile(path):
         return sim.loadp(path)
@@ -74,7 +43,7 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, d
     if offset is None:
         prov = pr.EdgeList(edgelist=input)
     else:
-        prov = Offset_provider(input, offset)
+        prov = pr.Offset(input, offset)
         for i, _ in enumerate(edges):
             edges[i][0] = int(edges[i][0]) + offset
             edges[i][1] = int(edges[i][1]) + offset
