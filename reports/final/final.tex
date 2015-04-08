@@ -35,8 +35,6 @@
 
 \newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
 \onehalfspacing
-\setcounter{tocdepth}{5}
-\setcounter{secnumdepth}{5}
 
 %-------------------------------------------------------------------------------
 % HEADER & FOOTER
@@ -50,6 +48,12 @@
 %-------------------------------------------------------------------------------
 % TITLE PAGE
 %-------------------------------------------------------------------------------
+
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{3}
+
+\renewcommand\thesection{\arabic{section}}
+\renewcommand\thesubsection{\thesection.\arabic{subsection}}
 
 \begin{document}
 
@@ -65,7 +69,7 @@ University of Southampton
         Project Supervisor: Dr. Adam Prügel-Bennett \\
 Second Examiner: Dr. Sasan Mahmoodi
 	\\ [2.0cm]
-	A progress report submitted for the award of \\
+	A project report submitted for the award of \\
 MEng Computer Science with Artificial Intelligence
         \normalsize \vspace*{5\baselineskip}}
 
@@ -79,7 +83,7 @@ MEng Computer Science with Artificial Intelligence
 % ABSTRACT
 %-------------------------------------------------------------------------------
 \section*{Abstract}
-\addcontentsline{toc}{section}{Abstract}Given a large graph, in the range of millions or billions of nodes, it is difficult
+%\addcontentsline{toc}{section}{Abstract}Given a large graph, in the range of millions or billions of nodes, it is difficult
 to efficiently find similar nodes. Examples of applications of finding similar
 nodes in data represented as graphs are all around the web nowadays:
 \textit{people you may know} and \textit{who to follow} suggestions on social
@@ -95,8 +99,8 @@ library to provide everyone with this functionality.
 %-------------------------------------------------------------------------------
 % INTRODUCTION
 %-------------------------------------------------------------------------------
-\section*{Introduction}
-\addcontentsline{toc}{section}{Introduction}
+\section{Introduction}
+%\addcontentsline{toc}{section}{Introduction}
 %
 Plenty of datasets are or can be represented as graphs where vertices represent
 entities and edges represent relationships between entities. A problem of interest
@@ -117,8 +121,8 @@ performance (accuracy) on different datasets.
 % BRUTE FORCE
 %-------------------------------------------------------------------------------
 %
-\section*{Brute-force approach}
-\addcontentsline{toc}{section}{Brute-force approach}
+\section{Brute-force approach}
+%\addcontentsline{toc}{chapter}{Brute-force approach}
 %
 The similarity algorithm is described regarding the undirected graph $G(v, \epsilon)$
 with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of
@@ -163,8 +167,8 @@ the next section an algorithm that scales up to large datasets is described.
 % Approximative approach
 %-------------------------------------------------------------------------------
 %
-\section*{Approximative approach}
-\addcontentsline{toc}{section}{Approximative approach}
+\section{Approximative approach}
+%\addcontentsline{toc}{section}{Approximative approach}
 %
 %% Geometry
 %
@@ -384,8 +388,8 @@ similarity between two nodes is the same as multiplying three small matrices
 %%%%%%%%%%%%%%%
 %% Vectorisation
 %%%%%%%%%%%%%%%
-\subsection*{Vectorisation}
-\addcontentsline{toc}{subsection}{Vectorisation}
+\subsection{Vectorisation}
+%\addcontentsline{toc}{subsection}{Vectorisation}
 It is usually more efficient to have vectorised implementations (to use matrix
 operations in favour of iterative solutions) in programming languages like Matlab,
 Octave or R. In this subsection is presented a way of computing the matrices $Z$
@@ -425,8 +429,8 @@ Q = \vee^T W \vee
 %-------------------------------------------------------------------------------
 % IMPLEMENTATION
 %-------------------------------------------------------------------------------
-\section*{Implementation}
-\addcontentsline{toc}{section}{Implementation}
+\section{Implementation}
+%\addcontentsline{toc}{section}{Implementation}
 %
 A choice had to be made on what tools and languages to use for the implementation
 of this algorithm. It involves linear algebra so programming languages that support
@@ -479,10 +483,10 @@ with a very similar interface.
 % EVALUATION
 %-------------------------------------------------------------------------------
 %
-\section*{Evaluation}
-\addcontentsline{toc}{section}{Evaluation}
-\subsection*{Comparison of approximative and brute-force approaches}
-\addcontentsline{toc}{subsection}{Comparison of approximative and brute-force approaches}
+\section{Evaluation}
+%\addcontentsline{toc}{section}{Evaluation}
+\subsection{Comparison of approximative and brute-force approaches}
+%\addcontentsline{toc}{subsection}{Comparison of approximative and brute-force approaches}
 %
 A simple evaluation metric of how well the approximative approach retains the
 most important information from the graph is to evaluate how different are the
@@ -567,8 +571,8 @@ evaluate the performance of the algorithm on real problems.
 
 
 %
-\subsection*{Visualisation}
-\addcontentsline{toc}{subsection}{Visualisation}
+\subsection{Visualisation}
+%\addcontentsline{toc}{subsection}{Visualisation}
 %
 A subjective method of evaluation on real data is attempting to visualise the
 algorithm output on real data and deduce whether it gives sensitive results.
@@ -578,8 +582,8 @@ fine-tune the algorithm on specific problems.
 
 
 %
-\subsection*{Discussion of further evaluation}
-\addcontentsline{toc}{subsection}{Discussion of further evaluation}
+\subsection{Discussion of further evaluation}
+%\addcontentsline{toc}{subsection}{Discussion of further evaluation}
 %
 None of the evaluation methods described above give an objective, efficient and
 automatic evaluation metric. In this subsection we discuss a few possible evaluation
@@ -617,8 +621,8 @@ of this project, along with investigating more methods of evaluation.
 % LIMITATIONS
 %-------------------------------------------------------------------------------
 %
-\section*{Limitations of current implementation}
-\addcontentsline{toc}{section}{Limitations of the current implementation}
+\section{Limitations of current implementation}
+%\addcontentsline{toc}{section}{Limitations of the current implementation}
 %
 The current implementation of this algorithm has various limitations which are
 discussed along with possible improvements.
@@ -650,8 +654,8 @@ over multiple machines will help run it on even larger datasets.
 % FUTURE PLANS
 %-------------------------------------------------------------------------------
 %
-\section*{Future plans}
-\addcontentsline{toc}{section}{Future plans}
+\section{Future plans}
+%\addcontentsline{toc}{section}{Future plans}
 %
 The highest priority improvements are: develop a good evaluation method, add support
 for directed graphs, and use different edge weights for different types of relationships.
