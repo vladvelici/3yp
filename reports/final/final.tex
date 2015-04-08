@@ -109,11 +109,23 @@ problem are finding \textit{people you may know} in a social network, people wit
 common interests from research publications repositories or identifying possible
 duplicates in a dataset.
 
+It is possible to calculate cloud vectors that represent the neighbourhoods of
+vertices in a graph only by looking at the structure of the graph. Then if a cloud
+vector is close to another it means the vertices they represent belong to the same
+neighbourhood. Using the dot product of cloud vectors we can compute different
+similarity measures between vertices. Cosine similarity and Euclidean distance
+are studied in this report.
 
-It is not computationally feasible to calculate the exact similarities between
-vertices of very large graphs. In this project, we investigate a method to compute
-an approximation of similarities between vertices and attempt to evaluate its
-performance (accuracy) on different datasets.
+It is computationally too expensive to compute all the cloud vectors and then
+the dot products or the Euclidean distances. This project investigates methods
+for approximating the dot products, different similarity measures based on the
+dot products, and the evaluation of these measures on real world datasets.
+
+%
+%-------------------------------------------------------------------------------
+% BRUTE FORCE
+%-------------------------------------------------------------------------------
+%
 
 
 %
