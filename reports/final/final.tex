@@ -30,6 +30,7 @@
 \usepackage{pgfgantt}
 \usepackage{lscape}
 \usepackage{url}
+\usepackage{bm}
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1.2em}
 
@@ -49,11 +50,15 @@
 % TITLE PAGE
 %-------------------------------------------------------------------------------
 
+%% USEFUL DEFINITIONS
+
 \setcounter{secnumdepth}{2}
 \setcounter{tocdepth}{3}
 
 \renewcommand\thesection{\arabic{section}}
 \renewcommand\thesubsection{\thesection.\arabic{subsection}}
+
+\DeclareMathAlphabet{\mat}{OT1}{cmss}{bx}{12}
 
 \begin{document}
 
@@ -111,7 +116,7 @@ duplicates in a dataset.
 
 It is possible to calculate cloud vectors that represent the neighbourhoods of
 vertices in a graph only by looking at the structure of the graph. Then if a cloud
-vector is close to another it means the vertices they represent belong to the same
+vector is close to another it means the vertices they represent belong to a similar
 neighbourhood. Using the dot product of cloud vectors we can compute different
 similarity measures between vertices. Cosine similarity and Euclidean distance
 are studied in this report.
@@ -121,12 +126,22 @@ the dot products or the Euclidean distances. This project investigates methods
 for approximating the dot products, different similarity measures based on the
 dot products, and the evaluation of these measures on real world datasets.
 
-%
-%-------------------------------------------------------------------------------
-% BRUTE FORCE
-%-------------------------------------------------------------------------------
-%
 
+%
+%-------------------------------------------------------------------------------
+% CLOUD VECTORS AND SIMILARITY MEASURES
+%-------------------------------------------------------------------------------
+%
+\section{Cloud vectors and similarity measures}
+
+Given a graph $G(\mathcal{V}, \mathcal{E})$ with adjacency matrix $\mat{M}$. The
+number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
+
+The cloud vector of a vertex is formed using a diffusion-like process starting at
+that vertex. 
+
+For each vertex of the graph, $i \in \mathcal{V}$, we can define a could vector
+$\bm{c}_i$.
 
 %
 %-------------------------------------------------------------------------------
