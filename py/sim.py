@@ -141,6 +141,11 @@ def is_symmetric(adj):
             return False
     return True
 
+def normalise_adj(adj):
+    neigh = 1/adj.sum(1)
+    w = sparse.diags(neigh.flat, 0)
+    return w * adj
+
 def train(adj, mu, k, qandz=False):
     """Training for undirected graphs (symmetric adjacency matrix).
 
