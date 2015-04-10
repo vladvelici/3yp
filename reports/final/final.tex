@@ -134,14 +134,86 @@ dot products, and the evaluation of these measures on real world datasets.
 %
 \section{Cloud vectors and similarity measures}
 
-Given a graph $G(\mathcal{V}, \mathcal{E})$ with adjacency matrix $\mat{M}$. The
-number of nodes is $N = |v|$ and the number of edges is $|\epsilon|$.
+The cloud vector of a vertex represents the way this vertex is connected to the
+rest of the graph. In other words, it represents an extended neighbourhood of the
+node. It is created by a process similar to diffusion, as shown in
+\emph{Figure~\ref{fig:ci_diffusion}}.
 
-The cloud vector of a vertex is formed using a diffusion-like process starting at
-that vertex. 
+Given a graph $\mathcal{G}(\mathcal{V}, \mathcal{E})$ with adjacency matrix
+$\mat{M}$. The number of nodes is $N = |v|$ and the number of edges is
+$|\epsilon|$.
 
-For each vertex of the graph, $i \in \mathcal{V}$, we can define a could vector
-$\bm{c}_i$.
+The cloud vectors represent the neighbourhoods of vertices of the graph
+$\mathcal{G}$, thus looking at the number of walks of different lengths from a
+vertex $i$ to all the other vertices in the graph is a promising start.
+
+The adjacency matrix has the property that if it is raised at the $k^{th}$ power,
+the $(i, j)$ element of it, $\mat{M}^k_{ij}$, is the number of walks of length
+$k$ from vertex $i$ to vertex $j$. Therefore the $i^{th}$ column of $\mat{M}^k$
+is a vector that represents the way vertex $i$ is connected to the rest of the
+graph by walks of lenght $k$.
+
+The could vectors should include the walks of all lengths with a preference
+towards the shorter walks over the longer walks. Therefore the adjacency matrix
+should be normalised such that all rows sum up to one. Let
+%
+\begin{equation}
+\label{eq:initial-d}
+\mat{D}_{ij} = \frac{\mat{M}_{ij}}{\sum_k^N \mat{M}_{ik}}
+\end{equation}
+be the normalised adjacency matrix. A matrix that includes walks of all lengths
+as described above can be written as the sum
+%
+\begin{equation}
+\label{eq:mu^t_d^t}
+\sum_t^\infty \mu^t \mat{D}^t,
+\end{equation}
+%
+where $\mu \in [0,1]$ is a penalising factor. For each vertex of the graph, $i
+\in \mathcal{V}$, the cloud vector is the $i^{th}$ column of the matrix in
+\emph{Equation~\ref{eq:mu^t_d^t}}, or mathematically
+%
+\begin{equation}
+\label{eq:brute-ci}
+\bm{C}_i = \sum_{t=0}^\infty \mu^t D^t \bm{\delta}_i
+\end{equation}
+%
+where $\bm{\delta}_i$ is the $i^{th}$ column of the $N \times N$ identity matrix.
+
+\begin{figure}[tpb]
+  \centering
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{frame0}
+		\caption{$k=0$}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{frame1}
+    \caption{$k=1$}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{frame2}
+		\caption{$k=2$}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{frame3}
+    \caption{$k=3$}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{frame4}
+		\caption{$k=4$}
+  \end{subfigure}%
+  ~
+  \begin{subfigure}[b]{0.5\textwidth}
+    \includegraphics[width=\textwidth]{frame5}
+    \caption{$k=5$}
+  \end{subfigure}
+
+
+  \caption{ci sum calculation up to different k}
+  \label{fig:ci_diffusion}
+\end{figure}
 
 %
 %-------------------------------------------------------------------------------
@@ -163,7 +235,6 @@ if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let
 $D$ be a normalised adjacency matrix such that each row sums up to $1$:
 %
 \begin{equation}
-\label{eq:initial-d}
 D_{i j} = \frac{1}{\sum_{j=1}^N M_{ij}}
 \end{equation}
 %
