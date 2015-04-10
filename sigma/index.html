@@ -1,0 +1,125 @@
+<html>
+<head>
+<style type="text/css">
+  #container {
+    max-width: 100%;
+    height: 100%;
+    margin: auto;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .buttonbar {
+    position: fixed;
+    display: inline-block;
+    top: 5px;
+    left: 5px;
+    z-index: 10;
+    padding: 3px;
+  }
+</style>
+</head>
+<body>
+<div id="container"></div>
+<div class="buttonbar">
+  <a href="#" id="exportbtn">Save SVG</a>
+  <input type="text" id="frame_number" value="0" />
+</div>
+<script src="sigma.min.js"></script>
+<script src="plugins/sigma.parsers.json.min.js"></script>
+<script src="plugins/sigma.exporters.svg.js"></script>
+<script src="plugins/sigma.layout.forceAtlas2.min.js"></script>
+<script src="plugins/sigma.plugins.dragNodes.min.js"></script>
+<script>
+  var s;
+
+  sigma.parsers.json('frame0.json', {
+    container: 'container',
+    renderers: [{
+        container: document.getElementById("container"),
+        type: "canvas"
+    }],
+    settings: {
+      defaultNodeColor: '#ec5148'
+    }
+  },
+  function(sg) {
+    s = sg;
+    console.log("Sigma initiated.");
+  });
+
+
+  var added = [];
+
+  function add(src, to) {
+    src = src + "";
+    to = to + "";
+    var eid = src + "_to_" + to;
+    var edge = {
+      id: eid,
+      source: src,
+      target: to,
+      color: "#000"
+    };
+    s.graph.addEdge(edge);
+    s.refresh();
+    added.push(edge);
+  }
+
+  function reset() {
+    for (var i in added) {
+      s.graph.dropEdge(added[i]["id"]);
+    }
+    s.refresh();
+    added.length = 0;
+  }
+
+  function force() {
+    s.startForceAtlas2({gravity: 2, scalingRatio: 0.5, }); setTimeout(function() { s.stopForceAtlas2(); }, 1000);
+  }
+
+  function shake() {
+    s.startForceAtlas2({gravity: 20, scalingRatio: 0.5}); setTimeout(function() { s.stopForceAtlas2(); }, 1000);
+  }
+
+  function exportSvg(size) {
+    if (size === undefined) {
+      size = 1000;
+    }
+    return s.toSVG({download: true, filename: 'mygraph.svg', size: 1000});
+  }
+
+  window.addEventListener("load", function() {
+    console.log("initialised");
+
+    document.getElementById("exportbtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      exportSvg();
+      console.log("exported");
+    });
+
+    document.getElementById("frame_number").addEventListener("click", function(e) {
+      e.preventDefault();
+      e.target.select();
+    });
+
+    document.getElementById("frame_number").addEventListener("keypress", function(e) {
+      if (e.keyCode == 13) {
+        sigma.parsers.json("frame" + e.target.value + ".json", s,
+        function() {
+          console.log("new frame loaded (frame"+e.target.value+".json).");
+          s.refresh();
+        });
+      }
+    });
+
+  })
+
+  function drag() {
+    sigma.plugins.dragNodes(s, s.renderers[0]);
+  }
+
+</script>
+</body>
+</html>
