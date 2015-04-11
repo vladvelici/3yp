@@ -175,7 +175,7 @@ where $\mu \in [0,1]$ is a penalising factor. For each vertex of the graph, $i
 %
 \begin{equation}
 \label{eq:brute-ci}
-\bm{C}_i = \sum_{t=0}^\infty \mu^t D^t \bm{\delta}_i
+\bm{C}_i = \sum_{t=0}^\infty \mu^t \mat{D}^t \bm{\delta}_i
 \end{equation}
 %
 where $\bm{\delta}_i$ is the $i^{th}$ column of the $N \times N$ identity matrix.
@@ -222,7 +222,7 @@ into the cloud vector $\bm{c}_i$, making it more accurate.
   \end{subfigure}
 
 
-  \caption{Computation of $\bm{c}_i = \sum_{t=0}^k 0.5^t D^t \bm{\delta}_i$ up
+  \caption{Computation of $\bm{c}_i = \sum_{t=0}^k 0.5^t \mat{D}^t \bm{\delta}_i$ up
   to different $k$. Vertex $i$ is the only red vertex in \textbf{(a)}. The
   saturation of the colour of a vertex, $j$, represents the connection strength
   between vertices $i$ and $j$ (red means strong connection and light gray no
