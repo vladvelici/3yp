@@ -230,12 +230,32 @@ into the cloud vector $\bm{c}_i$, making it more accurate.
   \label{fig:ci_diffusion}
 \end{figure}
 
+\subsection{Similarity between two vertices}
+
+Two vertices of a graph are similar if they are in a similar neighbourhood. The
+cloud vector of a vertex represents the neighbourhood of that vertex, therefore
+the similarity between two vertices can be obtained by comparing their cloud
+vectors.
+
+One similarity measure is the Euclidean distance between cloud vectors. For
+vertices $i$ and $j$ it is $\|\bm{c}_i - \bm{c}_j\|$. The smaller the distance
+is, the more similar the vertices are. The minimum distance is $0$ and it is the
+similarity between a vertex and itself.
+
+Another similarity measure is the cosine similarity, which is the cosine of the
+angle between the two vectors. It has values in the interval $[-1,1]$, with the
+property that $\cos(0) = 1$ and $\cos(a) < \cos(b) \leq 1$, where $\pi \geq a > b
+\geq 0$. A higher values means higher similarity, with $1$ being the maximum. The
+cosine similarity ignores the magnitudes of the cloud vectors and only considers
+the angle between them, therefore two cloud vectors that are not identical but
+have the same direction (angle between them $0$) have the cosine similarity $1$.
+
 %
 %-------------------------------------------------------------------------------
-% BRUTE FORCE
+% Naive implementation
 %-------------------------------------------------------------------------------
 %
-\section{Brute-force approach}
+\section{Naive implementation}
 %\addcontentsline{toc}{chapter}{Brute-force approach}
 %
 The similarity algorithm is described regarding the undirected graph $G(v, \epsilon)$
