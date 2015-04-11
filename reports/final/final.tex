@@ -147,7 +147,7 @@ The cloud vectors represent the neighbourhoods of vertices of the graph
 $\mathcal{G}$, thus looking at the number of walks of different lengths from a
 vertex $i$ to all the other vertices in the graph is a promising start.
 
-The adjacency matrix has the property that if it is raised at the $k^{th}$ power,
+The adjacency matrix has the property that if it is raised to the $k^{th}$ power,
 the $(i, j)$ element of it, $\mat{M}^k_{ij}$, is the number of walks of length
 $k$ from vertex $i$ to vertex $j$. Therefore the $i^{th}$ column of $\mat{M}^k$
 is a vector that represents the way vertex $i$ is connected to the rest of the
@@ -180,11 +180,22 @@ where $\mu \in [0,1]$ is a penalising factor. For each vertex of the graph, $i
 %
 where $\bm{\delta}_i$ is the $i^{th}$ column of the $N \times N$ identity matrix.
 
+\emph{Figure~\ref{fig:ci_diffusion}} shows the diffusion process of computing
+$\bm{c}_i$ up to $k = 0, 1, 2, 3, 4, 5$. The coloured vertices are used in the
+computation of $\bm{c}_i$ up to that $k$. The saturation of the colour of a vertex
+$j$ represents the $j^{th}$ value of a normalised $\bm{c}_i$, such that red
+represents the highest value in $\bm{c}_i$ and light gray represents values of 0.
+In other words, the saturation of the colour of a vertex $j$ represents the strength
+of the connection between vertex $i$ and vertex $j$. When $k=0$, only the first
+vertex, $i$, counts. As $k$ gets larger, more and more vertices are considered
+into the cloud vector $\bm{c}_i$, making it more accurate.
+
 \begin{figure}[tpb]
   \centering
   \begin{subfigure}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{frame0}
 		\caption{$k=0$}
+    \label{fig:ci_diffusion_frame0}
   \end{subfigure}%
   ~
   \begin{subfigure}[b]{0.5\textwidth}
@@ -211,7 +222,11 @@ where $\bm{\delta}_i$ is the $i^{th}$ column of the $N \times N$ identity matrix
   \end{subfigure}
 
 
-  \caption{ci sum calculation up to different k}
+  \caption{Computation of $\bm{c}_i = \sum_{t=0}^k 0.5^t D^t \bm{\delta}_i$ up
+  to different $k$. Vertex $i$ is the only red vertex in \textbf{(a)}. The
+  saturation of the colour of a vertex, $j$, represents the connection strength
+  between vertices $i$ and $j$ (red means strong connection and light gray no
+  connection).}
   \label{fig:ci_diffusion}
 \end{figure}
 
