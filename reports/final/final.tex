@@ -175,7 +175,7 @@ where $\mu \in [0,1]$ is a penalising factor. For each vertex of the graph, $i
 %
 \begin{equation}
 \label{eq:brute-ci}
-\bm{C}_i = \sum_{t=0}^\infty \mu^t \mat{D}^t \bm{\delta}_i
+\bm{c}_i = \sum_{t=0}^\infty \mu^t \mat{D}^t \bm{\delta}_i
 \end{equation}
 %
 where $\bm{\delta}_i$ is the $i^{th}$ column of the $N \times N$ identity matrix.
@@ -255,7 +255,7 @@ have the same direction (angle between them $0$) have the cosine similarity $1$.
 % Naive implementation
 %-------------------------------------------------------------------------------
 %
-\section{Naive implementation}
+\section{Naive approach}
 %\addcontentsline{toc}{chapter}{Brute-force approach}
 %
 A naive implementation that does not scale to large graphs is to compute and
@@ -268,11 +268,11 @@ store all could vectors $\bm{c}_i, \forall i \in \mathcal{V}$. Observe that
 so every $\bm{c}_i$ vector is the $i^{th}$ column in the matrix $(\mat{I} -
 \mu \mat{D})^{-1}$.
 
-The naive implementation was run on a small graph designed by hand and it gave
+The naive approach was implemented and run on a small graph designed by hand and it gave
 meaningful results (vertices connected to the graph in a similar way have a small
-$\|\mathbf{C_i} - \mathbf{C_j}\|^2$) but it does not scale for large datasets.
+$\|\bm{c}_i - \bm{c}_j\|^2$) but it does not scale for large datasets.
 
-For large graphs, it is expected to have sparse adjacency matrices, where the
+Large graphs are expected to have sparse adjacency matrices, where the
 number of edges is significantly lower then the number of vertices squared (
 $|\mathcal{E}| \ll N^2$). The inverse $(\mat{I} - \mu \mat{D})^{-1}$ is
 not sparse and it takes significantly more memory than the adjacency matrix. If
@@ -287,122 +287,158 @@ a computationally costly operation of complexity $O(N^3)$.
 %
 \section{Approximative approach}
 %\addcontentsline{toc}{section}{Approximative approach}
+
 %
-%% Geometry
+%% Motivation for dot products only.
 %
-Geometrically, if vectors $\mathbf{C_i}$ and $\mathbf{C_j}$ start from the origin,
-then $\mathbf{C_i}$, $\mathbf{C_j}$ and $\mathbf{C_i}-\mathbf{C_j}$ describe a
-triangle. Let $\theta$ be the angle between $\mathbf{C_i}$ and $\mathbf{C_j}$.
-From the Law of Cosines:
-%
-\begin{equation}
-\label{eq:cosinelaw}
-\|\mathbf{C_i}-\mathbf{C_j}\|^2 = \|\mathbf{C_i}\|^2 + \|\mathbf{C_j}\|^2 - 2  \|\mathbf{C_i}\| \|\mathbf{C_j}\| \cos \ \theta
-\end{equation}
-%
-Take the dot product $\mathbf{C_i^T}\mathbf{C_j} = \| \mathbf{C_i} \| \| \mathbf{C_j} \| \cos \theta$.
-The angle between $\mathbf{C_i}$ and itself is $0$ and $\cos0=1$, thus
-$\|\mathbf{C_i}\|^2 = \mathbf{C_i^T}\mathbf{C_i}$. Now \emph{Equation~\ref{eq:cosinelaw}} becomes:
+There are two similarity measures that should be computed, namely the Euclidean
+distance between two cloud vectors and the cosine of the angle between them.
+
+Geometrically, if vectors $\bm{c}_i$ and $\bm{c}_j$ start from the origin, then
+$\bm{c}_i$, $\bm{c}_j$ and $\bm{c}_i-\bm{c}_j$ describe a triangle. Let $\theta$
+be the angle between $\bm{c}_i$ and $\bm{c}_j$. From the Law of Cosines
 %
 \begin{equation}
-\label{eq:norm-equation}
-\|\mathbf{C_i}-\mathbf{C_j}\|^2 = \mathbf{C_i^T}\mathbf{C_i} + \mathbf{C_j^T}\mathbf{C_j} - 2 \mathbf{C_i^T}\mathbf{C_j}
+  \label{eq:cosinelaw}
+  \|\bm{c}_i-\bm{c}_j\|^2 = \|\bm{c}_i\|^2 + \|\bm{c}_j\|^2 - 2 \|\bm{c}_i\|
+  \|\bm{c}_j\| \cos \ \theta.
 \end{equation}
 %
-Therefore, it is sufficient to be able to compute all dot products $\mathbf{C_i^T}\mathbf{C_j}$
-(for all $i, j \in v$) to compute the similarities between all vertices of the graph.
-Computing and storing all $\mathbf{C_i^T}\mathbf{C_j}; i,j \in v$ takes too much time and memory
-for a very large dataset, so we will make a trade-off between the accuracy of the result and
-the computational complexity.
+Take the dot product $\bm{c}^T_i\bm{c}_j = \| \bm{c}_i \| \| \bm{c}_j \| \cos \ \theta$.
+The angle between $\bm{c}_i$ and itself is $0$ and $\cos \ 0=1$, thus
+$\|\bm{c}_i\|^2 = \bm{c}^T_i\bm{c}_i$. Now \emph{Equation~\ref{eq:cosinelaw}} becomes
+%
+\begin{equation}
+  \label{eq:norm-equation}
+  \|\bm{c}_i-\bm{c}_j\|^2 = \bm{c}^T_i\bm{c}_i + \bm{c}^T_j\bm{c}_j - 2 \bm{c}^T_i\bm{c}_j,
+\end{equation}
+%
+from which the Euclidean distance can be computed by taking the square root of the
+result.
+
+The cosine similarity can be computed using the same dot products
+\begin{align}
+  \cos \ \theta = \frac{\bm{c}^T_i\bm{c}_j}{\|\bm{c}_i\|\|\bm{c}_j\|} =
+  \frac{\bm{c}^T_i\bm{c}_j}{\sqrt{\bm{c}^T_i\bm{c}_i} \ \sqrt{\bm{c}^T_j\bm{c}_j}}.
+\end{align}
+
+Therefore, it is sufficient to be able to compute all dot products $\bm{c}^T_i\bm{c}_j$
+(for all $i, j \in v$) to compute the similarities between all vertices of the
+graph. Computing and storing all $\bm{c}^T_i\bm{c}_j; i,j \in v$ takes too much
+time and memory for a very large dataset, so we will make a trade-off between the
+accuracy of the result and the computational complexity.
 
 
 %
 %% Approximative algorithm intro
 %
-An approximative algorithm to efficiently compute the dot products $\mathbf{C_i^T}\mathbf{C_j}$
-will be described. Let $W$ be a diagonal matrix:
-%
+
+
+An approximative algorithm to efficiently compute the dot products $\bm{c}^T_i\bm{c}_j$
+will be described.
+
+The algorithm is slightly different for directed and undirected graphs, because
+undirected graphs have symmetric adjacency matrices. Symmetric matrices have the
+advantage of having real eigenvalues, whereas non-symmetric matrices can have
+both real and complex eigenvalues.
+
+Both versions of the algorithm use the normalised adjacency matrix (from
+\emph{Equation~\ref{eq:initial-d}}), which can be vectorised as
 \begin{equation}
-\label{eq:W}
-W_{ij} = \frac{[i=j]}{\sum_{j=1}^N M_{ij}}
+  \label{eq:d-vectorised}
+  \mat{D} = \mat{W}\mat{M},
 \end{equation}
-%
-Now \emph{Equation~\ref{eq:initial-d}} can be written as $D = WM$, thus
-%
+where $\mat{W}$ is the diagonal matrix
 \begin{equation}
-\label{eq:newdt}
-D^t = (WM)^t
+  \label{eq:W}
+  \mat{W}_{ii} = \frac{1}{\sum_{j=1}^N \mat{M}_{ij}}.
 \end{equation}
-%
-Define a new matrix $A$:
-%
+
+\subsection{Undirected graphs}
+
+In this subsection, assume that the graph $\mathcal{G}$ is undirected and, as a
+consequence, the adjacency matrix $\mat{M}$ is a real symmetric matrix.
+
+The normalised adjacency matrix $\mat{D}$ is not symmetric as it is the product
+of a diagonal matrix ($\mat{W}$) and a symmetric matrix ($\mat{M}$). Knowing we
+are interested in $\mat{D}^t$, define a new symmetric matrix
 \begin{equation}
-\label{eq:a}
-A = W^{\sfrac{1}{2}}MW^{\sfrac{1}{2}}
+  \label{eq:a}
+  \mat{A} = \mat{W}^{\sfrac{1}{2}}\mat{M}\mat{W}^{\sfrac{1}{2}}
 \end{equation}
-%
-%
-From \emph{Equation~\ref{eq:newdt}} and \emph{Equation~\ref{eq:a}}:
-%
-\begin{equation}
-\label{eq:used-dt}
-D^t = W^{\sfrac{1}{2}} A^t W^{\sfrac{-1}{2}}
-\end{equation}
-%
-%
-The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute because
-$W$ is a diagonal matrix. Apply the operation only on the diagonal elements and obtain
-$(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
+that can be used in
+\begin{align}
+  \label{eq:undirected-dt-waw}
+  \mat{D}^t = (\mat{W}\mat{M})^t
+      = \mat{W}^{\sfrac{1}{2}} \mat{A}^t \mat{W}^{\sfrac{-1}{2}}.
+\end{align}
+
+The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute
+because $W$ is a diagonal matrix. Apply the operation only on the diagonal
+elements and obtain $(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and
+$(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
+
+
 %
 %% Defining eigen*matrices.
 %
-Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\vee^{(i)}$ be the $i^{th}$
-eigenvector of $A$ ($\forall i \in \{ 1, 2, ..., N \}$). $\vee$ is a matrix of all
-$N$ eigenvectors (such that $\vee^{(i)}$ is the $i^{th}$ column of $\vee$), and
-$\Lambda$ is a diagonal matrix of all $N$ eigenvalues:
+
+
+Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\bm{\vee^{(i)}}$ be the
+$i^{th}$ eigenvector of $A$ ($\forall i \in \{ 1, 2, ..., N \}$). $\vee$ is a
+matrix of all $N$ eigenvectors (such that $\bm{\vee^{(i)}}$ is the $i^{th}$ column of
+$\vee$), and $\Lambda$ is a diagonal matrix of all $N$ eigenvalues
 %
 \begin{align}
-\vee &= \begin{bmatrix}
-\vert      & \vert      &       & \vert \\
-\vee^{(1)} & \vee^{(2)} & \dots & \vee^{(N)}\\
-\vert      & \vert      &       & \vert \end{bmatrix} \\
-\Lambda &= \begin{bmatrix}
-\lambda_1 & 0 		      & \dots  & 0 \\
-0 	 	    & \lambda_2   & \dots  & 0 \\
-\vdots 	  & \vdots	    & \ddots &   \\
-0	        & 0           &        & \lambda_N
-\end{bmatrix}
+  \vee &= \begin{bmatrix}
+    \vert           & \vert           &       & \vert \\
+    \bm{\vee^{(1)}} & \bm{\vee^{(2)}} & \dots & \bm{\vee^{(N)}} \\
+    \vert           & \vert           &       & \vert \end{bmatrix}, &&
+  \Lambda = \begin{bmatrix}
+    \lambda_1 & 0 		      & \dots  & 0 \\
+    0 	 	    & \lambda_2   & \dots  & 0 \\
+    \vdots 	  & \vdots	    & \ddots &   \\
+    0	        & 0           &        & \lambda_N
+  \end{bmatrix}.
 \end{align}
+
+
 %
 %% Eigenvalue decomposition
 %
-The diagonalisation of the matrix A is $A = \vee \Lambda \vee^{-1}$. The graph $G$
-is an undirected graph which makes $A$ a real symmetric matrix, thus $\vee^{-1} = \vee^{T}$
-\cite{eigval_and_eigvec}.The diagonalisation of the matrix $A$ is therefore:
+
+
+The diagonalisation of the matrix A is $A = \vee \Lambda \vee^{-1}$. A is a real
+symmetric matrix thus its eigenvectors are orthogonal, which makes $\vee$ an
+orthogonal matrix, therefore $\vee^{-1} = \vee^{T}$ \cite{eigval_and_eigvec}.
+The diagonalisation of $A$ is
 %
 \begin{align}
-\label{eq:a-at-t-sum}
-A &= \vee \Lambda \vee^{T} \\
-\Rightarrow A^t &= \big(\vee \Lambda \vee^{T}\big)^t = \vee \Lambda^t \vee^{T} \\
-\Leftrightarrow A^t &= \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T}
+  A &= \vee \Lambda \vee^{T} \\
+  \Rightarrow A^t &= \big(\vee \Lambda \vee^{T}\big)^t
+                  = \vee \Lambda^t \vee^{T} \\
+  \label{eq:a-at-t-sum}
+                  &= \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}}.
 \end{align}
-%
-From \emph{Equation~\ref{eq:used-dt}} and \emph{Equation~\ref{eq:a-at-t-sum}}:
+
+
+From \emph{Equation~\ref{eq:undirected-dt-waw}} and \emph{Equation~\ref{eq:a-at-t-sum}}
 \begin{equation}
-\label{eq:d-at-t-with-a}
-D^t = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}}
+  \label{eq:d-at-t-with-a}
+  D^t = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T}
+    W^{\sfrac{-1}{2}}
 \end{equation}
 %
 %% Plugging into the Ci
 %
-Plug $D^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into \emph{Equation~\ref{eq:brute-ci}}:
+Plug $D^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into \emph{Equation~\ref{eq:brute-ci}}
 \begin{equation}
-\mathbf{C_i} = \sum_{t=0}^\infty \mu^t W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i}
+\bm{c}_i = \sum_{t=0}^\infty \mu^t W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i,
 \end{equation}
-Rearrange the equation and obtain:
+rearrange the equation and obtain
 \begin{equation}
 \label{eq:ci-rearranged}
-\mathbf{C_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t  \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i}
+\bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t  \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i.
 \end{equation}
 %
 %% Geometric series - to look into lambda mu < 1.
@@ -415,10 +451,10 @@ the first term $1$ and ratio $\mu \lambda_a$, therefore:
 \sum_{t=0}^\infty \mu^t\lambda_a^t = \frac{1}{1 - \mu \lambda_a}
 \end{equation}
 %
-Observe $\vee^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i}$ is a scalar:
+Observe $\vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar:
 \begin{equation}
 \label{eq:observe-scalar}
-\vee^{(a)^T} W^{\sfrac{-1}{2}} \mathbf{\delta_i} = \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+\vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i = \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
 \end{equation}
 %
 Substitute \emph{Equation~\ref{eq:observe-scalar}} and \emph{Equation~\ref{eq:geometric-series}}
@@ -426,19 +462,19 @@ back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain:
 %
 \begin{equation}
 \label{eq:ci-rearranged-geometric}
-\mathbf{C_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a} \vee^{(a)} \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+\bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a} \vee^{(a)} \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
 \end{equation}
 %
 %% Approximation explained.
 %
-An approximation of the vectors $\mathbf{C_i} (\forall i \in v)$ can be obtained
+An approximation of the vectors $\bm{c}_i (\forall i \in v)$ can be obtained
 by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of
 them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using
 the Lanczos Method for real symmetric matrices\cite{calvetti1994implicitly}. For directed graphs the Arnoldi
 Iteration \cite{lehoucq1996deflation} will be used instead. These algorithms perform well on large sparse
 matrices. In real datasets it is very often the case that the number of edges is
 orders of magnitude smaller than the number of vertices squared, resulting in sparse
-adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C}_i}$ to be an approximation of $\mathbf{C_i}$:
+adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C}_i}$ to be an approximation of $\bm{c}_i$:
 %
 \begin{equation}
 \label{eq:c-hat}
