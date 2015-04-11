@@ -258,42 +258,27 @@ have the same direction (angle between them $0$) have the cosine similarity $1$.
 \section{Naive implementation}
 %\addcontentsline{toc}{chapter}{Brute-force approach}
 %
-The similarity algorithm is described regarding the undirected graph $G(v, \epsilon)$
-with adjacency matrix $M$. The number of nodes is $N = |v|$ and the number of
-edges is $|\epsilon|$.
+A naive implementation that does not scale to large graphs is to compute and
+store all could vectors $\bm{c}_i, \forall i \in \mathcal{V}$. Observe that
+\emph{Equation~\ref{eq:brute-ci}} is a geometric series and can be computed as
+\begin{align}
+  \label{eq:ci_inverse}
+  \bm{c}_i = (\mat{I} - \mu \mat{D})^{-1} \bm{\delta}_i,
+\end{align}
+so every $\bm{c}_i$ vector is the $i^{th}$ column in the matrix $(\mat{I} -
+\mu \mat{D})^{-1}$.
 
+The naive implementation was run on a small graph designed by hand and it gave
+meaningful results (vertices connected to the graph in a similar way have a small
+$\|\mathbf{C_i} - \mathbf{C_j}\|^2$) but it does not scale for large datasets.
 
-In order to derive an algorithm to find similarities between vertices in a graph,
-a measure of similarity between two vertices must be defined. $M$ is the adjacency
-matrix of the graph and $M_{i j} = [(i,j) \in \epsilon]$, that is $M_{i j} = 1$
-if there is an edge between vertices $i$ and $j$, otherwise $M_{i j} = 0$. Let
-$D$ be a normalised adjacency matrix such that each row sums up to $1$:
-%
-\begin{equation}
-D_{i j} = \frac{1}{\sum_{j=1}^N M_{ij}}
-\end{equation}
-%
-Let $\mathbf{\delta_i}$ be the $i^{th}$ column of the $N \times N$ identity matrix,
-and $\mathbf{C_i}$ a vector that represents how vertex $i$ is connected to the graph.
-In a brute-force approach, $\mathbf{C_i}$ can be computed as:
-%
-\begin{equation}
-\label{eq:brute-ci}
-\mathbf{C_i} = \sum_{t=0}^\infty \mu^t D^t \mathbf{\delta_i}
-\end{equation}
-%
-Where $\mu \in (0,1)$ is a penalising factor. The similarity between two vertices
-$i$ and $j$ is the (squared) norm of the difference between $\mathbf{C_i}$ and
-$\mathbf{C_j}$:
-%
-\begin{equation}
-\|\mathbf{C_i} - \mathbf{C_j}\|^2
-\end{equation}
-%
-The brute-force approach was run on a small graph designed by hand with 50 iterations
-and it gave meaningful results (vertices connected in a similar way have a small
-$\|\mathbf{C_i} - \mathbf{C_j}\|^2$) but it does not scale for large datasets. In
-the next section an algorithm that scales up to large datasets is described.
+For large graphs, it is expected to have sparse adjacency matrices, where the
+number of edges is significantly lower then the number of vertices squared (
+$|\mathcal{E}| \ll N^2$). The inverse $(\mat{I} - \mu \mat{D})^{-1}$ is
+not sparse and it takes significantly more memory than the adjacency matrix. If
+the graph is large enough, it can easily take more memory than the available RAM
+on an average computer. Another problem is that computing the matrix inverse is
+a computationally costly operation of complexity $O(N^3)$.
 
 %
 %-------------------------------------------------------------------------------
