@@ -386,8 +386,8 @@ $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
 
 Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\bm{\vee^{(i)}}$ be the
 $i^{th}$ eigenvector of $A$ ($\forall i \in \{ 1, 2, ..., N \}$). $\vee$ is a
-matrix of all $N$ eigenvectors (such that $\bm{\vee^{(i)}}$ is the $i^{th}$ column of
-$\vee$), and $\Lambda$ is a diagonal matrix of all $N$ eigenvalues
+matrix of all $N$ eigenvectors (such that $\bm{\vee^{(i)}}$ is the $i^{th}$
+column of $\vee$), and $\Lambda$ is a diagonal matrix of all $N$ eigenvalues
 %
 \begin{align}
   \vee &= \begin{bmatrix}
@@ -425,85 +425,122 @@ The diagonalisation of $A$ is
 From \emph{Equation~\ref{eq:undirected-dt-waw}} and \emph{Equation~\ref{eq:a-at-t-sum}}
 \begin{equation}
   \label{eq:d-at-t-with-a}
-  D^t = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T}
-    W^{\sfrac{-1}{2}}
+  D^t = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}}
+    W^{\sfrac{-1}{2}}.
 \end{equation}
+
+
 %
 %% Plugging into the Ci
 %
+
+
 Plug $D^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into \emph{Equation~\ref{eq:brute-ci}}
 \begin{equation}
-\bm{c}_i = \sum_{t=0}^\infty \mu^t W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i,
+  \bm{c}_i = \sum_{t=0}^\infty \mu^t W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t
+    \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i,
 \end{equation}
 rearrange the equation and obtain
 \begin{equation}
-\label{eq:ci-rearranged}
-\bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t  \lambda_a^t \vee^{(a)} \vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i.
+  \label{eq:ci-rearranged}
+  \bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t \lambda_a^t
+    \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i.
 \end{equation}
+
+
 %
 %% Geometric series - to look into lambda mu < 1.
 %
-Note that $\sum_{t=0}^\infty \mu^t\lambda_a^t$ is a sum of a geometric series with
-the first term $1$ and ratio $\mu \lambda_a$, therefore:
-%
+
+
+Note that $\sum_{t=0}^\infty \mu^t\lambda_a^t$ is a sum of a geometric series
+with the first term $1$ and ratio $\mu \lambda_a$, therefore
 \begin{equation}
-\label{eq:geometric-series}
-\sum_{t=0}^\infty \mu^t\lambda_a^t = \frac{1}{1 - \mu \lambda_a}
+  \label{eq:geometric-series}
+  \sum_{t=0}^\infty \mu^t\lambda_a^t = \frac{1}{1 - \mu \lambda_a}.
 \end{equation}
-%
-Observe $\vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar:
+
+
+Observe $\bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar
 \begin{equation}
-\label{eq:observe-scalar}
-\vee^{(a)^T} W^{\sfrac{-1}{2}} \bm{\delta}_i = \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+  \label{eq:observe-scalar}
+  \bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i = \bm{\vee^{(a)}}_i.
+    W^{\sfrac{-1}{2}}_{ii}
 \end{equation}
-%
+
+
 Substitute \emph{Equation~\ref{eq:observe-scalar}} and \emph{Equation~\ref{eq:geometric-series}}
-back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain:
-%
+back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain
 \begin{equation}
-\label{eq:ci-rearranged-geometric}
-\bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a} \vee^{(a)} \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+  \label{eq:ci-rearranged-geometric}
+  \bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a}
+    \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i W^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
+
+
 %
 %% Approximation explained.
 %
+
+
 An approximation of the vectors $\bm{c}_i (\forall i \in v)$ can be obtained
-by only using the $m$ leading eigenvectors and eigenvalues of $A$ instead of all of
-them. Compute the largest $m$ eigenvalues and eigenvectors of the matrix $A$ using
-the Lanczos Method for real symmetric matrices\cite{calvetti1994implicitly}. For directed graphs the Arnoldi
-Iteration \cite{lehoucq1996deflation} will be used instead. These algorithms perform well on large sparse
-matrices. In real datasets it is very often the case that the number of edges is
-orders of magnitude smaller than the number of vertices squared, resulting in sparse
-adjacency matrices and a sparse $A$. Define $\mathbf{\hat{C}_i}$ to be an approximation of $\bm{c}_i$:
-%
+by only using the $k$ leading eigenvectors and eigenvalues of $A$ instead of all
+of them. It is expected that the $A$ is large and sparse, because in a typical
+dataset the number of relationships is significantly smaller than the number
+of data points squared. In terms of the undirected graph $\mathcal{G}(\mathcal{V},
+\mathcal{E})$ it is expected that $\|E\| \ll \|V\|^2$. The Lanczos Method is an
+efficient iterative algorithm to compute the leading eigenvalues of large sparse
+real symmetric matrices \cite{calvetti1994implicitly} and it is implemented in
+both Matlab and Python (SciPy).
+
+Compute the largest $k$ eigenvalues and eigenvectors using the Lanczos Method
+and define $\bm{\hat{c}}_i$ to be an approximation of $\bm{c}_i$
 \begin{equation}
-\label{eq:c-hat}
-\mathbf{\hat{C}_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{m} \frac{1}{1 - \mu \lambda_a} \vee^{(a)} \vee^{(a)}_i W^{\sfrac{-1}{2}}_{ii}
+  \label{eq:c-hat}
+  \bm{\hat{c}}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{k} \frac{1}{1 - \mu
+    \lambda_a} \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i W^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
+
+
 %
 %% Define Z
 %
-To simplify the equation, let $Z$ be a $N \times m$ matrix such that:
-\begin{equation}
-\label{eq:z-ij}
-Z_{ij} = \frac{\vee^{(j)}_i W^{\sfrac{-1}{2}}_{ii}}{1-\mu \lambda_j}
-\end{equation}
-%
-Substitute in \emph{Equation~\ref{eq:c-hat}} and get:
-%
-\begin{equation}
-\label{eq:ci-rearranged-z}
-\mathbf{\hat{C}_i} = W^{\sfrac{1}{2}} \sum_{a=1}^{N} Z_{ia} \vee^{(a)}
-\end{equation}
-%
-The dot product between $\mathbf{\hat{C}_i}$ and $\mathbf{\hat{C}_j}$ becomes:
+
+
+To simplify the equation, let $Z$ be a $N \times k$ matrix such that
 \begin{align}
+  \label{eq:z-ij}
+  Z_{ij} &= \frac{\bm{\vee^{(j)}}_i W^{\sfrac{-1}{2}}_{ii}}{1-\mu \lambda_j},
+\end{align}
+and substitute in \emph{Equation~\ref{eq:c-hat}} to get
+\begin{equation}
+  \label{eq:ci-rearranged-z}
+  \bm{\hat{c}}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} Z_{ia} \bm{\vee^{(a)}}.
+\end{equation}
+
+The computation of $Z$ (\emph{Equation~\ref{eq:z-ij}}) can be vectorised using a
+new $k \times k$ diagonal matrix $R$ as follows
+\begin{align}
+  \label{eq:z-vectorised}
+  Z = W^{\sfrac{-1}{2}} \hat{\vee} R, &&
+  R_{ii} = \frac{1}{1 - \mu \lambda_i}.
+\end{align}
+
+
 %
-\mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \Big(  W^{\sfrac{1}{2}} \sum_{a=1}^{m} Z_{ia} \vee^{(a)} \Big)^T \Big(  W^{\sfrac{1}{2}} \sum_{a'=1}^{m} Z_{ia'} \vee^{(a')} \Big)
-\\
-\Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^{m} Z_{ia}  \vee^{(a)^T} W \sum_{a'=1}^{m} Z_{ia'} \vee^{(a')}
-\\
-\Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} \vee^{(a)^T} W \vee^{(a')} \label{eq:dot-zvw}
+%% Dot product undirected
+%
+
+
+The dot product between $\bm{\hat{c}}_i$ and $\mathbf{\hat{C}_j}$ becomes
+\begin{align}
+  \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \Big(  W^{\sfrac{1}{2}}
+  \sum_{a=1}^{m} Z_{ia} \bm{\vee^{(a)}} \Big)^T \Big(  W^{\sfrac{1}{2}}
+  \sum_{a'=1}^{m} Z_{ia'} \vee^{(a')} \Big)
+  \\
+  \Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^{m} Z_{ia}  \bm{\vee^{(a)^T}} W \sum_{a'=1}^{m} Z_{ia'} \vee^{(a')}
+  \\
+\ Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} \bm{\vee^{(a)^T}} W \vee^{(a')} \label{eq:dot-zvw}
 \end{align}
 %
 %% Define Q
@@ -519,12 +556,19 @@ $\mathbf{Z_i}$ is the $i^{th}$ row of the matrix $Z$. Substitute $Q$ into \emph{
 \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} Q_{aa'} \label{eq:dot-zq-sum} \\
 \Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \mathbf{Z_i^T} Q \mathbf{Z_j} \label{eq:dot-zq-vectorised}
 \end{align}
+
+
+\subsection{Directed graphs}
+
+For directed graphs the Arnoldi Iteration \cite{lehoucq1996deflation} will be used
+instead.
+
 %
 %% Storage and predictions
 %
 From \emph{Equation~\ref{eq:dot-zq-vectorised}} it is deduced that it is only
 required to store the matrices $Q$ and $Z$, which only takes $O(m^2 + Nm)$ memory,
-instead of $O(N^2)$ to store all $\mathbf{\hat{C}_i}$ vectors.
+instead of $O(N^2)$ to store all $\bm{\hat{c}}_i$ vectors.
 
 
 To compute the similarity between two vertices, $i$ and $j$, use the norm formula
