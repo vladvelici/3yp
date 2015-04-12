@@ -629,46 +629,6 @@ similarity between two nodes is the same as multiplying three small matrices
 (of sizes $1 \times m$, $m \times m$ and $m \times 1$).
 
 
-%%%%%%%%%%%%%%%
-%% Vectorisation
-%%%%%%%%%%%%%%%
-\subsection{Vectorisation}
-%\addcontentsline{toc}{subsection}{Vectorisation}
-It is usually more efficient to have vectorised implementations (to use matrix
-operations in favour of iterative solutions) in programming languages like Matlab,
-Octave or R. In this subsection is presented a way of computing the matrices $\mat{Z}$
-and $Q$ using matrix operations. For this purpose, in this subsection, $\vee$ only
-contains the leading $m$ eigenvectors (is of size $N \times m$), and $\Lambda$ only
-contains the leading $m$ eigenvalues (is of size $m \times m$).
-
-
-%
-%% Z
-%
-To vectorise the computation of $\mat{Z}$ from \emph{Equation~\ref{eq:z-ij}}, define a
-new diagonal matrix $R$:
-%
-\begin{equation}
-R = \begin{bmatrix}
-\frac{1}{1 - \mu \lambda_1} & 0  & \dots & 0 \\
-0 & \frac{1}{1 - \mu \lambda_2}  & \dots & 0 \\
-\vdots & \vdots & \ddots & \\
-0 & 0 & \dots & \frac{1}{1 - \mu \lambda_m}
-\end{bmatrix}
-\end{equation}
-And then define $\mat{Z}$ as:
-\begin{equation}
-Z = W^{\sfrac{-1}{2}} \vee R
-\end{equation}
-%
-%% Q
-%
-A vectorised version of \emph{Equation~\ref{eq:q-ij}} (to compute $Q$) is:
-\begin{equation}
-Q = \vee^T W \vee
-\end{equation}
-
-
 %
 %-------------------------------------------------------------------------------
 % IMPLEMENTATION
