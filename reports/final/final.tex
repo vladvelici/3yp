@@ -494,7 +494,23 @@ real symmetric matrices \cite{calvetti1994implicitly} and it is implemented in
 both Matlab and Python (SciPy).
 
 Compute the largest $k$ eigenvalues and eigenvectors using the Lanczos Method
-and define $\bm{\hat{c}}_i$ to be an approximation of $\bm{c}_i$
+and define $\hat{\vee}$ to be the matrix of the $k$ leading eigenvectors and
+$\hat{\Lambda}$ to be the diagonal matrix of the leading $k$ leading eigenvalues
+\begin{align}
+  \hat{\vee} &= \begin{bmatrix}
+    \vert           & \vert           &       & \vert \\
+    \bm{\vee^{(1)}} & \bm{\vee^{(2)}} & \dots & \bm{\vee^{(k)}} \\
+    \vert           & \vert           &       & \vert \end{bmatrix}, &&
+  \hat{\Lambda} = \begin{bmatrix}
+    \lambda_1 & 0 		      & \dots  & 0 \\
+    0 	 	    & \lambda_2   & \dots  & 0 \\
+    \vdots 	  & \vdots	    & \ddots &   \\
+    0	        & 0           &        & \lambda_k
+  \end{bmatrix}.
+\end{align}
+
+
+Let $\bm{\hat{c}}_i$ be an approximation of $\bm{c}_i$
 \begin{equation}
   \label{eq:c-hat}
   \bm{\hat{c}}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{k} \frac{1}{1 - \mu
