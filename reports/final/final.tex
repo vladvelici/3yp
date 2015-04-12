@@ -354,6 +354,10 @@ where $\mat{W}$ is the diagonal matrix
   \mat{W}_{ii} = \frac{1}{\sum_{j=1}^N \mat{M}_{ij}}.
 \end{equation}
 
+%
+%% Undirected graphs
+%
+
 \subsection{Undirected graphs}
 
 In this subsection, assume that the graph $\mathcal{G}$ is undirected and, as a
@@ -373,10 +377,11 @@ that can be used in
       = \mat{W}^{\sfrac{1}{2}} \mat{A}^t \mat{W}^{\sfrac{-1}{2}}.
 \end{align}
 
-The matrices $W^{\sfrac{1}{2}}$ and $W^{\sfrac{-1}{2}}$ are easy to compute
-because $W$ is a diagonal matrix. Apply the operation only on the diagonal
-elements and obtain $(W^{\sfrac{1}{2}})_{ii} = (W_{ii})^{\sfrac{1}{2}}$ and
-$(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
+The matrices $\mat{W}^{\sfrac{1}{2}}$ and $\mat{W}^{\sfrac{-1}{2}}$ are easy to
+compute because $\mat{W}$ is a diagonal matrix. Apply the operation only on the
+diagonal elements and obtain $(\mat{W}^{\sfrac{1}{2}})_{ii} = (\mat{W}_{ii})^
+{\sfrac{1}{2}}$ and $(\mat{W}^{\sfrac{-1}{2}})_{ii} = (\mat{W}_{ii})^
+{\sfrac{-1}{2}}$.
 
 
 %
@@ -384,17 +389,18 @@ $(W^{\sfrac{-1}{2}})_{ii} = (W_{ii})^{\sfrac{-1}{2}}$.
 %
 
 
-Let $\lambda_i$ be the $i^{th}$ eigenvalue of $A$ and $\bm{\vee^{(i)}}$ be the
-$i^{th}$ eigenvector of $A$ ($\forall i \in \{ 1, 2, ..., N \}$). $\vee$ is a
-matrix of all $N$ eigenvectors (such that $\bm{\vee^{(i)}}$ is the $i^{th}$
-column of $\vee$), and $\Lambda$ is a diagonal matrix of all $N$ eigenvalues
+Let $\lambda_i$ be the $i^{th}$ eigenvalue of $\mat{A}$ and $\bm{\vee^{(i)}}$ be
+the $i^{th}$ eigenvector of $\mat{A}$ ($\forall i \in \{ 1, 2, ..., N \}$).
+$\mat{V}$ is a matrix of all $N$ eigenvectors (such that $\bm{\vee^{(i)}}$ is
+the $i^{th}$ column of $\bm{\vee}$), and $\bm{\Lambda}$ is a diagonal matrix
+of all $N$ eigenvalues
 %
 \begin{align}
-  \vee &= \begin{bmatrix}
+  \bm{\vee} &= \begin{bmatrix}
     \vert           & \vert           &       & \vert \\
     \bm{\vee^{(1)}} & \bm{\vee^{(2)}} & \dots & \bm{\vee^{(N)}} \\
     \vert           & \vert           &       & \vert \end{bmatrix}, &&
-  \Lambda = \begin{bmatrix}
+  \bm{\Lambda} = \begin{bmatrix}
     \lambda_1 & 0 		      & \dots  & 0 \\
     0 	 	    & \lambda_2   & \dots  & 0 \\
     \vdots 	  & \vdots	    & \ddots &   \\
@@ -408,15 +414,16 @@ column of $\vee$), and $\Lambda$ is a diagonal matrix of all $N$ eigenvalues
 %
 
 
-The diagonalisation of the matrix A is $A = \vee \Lambda \vee^{-1}$. A is a real
-symmetric matrix thus its eigenvectors are orthogonal, which makes $\vee$ an
-orthogonal matrix, therefore $\vee^{-1} = \vee^{T}$ \cite{eigval_and_eigvec}.
-The diagonalisation of $A$ is
+The diagonalisation of the matrix $\mat{A}$ is $\mat{A} = \bm{\vee} \bm{\Lambda}
+\bm{\vee}^{-1}$.
+$\mat{A}$ is a real symmetric matrix thus its eigenvectors are orthogonal, which
+makes $\bm{\vee}$ an orthogonal matrix, therefore $\bm{\vee}^{-1} = \bm{\vee}^{T}$
+\cite{eigval_and_eigvec}. The diagonalisation of $\mat{A}$ is then
 %
 \begin{align}
-  A &= \vee \Lambda \vee^{T} \\
-  \Rightarrow A^t &= \big(\vee \Lambda \vee^{T}\big)^t
-                  = \vee \Lambda^t \vee^{T} \\
+  \mat{A} &= \bm{\vee} \bm{\Lambda} \bm{\vee}^{T} \\
+  \Rightarrow \mat{A}^t &= \big(\bm{\vee} \bm{\Lambda} \bm{\vee}^{T}\big)^t
+                  = \bm{\vee} \bm{\Lambda}^t \bm{\vee}^{T} \\
   \label{eq:a-at-t-sum}
                   &= \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}}.
 \end{align}
@@ -425,8 +432,8 @@ The diagonalisation of $A$ is
 From \emph{Equation~\ref{eq:undirected-dt-waw}} and \emph{Equation~\ref{eq:a-at-t-sum}}
 \begin{equation}
   \label{eq:d-at-t-with-a}
-  D^t = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}}
-    W^{\sfrac{-1}{2}}.
+  \mat{D}^t = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}}
+    \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}}.
 \end{equation}
 
 
@@ -435,16 +442,19 @@ From \emph{Equation~\ref{eq:undirected-dt-waw}} and \emph{Equation~\ref{eq:a-at-
 %
 
 
-Plug $D^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into \emph{Equation~\ref{eq:brute-ci}}
+Plug $\mat{D}^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into
+\emph{Equation~\ref{eq:brute-ci}}
 \begin{equation}
-  \bm{c}_i = \sum_{t=0}^\infty \mu^t W^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t
-    \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i,
+  \bm{c}_i = \sum_{t=0}^\infty \mu^t \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N}
+    \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}}
+    \bm{\delta}_i,
 \end{equation}
 rearrange the equation and obtain
 \begin{equation}
   \label{eq:ci-rearranged}
-  \bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t \lambda_a^t
-    \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i.
+  \bm{c}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t
+    \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}}
+    \bm{\delta}_i.
 \end{equation}
 
 
@@ -461,11 +471,11 @@ with the first term $1$ and ratio $\mu \lambda_a$, therefore
 \end{equation}
 
 
-Observe $\bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar
+Observe $\bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar
 \begin{equation}
   \label{eq:observe-scalar}
-  \bm{\vee^{(a)^T}} W^{\sfrac{-1}{2}} \bm{\delta}_i = \bm{\vee^{(a)}}_i.
-    W^{\sfrac{-1}{2}}_{ii}
+  \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}} \bm{\delta}_i =
+    \bm{\vee^{(a)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
 
 
@@ -473,8 +483,8 @@ Substitute \emph{Equation~\ref{eq:observe-scalar}} and \emph{Equation~\ref{eq:ge
 back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain
 \begin{equation}
   \label{eq:ci-rearranged-geometric}
-  \bm{c}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a}
-    \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i W^{\sfrac{-1}{2}}_{ii}.
+  \bm{c}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a}
+    \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
 
 
@@ -483,25 +493,27 @@ back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain
 %
 
 
-An approximation of the vectors $\bm{c}_i (\forall i \in v)$ can be obtained
-by only using the $k$ leading eigenvectors and eigenvalues of $A$ instead of all
-of them. It is expected that the $A$ is large and sparse, because in a typical
-dataset the number of relationships is significantly smaller than the number
-of data points squared. In terms of the undirected graph $\mathcal{G}(\mathcal{V},
-\mathcal{E})$ it is expected that $\|E\| \ll \|V\|^2$. The Lanczos Method is an
-efficient iterative algorithm to compute the leading eigenvalues of large sparse
-real symmetric matrices \cite{calvetti1994implicitly} and it is implemented in
-both Matlab and Python (SciPy).
+An approximation of the vectors $\bm{c}_i \ (\forall i \in \mathcal{V})$ can be
+obtained by only using the $k$ leading eigenvectors and eigenvalues of $\mat{A}$
+instead of all of them. It is expected that the $\mat{A}$ is large and sparse,
+because in a typical dataset the number of relationships is significantly
+smaller than the number of data points squared. In terms of the undirected graph
+$\mathcal{G}(\mathcal{V}, \mathcal{E})$, it is expected that $\|\mathcal{E}\|
+\ll \|\mathcal{V}\|^2$. The Lanczos Method is an efficient iterative algorithm
+to compute the leading eigenvalues of large sparse real symmetric matrices
+\cite{calvetti1994implicitly} and it is implemented in both Matlab and Python
+(SciPy).
 
 Compute the largest $k$ eigenvalues and eigenvectors using the Lanczos Method
-and define $\hat{\vee}$ to be the matrix of the $k$ leading eigenvectors and
-$\hat{\Lambda}$ to be the diagonal matrix of the leading $k$ leading eigenvalues
+and define $\bm{\hat{\vee}}$ to be the matrix of the $k$ leading eigenvectors
+and $\bm{\hat{\Lambda}}$ to be the diagonal matrix of the leading $k$ leading
+eigenvalues
 \begin{align}
-  \hat{\vee} &= \begin{bmatrix}
+  \bm{\hat{\vee}} &= \begin{bmatrix}
     \vert           & \vert           &       & \vert \\
     \bm{\vee^{(1)}} & \bm{\vee^{(2)}} & \dots & \bm{\vee^{(k)}} \\
     \vert           & \vert           &       & \vert \end{bmatrix}, &&
-  \hat{\Lambda} = \begin{bmatrix}
+  \bm{\hat{\Lambda}} = \begin{bmatrix}
     \lambda_1 & 0 		      & \dots  & 0 \\
     0 	 	    & \lambda_2   & \dots  & 0 \\
     \vdots 	  & \vdots	    & \ddots &   \\
@@ -513,8 +525,8 @@ $\hat{\Lambda}$ to be the diagonal matrix of the leading $k$ leading eigenvalues
 Let $\bm{\hat{c}}_i$ be an approximation of $\bm{c}_i$
 \begin{equation}
   \label{eq:c-hat}
-  \bm{\hat{c}}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{k} \frac{1}{1 - \mu
-    \lambda_a} \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i W^{\sfrac{-1}{2}}_{ii}.
+  \bm{\hat{c}}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \frac{1}{1 - \mu
+    \lambda_a} \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
 
 
@@ -523,10 +535,11 @@ Let $\bm{\hat{c}}_i$ be an approximation of $\bm{c}_i$
 %
 
 
-To simplify the equation, let $Z$ be a $N \times k$ matrix such that
+To simplify the equation, let $\mat{Z}$ be a $N \times k$ matrix such that
 \begin{align}
   \label{eq:z-ij}
-  Z_{ij} &= \frac{\bm{\vee^{(j)}}_i W^{\sfrac{-1}{2}}_{ii}}{1-\mu \lambda_j},
+  \mat{Z}_{ij} &= \frac{\bm{\vee^{(j)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}}
+    {1-\mu \lambda_j},
 \end{align}
 and substitute in \emph{Equation~\ref{eq:c-hat}} to get
 \begin{equation}
@@ -534,12 +547,12 @@ and substitute in \emph{Equation~\ref{eq:c-hat}} to get
   \bm{\hat{c}}_i = W^{\sfrac{1}{2}} \sum_{a=1}^{N} Z_{ia} \bm{\vee^{(a)}}.
 \end{equation}
 
-The computation of $Z$ (\emph{Equation~\ref{eq:z-ij}}) can be vectorised using a
-new $k \times k$ diagonal matrix $R$ as follows
+The computation of $\mat{Z}$ (\emph{Equation~\ref{eq:z-ij}}) can be vectorised
+using a new $k \times k$ diagonal matrix $\mat{R}$ as follows
 \begin{align}
   \label{eq:z-vectorised}
-  Z = W^{\sfrac{-1}{2}} \hat{\vee} R, &&
-  R_{ii} = \frac{1}{1 - \mu \lambda_i}.
+  \mat{Z} = \mat{W}^{\sfrac{-1}{2}} \bm{\hat{\vee}} \mat{R}, &&
+  \mat{R}_{ii} = \frac{1}{1 - \mu \lambda_i}.
 \end{align}
 
 
@@ -567,7 +580,7 @@ Define a new $m \times m$ matrix $Q$ such that:
 \label{eq:q-ij}
 Q_{ij} = \vee^{(i)^T} W \vee^{(j)}
 \end{equation}
-$\mathbf{Z_i}$ is the $i^{th}$ row of the matrix $Z$. Substitute $Q$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain:
+$\mathbf{Z_i}$ is the $i^{th}$ row of the matrix $\mat{Z}$. Substitute $Q$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain:
 \begin{align}
 \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \sum_{a=1}^m \sum_{a'=1}^m Z_{ia} Z_{ja'} Q_{aa'} \label{eq:dot-zq-sum} \\
 \Leftrightarrow \mathbf{\hat{C}_i^T} \mathbf{\hat{C}_j} &= \mathbf{Z_i^T} Q \mathbf{Z_j} \label{eq:dot-zq-vectorised}
@@ -583,7 +596,7 @@ instead.
 %% Storage and predictions
 %
 From \emph{Equation~\ref{eq:dot-zq-vectorised}} it is deduced that it is only
-required to store the matrices $Q$ and $Z$, which only takes $O(m^2 + Nm)$ memory,
+required to store the matrices $Q$ and $\mat{Z}$, which only takes $O(m^2 + Nm)$ memory,
 instead of $O(N^2)$ to store all $\bm{\hat{c}}_i$ vectors.
 
 
@@ -594,7 +607,7 @@ from \emph{Equation~\ref{eq:dot-zq-vectorised}} and obtain:
 \|\mathbf{\hat{C}_i^T} - \mathbf{\hat{C}_j}\|^2 = \mathbf{Z_i^T} Q \mathbf{Z_i} + \mathbf{Z_j^T} Q \mathbf{Z_j} - 2 \mathbf{Z_i^T} Q \mathbf{Z_j}
 \end{equation}
 %
-After computing the matrices $Z$ and $Q$, the time complexity of computing the
+After computing the matrices $\mat{Z}$ and $Q$, the time complexity of computing the
 similarity between two nodes is the same as multiplying three small matrices
 (of sizes $1 \times m$, $m \times m$ and $m \times 1$).
 
@@ -606,7 +619,7 @@ similarity between two nodes is the same as multiplying three small matrices
 %\addcontentsline{toc}{subsection}{Vectorisation}
 It is usually more efficient to have vectorised implementations (to use matrix
 operations in favour of iterative solutions) in programming languages like Matlab,
-Octave or R. In this subsection is presented a way of computing the matrices $Z$
+Octave or R. In this subsection is presented a way of computing the matrices $\mat{Z}$
 and $Q$ using matrix operations. For this purpose, in this subsection, $\vee$ only
 contains the leading $m$ eigenvectors (is of size $N \times m$), and $\Lambda$ only
 contains the leading $m$ eigenvalues (is of size $m \times m$).
@@ -615,7 +628,7 @@ contains the leading $m$ eigenvalues (is of size $m \times m$).
 %
 %% Z
 %
-To vectorise the computation of $Z$ from \emph{Equation~\ref{eq:z-ij}}, define a
+To vectorise the computation of $\mat{Z}$ from \emph{Equation~\ref{eq:z-ij}}, define a
 new diagonal matrix $R$:
 %
 \begin{equation}
@@ -626,7 +639,7 @@ R = \begin{bmatrix}
 0 & 0 & \dots & \frac{1}{1 - \mu \lambda_m}
 \end{bmatrix}
 \end{equation}
-And then define $Z$ as:
+And then define $\mat{Z}$ as:
 \begin{equation}
 Z = W^{\sfrac{-1}{2}} \vee R
 \end{equation}
@@ -683,7 +696,7 @@ Some helper functions are not included in the table.
    top(q,z,i) & Uses simlist(q,z,i) and sorts the results. \\
    randomGraph(nodes, vertices, directed) & Generates a random connected graph.
    \end{tabular}
-   \caption{Implementation interface. Parameters: q represents the matrix $Q$, z represents the matrix $Z$, adj represents the adjacency matrix, and i and j represent vertex numbers.}
+   \caption{Implementation interface. Parameters: q represents the matrix $Q$, z represents the matrix $\mat{Z}$, adj represents the adjacency matrix, and i and j represent vertex numbers.}
    \label{tbl:interface}
 \end{table}
 
