@@ -389,16 +389,16 @@ diagonal elements and obtain $(\mat{W}^{\sfrac{1}{2}})_{ii} = (\mat{W}_{ii})^
 %
 
 
-Let $\lambda_i$ be the $i^{th}$ eigenvalue of $\mat{A}$ and $\bm{\vee^{(i)}}$ be
+Let $\lambda_i$ be the $i^{th}$ eigenvalue of $\mat{A}$ and $\bm{\vee}^{(i)}$ be
 the $i^{th}$ eigenvector of $\mat{A}$ ($\forall i \in \{ 1, 2, ..., N \}$).
-$\mat{V}$ is a matrix of all $N$ eigenvectors (such that $\bm{\vee^{(i)}}$ is
+$\mat{V}$ is a matrix of all $N$ eigenvectors (such that $\bm{\vee}^{(i)}$ is
 the $i^{th}$ column of $\bm{\vee}$), and $\bm{\Lambda}$ is a diagonal matrix
 of all $N$ eigenvalues
 %
 \begin{align}
   \bm{\vee} &= \begin{bmatrix}
     \vert           & \vert           &       & \vert \\
-    \bm{\vee^{(1)}} & \bm{\vee^{(2)}} & \dots & \bm{\vee^{(N)}} \\
+    \bm{\vee}^{(1)} & \bm{\vee}^{(2)} & \dots & \bm{\vee}^{(N)} \\
     \vert           & \vert           &       & \vert \end{bmatrix}, &&
   \bm{\Lambda} = \begin{bmatrix}
     \lambda_1 & 0 		      & \dots  & 0 \\
@@ -425,15 +425,15 @@ makes $\bm{\vee}$ an orthogonal matrix, therefore $\bm{\vee}^{-1} = \bm{\vee}^{T
   \Rightarrow \mat{A}^t &= \big(\bm{\vee} \bm{\Lambda} \bm{\vee}^{T}\big)^t
                   = \bm{\vee} \bm{\Lambda}^t \bm{\vee}^{T} \\
   \label{eq:a-at-t-sum}
-                  &= \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}}.
+                  &= \sum_{a=1}^{N} \lambda_a^t \bm{\vee}^{(a)} \bm{\vee}^{(a)T}.
 \end{align}
 
 
 From \emph{Equation~\ref{eq:undirected-dt-waw}} and \emph{Equation~\ref{eq:a-at-t-sum}}
 \begin{equation}
   \label{eq:d-at-t-with-a}
-  \mat{D}^t = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bm{\vee^{(a)}}
-    \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}}.
+  \mat{D}^t = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \lambda_a^t \bm{\vee}^{(a)}
+    \bm{\vee}^{(a)T} \mat{W}^{\sfrac{-1}{2}}.
 \end{equation}
 
 
@@ -446,14 +446,14 @@ Plug $\mat{D}^t$ from \emph{Equation~\ref{eq:d-at-t-with-a}} into
 \emph{Equation~\ref{eq:brute-ci}}
 \begin{equation}
   \bm{c}_i = \sum_{t=0}^\infty \mu^t \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N}
-    \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}}
+    \lambda_a^t \bm{\vee}^{(a)} \bm{\vee}^{(a)T} \mat{W}^{\sfrac{-1}{2}}
     \bm{\delta}_i,
 \end{equation}
 rearrange the equation and obtain
 \begin{equation}
   \label{eq:ci-rearranged}
   \bm{c}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \sum_{t=0}^\infty \mu^t
-    \lambda_a^t \bm{\vee^{(a)}} \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}}
+    \lambda_a^t \bm{\vee}^{(a)} \bm{\vee}^{(a)T} \mat{W}^{\sfrac{-1}{2}}
     \bm{\delta}_i.
 \end{equation}
 
@@ -471,11 +471,11 @@ with the first term $1$ and ratio $\mu \lambda_a$, therefore
 \end{equation}
 
 
-Observe $\bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar
+Observe $\bm{\vee}^{(a)T} \mat{W}^{\sfrac{-1}{2}} \bm{\delta}_i$ is a scalar
 \begin{equation}
   \label{eq:observe-scalar}
-  \bm{\vee^{(a)^T}} \mat{W}^{\sfrac{-1}{2}} \bm{\delta}_i =
-    \bm{\vee^{(a)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
+  \bm{\vee}^{(a)T} \mat{W}^{\sfrac{-1}{2}} \bm{\delta}_i =
+    \bm{\vee}^{(a)}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
 
 
@@ -484,7 +484,7 @@ back into \emph{Equation~\ref{eq:ci-rearranged}} and obtain
 \begin{equation}
   \label{eq:ci-rearranged-geometric}
   \bm{c}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{N} \frac{1}{1 - \mu \lambda_a}
-    \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
+    \bm{\vee}^{(a)} \bm{\vee}^{(a)}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
 
 
@@ -511,7 +511,7 @@ eigenvalues
 \begin{align}
   \bm{\hat{\vee}} &= \begin{bmatrix}
     \vert           & \vert           &       & \vert \\
-    \bm{\vee^{(1)}} & \bm{\vee^{(2)}} & \dots & \bm{\vee^{(k)}} \\
+    \bm{\vee}^{(1)} & \bm{\vee}^{(2)} & \dots & \bm{\vee}^{(k)} \\
     \vert           & \vert           &       & \vert \end{bmatrix}, &&
   \bm{\hat{\Lambda}} = \begin{bmatrix}
     \lambda_1 & 0 		      & \dots  & 0 \\
@@ -526,7 +526,7 @@ Let $\bm{\hat{c}}_i$ be an approximation of $\bm{c}_i$
 \begin{equation}
   \label{eq:c-hat}
   \bm{\hat{c}}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \frac{1}{1 - \mu
-    \lambda_a} \bm{\vee^{(a)}} \bm{\vee^{(a)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
+    \lambda_a} \bm{\vee}^{(a)} \bm{\vee}^{(a)}_i \mat{W}^{\sfrac{-1}{2}}_{ii}.
 \end{equation}
 
 
@@ -538,14 +538,14 @@ Let $\bm{\hat{c}}_i$ be an approximation of $\bm{c}_i$
 To simplify the equation, let $\mat{Z}$ be a $N \times k$ matrix such that
 \begin{align}
   \label{eq:z-ij}
-  \mat{Z}_{ij} &= \frac{\bm{\vee^{(j)}}_i \mat{W}^{\sfrac{-1}{2}}_{ii}}
+  \mat{Z}_{ij} &= \frac{\bm{\vee}^{(j)}_i \mat{W}^{\sfrac{-1}{2}}_{ii}}
     {1-\mu \lambda_j},
 \end{align}
 and substitute in \emph{Equation~\ref{eq:c-hat}} to get
 \begin{equation}
   \label{eq:ci-rearranged-z}
   \bm{\hat{c}}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \mat{Z}_{ia}
-    \bm{\vee^{(a)}}.
+    \bm{\vee}^{(a)}.
 \end{equation}
 
 The computation of $\mat{Z}$ (\emph{Equation~\ref{eq:z-ij}}) can be vectorised
@@ -565,14 +565,14 @@ using a new $k \times k$ diagonal matrix $\mat{R}$ as follows
 The dot product between $\bm{\hat{c}}_i$ and $\bm{\hat{c}}_j$ becomes
 \begin{align}
   \bm{\hat{c}}^T_i \bm{\hat{c}}_j &=
-    \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \mat{Z}_{ia} \bm{\vee^{(a)}} \Big)^T
-    \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a'=1}^{k} \mat{Z}_{ia} \bm{\vee^{(a')}} \Big)
+    \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \mat{Z}_{ia} \bm{\vee}^{(a)} \Big)^T
+    \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a'=1}^{k} \mat{Z}_{ia} \bm{\vee}^{(a')} \Big)
   \\
-  &= \sum_{a=1}^{k} \mat{Z}_{ia} \bm{\vee^{(a)^T}} \mat{W}
-    \sum_{a'=1}^{k} \mat{Z}_{ia'} \bm{\vee^{(a')}}
+  &= \sum_{a=1}^{k} \mat{Z}_{ia} \bm{\vee}^{(a)T} \mat{W}
+    \sum_{a'=1}^{k} \mat{Z}_{ia'} \bm{\vee}^{(a')}
   \\
   &= \sum_{a=1}^k \sum_{a'=1}^k \mat{Z}_{ia} \mat{Z}_{ja'}
-    \bm{\vee^{(a)^T}} \mat{W} \bm{\vee^{(a')}} \label{eq:dot-zvw}
+    \bm{\vee}^{(a)T} \mat{W} \bm{\vee}^{(a')} \label{eq:dot-zvw}
 \end{align}
 
 
@@ -584,7 +584,7 @@ The dot product between $\bm{\hat{c}}_i$ and $\bm{\hat{c}}_j$ becomes
 Define a new $k \times k$ matrix $\mat{Q}$ such that
 \begin{equation}
   \label{eq:q-ij}
-  \mat{Q}_{ij} = \bm{\vee^{(i)^T}} \mat{W} \bm{\vee^{(j)}},
+  \mat{Q}_{ij} = \bm{\vee}^{(i)T} \mat{W} \bm{\vee}^{(j)},
 \end{equation}
 or vectorised
 \begin{equation}
