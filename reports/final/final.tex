@@ -541,20 +541,19 @@ To simplify the equation, let $\mat{Z}$ be a $N \times k$ matrix such that
   \mat{Z}_{ij} &= \frac{\bm{\vee}^{(j)}_i \mat{W}^{\sfrac{-1}{2}}_{ii}}
     {1-\mu \lambda_j},
 \end{align}
-and substitute in \emph{Equation~\ref{eq:c-hat}} to get
-\begin{equation}
-  \label{eq:ci-rearranged-z}
-  \bm{\hat{c}}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \mat{Z}_{ia}
-    \bm{\vee}^{(a)}.
-\end{equation}
-
-The computation of $\mat{Z}$ (\emph{Equation~\ref{eq:z-ij}}) can be vectorised
-using a new $k \times k$ diagonal matrix $\mat{R}$ as follows
+or vectorised using a new $m \times m$ diagonal matrix $\mat{R}$,
 \begin{align}
   \label{eq:z-vectorised}
   \mat{Z} = \mat{W}^{\sfrac{-1}{2}} \bm{\hat{\vee}} \mat{R}, &&
   \mat{R}_{ii} = \frac{1}{1 - \mu \lambda_i}.
 \end{align}
+
+Substitute $\mat{Z}$ in \emph{Equation~\ref{eq:c-hat}} to get
+\begin{equation}
+  \label{eq:ci-rearranged-z}
+  \bm{\hat{c}}_i = \mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \mat{Z}_{ia}
+    \bm{\vee}^{(a)}.
+\end{equation}
 
 
 %
