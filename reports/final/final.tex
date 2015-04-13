@@ -58,6 +58,12 @@
 \renewcommand\thesection{\arabic{section}}
 \renewcommand\thesubsection{\thesection.\arabic{subsection}}
 
+%% Matrix horizontal line (\vert rotated at 90 deg.)
+\newcommand*{\horz}{\rule[.5ex]{2.5ex}{0.5pt}}
+
+%% complex conjugate
+\newcommand*\conj[1]{\bar{#1}}
+
 \DeclareMathAlphabet{\mat}{OT1}{cmss}{bx}{12}
 
 \begin{document}
@@ -541,7 +547,7 @@ To simplify the equation, let $\mat{Z}$ be a $N \times k$ matrix such that
   \mat{Z}_{ij} &= \frac{\bm{\vee}^{(j)}_i \mat{W}^{\sfrac{-1}{2}}_{ii}}
     {1-\mu \lambda_j},
 \end{align}
-or vectorised using a new $m \times m$ diagonal matrix $\mat{R}$,
+or vectorised using a new $k \times k$ diagonal matrix $\mat{R}$,
 \begin{align}
   \label{eq:z-vectorised}
   \mat{Z} = \mat{W}^{\sfrac{-1}{2}} \bm{\hat{\vee}} \mat{R}, &&
@@ -599,34 +605,189 @@ Substitute $\mat{Q}$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain
   &= \mat{Z}_i^T \mat{Q} \mat{Z}_j \label{eq:dot-zq-vectorised}
 \end{align}
 
-%% TO_WRITE: CHOLESKY DECOMPOSITION AND FINAL DOT PRODUCT FOR UNDIRECTED.
+%% TODO: why cholesky works.
+
+Using Cholesky decomposition, $\mat{Q}$ can be written as $\mat{Q} = \mat{L}
+\mat{L}^T$, which can be used to simplify the dot product even further as
+follows
+\begin{align}
+  \bm{\hat{c}}_i^T \bm{\hat{c}}_j &= \mat{Z}_i^T \mat{L} \mat{L}^T \mat{Z}_j \\
+   &= (\mat{L}^T \mat{Z}_i)^T (\mat{L}^T \mat{Z}_j).
+\end{align}
+
+Define a new $k \times N$ matrix $\bm{\omega}$ with columns
+$\bm{\omega}_i = \mat{L}^T \mat{Z}_i$, which can be vectorised as
+\begin{equation}
+  \bm{\omega} = \mat{L}^T \mat{Z}^T.
+\end{equation}
+
+The final form of the approximative dot product between cloud vectors is
+\begin{equation}
+  \bm{\hat{c}}_i^T \bm{\hat{c}}_j = \bm{\omega}_i^T \bm{\omega}_j,
+\end{equation}
+therefore the only matrix that needs to be computed and stored is $\bm{\omega}$,
+which takes $O(kN)$ space. Computing an approximative dot product has the time
+complexity $O(k)$, because the only operation is a dot product of two vectors of
+size $k$.
+
+%% TODO: time complexity analysis of training: lanczos method and cholesky
+
+
+%
+%% Directed graphs
+%
 
 \subsection{Directed graphs}
 
-%% TO_WRITE: ALL THE DIRECTED MATHS
+In this subsection, assume that the graph $\mathcal{G}$ is directed and, as a
+consequence, the adjacency matrix $\mat{M}$ is a general real matrix. As
+$\mat{M}$ is not symmetric, there is no property to take advantage of, thus
+the normalised adjacency $\mat{D}$ will be used directly.
 
-For directed graphs the Arnoldi Iteration \cite{lehoucq1996deflation} will be used
-instead.
+Let $\bm{\Lambda}$ be a diagonal matrix with the eigenvalues of $\mat{D}$, where
+$\lambda_i$ is the $i^{th}$ eigenvalue. $\bm{\vee_R}^{(i)}$ is the $i^{th}$
+right eigenvector and $\bm{\vee_R}$ is a matrix of the right
+eigenvectors. $\bm{\vee_L}^{(i)}$ is the $i^{th}$ left eigenvector and
+$\bm{\vee_L}$ is a matrix of the left eigenvectors.
+\begin{align}
+  \bm{\vee_R} &= \begin{bmatrix}
+    \vert           & \vert           &       & \vert \\
+    \bm{\vee_R}^{(1)} & \bm{\vee_R}^{(2)} & \dots & \bm{\vee_R}^{(N)} \\
+    \vert           & \vert           &       & \vert \end{bmatrix}, &&
+  \bm{\vee_L} &= \begin{bmatrix}
+      \horz   & \bm{\vee_L}^{(1)} & \horz \\
+      \horz   & \bm{\vee_L}^{(2)} & \horz \\
+              & \vdots            &       \\
+      \horz   & \bm{\vee_L}^{(N)} & \horz \end{bmatrix}, &&
+  \bm{\Lambda} = \begin{bmatrix}
+    \lambda_1 & 0 		      & \dots  & 0 \\
+    0 	 	    & \lambda_2   & \dots  & 0 \\
+    \vdots 	  & \vdots	    & \ddots &   \\
+    0	        & 0           &        & \lambda_N
+  \end{bmatrix}.
+\end{align}
 
-%
-%% Storage and predictions
-%
-From \emph{Equation~\ref{eq:dot-zq-vectorised}} it is deduced that it is only
-required to store the matrices $Q$ and $\mat{Z}$, which only takes $O(m^2 + Nm)$ memory,
-instead of $O(N^2)$ to store all $\bm{\hat{c}}_i$ vectors.
+Some of the eigenvalues and some elements of the eigenvectors might be complex.
+However, because $\mat{D}$ is real, if an eigenvalue $\lambda_i$ is copmlex,
+there exists an eigenvalue $\lambda_j$ that is its complex conjugate, that is
+$\lambda_i = \conj{\lambda_j}$. The same applies to eigenvectors, if an
+eigenvector $\bm{\vee}^{(i)}$ (left or right) has complex elements, there exists
+another eigenvector $\bm{\vee}^{(j)}$ (left or right, respectively) that is its
+complex conjugate, $\bm{\vee}^{(i)} = \conj{\bm{\vee}^{(j)}}$.
 
-
-To compute the similarity between two vertices, $i$ and $j$, use the norm formula
-from \emph{Equation~\ref{eq:dot-zq-vectorised}} and obtain:
-%
+Knowing that $\bm{\vee_R}^{-1} = \bm{\vee_L}$, the eigendecomposition of
+$\mat{D}$ is
 \begin{equation}
-\|\mathbf{\hat{C}_i^T} - \mathbf{\hat{C}_j}\|^2 = \mathbf{Z_i^T} Q \mathbf{Z_i} + \mathbf{Z_j^T} Q \mathbf{Z_j} - 2 \mathbf{Z_i^T} Q \mathbf{Z_j}
+  \mat{D} = \bm{\vee_R} \bm{\Lambda} \bm{\vee_R}^{-1}
+          = \bm{\vee_R} \bm{\Lambda} \bm{\vee_L}.
 \end{equation}
-%
-After computing the matrices $\mat{Z}$ and $Q$, the time complexity of computing the
-similarity between two nodes is the same as multiplying three small matrices
-(of sizes $1 \times m$, $m \times m$ and $m \times 1$).
+Also
+\begin{equation}
+  \mat{D}^t = \bm{\vee_R} \bm{\Lambda}^t \bm{\vee_R}^{-1}
+            = \bm{\vee_R} \bm{\Lambda}^t \bm{\vee_L}.
+\end{equation}
 
+We can now write $\bm{c}_i$ as
+\begin{align}
+  \bm{c}_i &= \sum_{t=0}^\infty \mu^t \mat{D}^t \bm{\delta}_i \\
+   &= \sum_{t=0}^\infty \mu^t \bm{\vee_R} \bm{\Lambda}^t \bm{\vee_L}
+      \bm{\delta}_i \\
+   &= \sum_{t=0}^\infty \mu^t \sum_{a=1}^N \lambda_a^t \bm{\vee_R}^{(a)}
+      \bm{\vee_L}^{(a)} \bm{\delta}_i.
+\end{align}
+Note that $\bm{\vee_L}^{(a)} \bm{\delta}_i$ is the $i^{th}$ value of
+$\bm{\vee_L}^{(a)}$ and obtain
+\begin{equation}
+  \bm{c}_i = \sum_{t=0}^\infty \mu^t \sum_{a=1}^N \lambda_a^t \bm{\vee_R}^{(a)}
+     \bm{\vee}_{\bm{L}i}^{(a)}.
+\end{equation}
+Observe that $\sum_{t=0}^\infty \mu^t \lambda_a^t$ is a sum of a geometric
+series, rearrange and obtain
+\begin{equation}
+  \bm{c}_i = \sum_{a=1}^N \frac{\bm{\vee}_{\bm{L}i}^{(a)}}
+             {1 - \mu \lambda_a} \bm{\vee_R}^{(a)}.
+\end{equation}
+
+Same as for the undirected graphs, an approximation of the cloud vectors can be
+made using only the $k$ largest eigenvalues and eigenvectors. Let
+$\bm{\hat{\Lambda}}$ be a diagonal matrix containing the leading $k$ eigenvalues,
+$\bm{\hat{\vee}_R}$ be a matrix that contains the leading $k$ right eigenvectors,
+and $\bm{\hat{\vee}_L}$ a matrix of the leading $k$ left eigenvectors. Arnoldi
+Iteration is an efficient iterative algorithm to compute the leading eigenvalues
+and eigenvectors of large sparse matrices \cite{lehoucq1996deflation}. Some of
+the computed eigenvalues might be complex, so is it necessary to check for all
+complex eigenvalues if their complex conjugates are also computed, and drop the
+eigenvalues (and corresponding left and right eigenvectors) if it is not. As a
+result of this extra check, the actual number of eigenvalues and eigenvectors
+used might be less than the initial $k$, however in the rest of this subsection,
+the variable $k$ will be used to denote this number.
+
+Let $\bm{\hat{c}}_i$ be the approximation of the cloud vector $\bm{c}_i$,
+\begin{equation}
+  \bm{\hat{c}}_i = \sum_{a=1}^k \frac{\bm{\vee}_{\bm{L}i}^{(a)}}
+             {1 - \mu \lambda_a} \bm{\vee_R}^{(a)}.
+\end{equation}
+
+%
+%% (Directed) Define Z
+%
+
+It can be rewritten as
+\begin{equation}
+  \bm{\hat{c}}_i = \sum_{a=1}^k \mat{Z}_{ia} \bm{\vee_R}^{(a)},
+\end{equation}
+where $\mat{Z}$ is a $N \times k$ matrix such that
+\begin{equation}
+  \mat{Z}_{ij} = \frac{\bm{\vee}_{\bm{L}i}^{(j)}}{1 - \mu \lambda_j},
+\end{equation}
+or vectorised using a new $k \times k$ diagonal matrix $\mat{R}$,
+\begin{align}
+  \label{eq:z-vectorised}
+  \mat{Z} = \bm{\hat{\vee}_L}^T \mat{R}, &&
+  \mat{R}_{ii} = \frac{1}{1 - \mu \lambda_i}.
+\end{align}
+
+The dot product between $\bm{\hat{c}}_i$ and $\bm{\hat{c}}_j$ becomes
+\begin{align}
+  \bm{\hat{c}}_i^T \bm{\hat{c}}_j &=
+        \Big( \sum_{a=1}^k \mat{Z}_{ia} \bm{\vee_R}^{(a)} \Big)^T
+        \Big( \sum_{a'=1}^k \mat{Z}_{ja'} \bm{\vee_R}^{(a')} \Big) \\
+  \label{eq:directed-ci-z}
+  &= \sum_{a=1}^k \sum_{a'=1}^k \mat{Z}_{ia} \mat{Z}_{ja'}
+        \bm{\vee_R}^{(a)T} \bm{\vee_R}^{(a')}
+\end{align}
+
+%
+%% (Directed) Define Q
+
+Define a $k \times k$ matrix $\mat{Q}$ such that
+\begin{equation}
+  \mat{Q}_{ij} = \bm{\vee_R}^{(i)T} \bm{\vee_R}^{(j)},
+\end{equation}
+or vectorised
+\begin{equation}
+  \mat{Q} = \bm{\vee_R}^T \bm{\vee_R},
+\end{equation}
+and substitute it into the dot product (\emph{Equation~\ref{eq:directed-ci-z}})
+to obtain
+\begin{equation}
+  \bm{\hat{c}}_i^T \bm{\hat{c}}_j = \sum_{a=1}^k \sum_{a'=1}^k
+    \mat{Z}_{ia} \mat{Z}_{ja'} \mat{Q}_{aa'}.
+\end{equation}
+
+$\mat{Z}_i$ is the $i^{th}$ row of the matrix $\mat{Z}$, as a column vector.
+The final approximative dot product between two cloud vectors in a directed
+graph is then
+\begin{equation}
+  \bm{\hat{c}}_i^T \bm{\hat{c}}_j = \mat{Z}_i^T \mat{Q} \mat{Z}_j.
+\end{equation}
+
+%% TODO: why cholesky does not work.
+
+It is only required to compute and store $\mat{Q}$ and $\mat{Z}$, which together
+take $O(k^3N)$ space. The time complexity of computing the approximative dot
+product between two cloud vectors is the same as multiplying two vectors of
+length $k$ and a $k \times k$ matrix.
 
 %
 %-------------------------------------------------------------------------------
