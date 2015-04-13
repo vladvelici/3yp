@@ -708,17 +708,11 @@ series, rearrange and obtain
              {1 - \mu \lambda_a} \bm{\vee_R}^{(a)}.
 \end{equation}
 
-
-Same as for undirected graphs, an approximation of the cloud vectors can be
-made using only a small number of the largest eigenvalues and eigenvectors. Some
-of the eigenvalues and corresponding (left or right) eigenvectors might be
-complex. The cloud vectors only contain real values, thus it is necessary to
-make sure their approximation is also real. The approximation is real if, for
-every complex eigenvalue used, its complex conjugate is also used. The
-eigenvectors are complex only if their corresponding eigenvalues are complex, and
-if two eigenvalues are complex conjugates, then their corresponding eigenvectors
-are also complex conjugates. It is, therefore, sufficient to check that for each
-complex eigenvalue used, its conjugate is also used.
+Same as for undirected graphs, an approximation of the cloud vectors can be made
+using only a small number of the largest eigenvalues and eigenvectors. Because
+$\mat{D}$ is not symmetric, it might have complex eigenvalues, and in order to
+have real approximations of the cloud vectors, it is necessary to check that for
+every complex eigenvalue used its complex conjugate is also used.
 
 
 Let $\bm{\hat{\Lambda}}$ be a diagonal matrix containing the leading $k$
