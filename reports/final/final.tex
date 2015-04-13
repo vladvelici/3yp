@@ -708,19 +708,28 @@ series, rearrange and obtain
              {1 - \mu \lambda_a} \bm{\vee_R}^{(a)}.
 \end{equation}
 
-Same as for the undirected graphs, an approximation of the cloud vectors can be
-made using only the $k$ largest eigenvalues and eigenvectors. Let
-$\bm{\hat{\Lambda}}$ be a diagonal matrix containing the leading $k$ eigenvalues,
-$\bm{\hat{\vee}_R}$ be a matrix that contains the leading $k$ right eigenvectors,
-and $\bm{\hat{\vee}_L}$ a matrix of the leading $k$ left eigenvectors. Arnoldi
-Iteration is an efficient iterative algorithm to compute the leading eigenvalues
-and eigenvectors of large sparse matrices \cite{lehoucq1996deflation}. Some of
-the computed eigenvalues might be complex, so is it necessary to check for all
-complex eigenvalues if their complex conjugates are also computed, and drop the
-eigenvalues (and corresponding left and right eigenvectors) if it is not. As a
-result of this extra check, the actual number of eigenvalues and eigenvectors
-used might be less than the initial $k$, however in the rest of this subsection,
-the variable $k$ will be used to denote this number.
+
+Same as for undirected graphs, an approximation of the cloud vectors can be
+made using only a small number of the largest eigenvalues and eigenvectors. Some
+of the eigenvalues and corresponding (left or right) eigenvectors might be
+complex. The cloud vectors only contain real values, thus it is necessary to
+make sure their approximation is also real. The approximation is real if, for
+every complex eigenvalue used, its complex conjugate is also used. The
+eigenvectors are complex only if their corresponding eigenvalues are complex, and
+if two eigenvalues are complex conjugates, then their corresponding eigenvectors
+are also complex conjugates. It is, therefore, sufficient to check that for each
+complex eigenvalue used, its conjugate is also used.
+
+
+Let $\bm{\hat{\Lambda}}$ be a diagonal matrix containing the leading $k$
+eigenvalues, $\bm{\hat{\vee}_R}$ be a matrix that contains the leading $k$ right
+eigenvectors, and $\bm{\hat{\vee}_L}$ a matrix of the leading $k$ left
+eigenvectors. Arnoldi Iteration is an efficient iterative algorithm to compute
+the leading eigenvalues and eigenvectors of large sparse matrices
+\cite{lehoucq1996deflation}. Assume that in the $k$ eigenpairs computed, if
+there is a complex eigenvalue $\lambda_i$, there also is its complex conjugate,
+$\lambda_j = \conj{\lambda_i}$.
+
 
 Let $\bm{\hat{c}}_i$ be the approximation of the cloud vector $\bm{c}_i$,
 \begin{equation}
