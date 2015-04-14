@@ -785,6 +785,7 @@ The dot product between $\bm{\hat{c}}_i$ and $\bm{\hat{c}}_j$ becomes
 
 %
 %% (Directed) Define Q
+%
 
 Define a $k \times k$ matrix $\mat{Q}$ such that
 \begin{equation}
@@ -811,9 +812,100 @@ graph is then
 %% TODO: why cholesky does not work.
 
 It is only required to compute and store $\mat{Q}$ and $\mat{Z}$, which together
-take $O(k^3N)$ space. The time complexity of computing the approximative dot
+take $O(k^2+kN)$ space. The time complexity of computing the approximative dot
 product between two cloud vectors is the same as multiplying two vectors of
 length $k$ and a $k \times k$ matrix.
+
+%
+%% Comparison with naive
+%
+
+\subsection{Comparison with naive approach}
+
+While the naive approach takes significantly more time ($O(N^3)$ compared to
+...) and space ($O(N^3)$ compared to $O(k^2 + kN)$), it also tends
+to be more accurate because it uses the whole adjacency matrix and not only an
+approximation of it.
+
+A simple evaluation metric of how well the approximative approach retains the
+most important information from the graph is to evaluate how different are the
+top similar vertices for the naive approach and the approximative approach
+with different choices of $k$.
+
+
+For a dataset of $N$ vertices, let $B(i,j)$ be the position of vertex $j$ in
+the top similar vertices of vertex $i$ for the naive approach. Similarly, let
+$T_k(i,j)$ be the position of vertex $j$ in the top similar vertices of vertex
+$i$ for the approximative approach with $k$ eigenvalues. Define the difference
+between two such tops to be
+\begin{equation}
+  d(B, T_k) = \frac{1}{N^3}
+    \sum_{i=1}^N \sum_{j=1}^N \operatorname{abs}(B(i,j) - T_k(i,j)).
+\end{equation}
+The equation is normalised by $N^3$ because the maximum value we can get lies in
+the interval $(N^2, N^3)$.
+%
+\begin{figure}[tpb]
+        \centering
+        \begin{subfigure}[b]{0.6\textwidth}
+	        \includegraphics[width=\textwidth]{no-of-eigenvectors}
+        		\caption{A plot of the differences on a range of eigenvalues.}
+        \end{subfigure}%
+        ~
+        \begin{subfigure}[b]{0.4\textwidth}
+           \centering
+           \def\arraystretch{1.5}
+           \begin{tabular}{|c|c|}
+	   \hline
+	   Parameters & Value of d() \\
+	   \hline
+	   $d(B, T_{10})$ & 0.2501 \\
+	   \hline
+	   $d(B, T_{20})$ & 0.2257   \\
+	   \hline
+   	   $d(B, T_{30})$ & 0.2243   \\
+	   \hline
+	   $d(B, T_{40})$ & 0.2208   \\
+	   \hline
+	   $d(B, T_{50})$ & 0.2150 \\
+	   \hline
+	   $d(B, T_{100})$ & 0.2453\\
+	   \hline
+	    $d(B$, $T_{199})$ & 0.0325 \\
+	    \hline
+	   \end{tabular}
+	   \caption{Table of some of the values.}
+	   \label{tbl:comparisons}
+        \end{subfigure}%
+        \caption{Difference of results between naive and approximative approaches.}
+	\label{fig:no-of-eigenvectors}
+\end{figure}
+%
+
+
+The value of $d()$ was evaluated on a randomly generated undirected graph with
+$200$ vertices and $350$ edges, between the naive approach
+and the approximative approach with $k = 10, 11, \dots, 199$ eigenvectors. The
+choice of the penalising factor $\mu=0.5$ was used for all the runs. The results
+can be observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. We can see that
+if we use the majority of eigenvalues, the value of $d()$ is very small. It is
+computationally infeasible to do that on a large dataset thus we will aim for a
+number of eigenvectors $k$ in the range of $20$ to $40$, where the difference
+seems to be at a local minimum (for this graph). The local minimum differs from
+dataset to dataset depending mainly on the size of the dataset. For completeness,
+the experiment was run on a randomly generated undirected graph with $500$
+vertices and $700$ edges. The first local minimum of $d()$ was at around $100$
+eigenvectors with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the
+values of $d()$ obtained are $0.2297$ and $0.2557$, respectively.
+
+
+This is just an evaluation of how well the approximation performs compared to
+the naive implementation. However, on real datasets it might be the case that
+ignoring some information is better than using it and the approximation approach
+might perform better. For large enough datasets it is impossible to compute the
+exact similarities.
+
+
 
 %
 %-------------------------------------------------------------------------------
@@ -878,75 +970,6 @@ with a very similar interface.
 \subsection{Comparison of approximative and brute-force approaches}
 %\addcontentsline{toc}{subsection}{Comparison of approximative and brute-force approaches}
 %
-A simple evaluation metric of how well the approximative approach retains the
-most important information from the graph is to evaluate how different are the
-top similar vertices for the brute-force approach and the approximative approach
-with different number of eigenvalues and eigenvectors used.
-
-
-For a dataset of $N$ vertices, let $B^m_{ij}$ be the position of vertex $j$ in
-the top similar vertices of vertex $i$ for the brute-force approach with $m$
-iterations. Similarly let $T^{m}_{ij}$ be the position of vertex $j$ in the top
-similar vertices of vertex $i$ for the approximative approach with $m$ eigenvectors.
-Define the difference between two such tops to be:
-%
-\begin{equation} d(B^m, T^{m'}) = \frac{1}{N^3} \sum_{i=1}^N \sum_{j=1}^N \operatorname{abs}(B^m_{ij} - T^{m'}_{ij}) \end{equation}
-%
-The equation is normalised by $N^3$ because the maximum value we can get lies in
-the interval $(N^2, N^3)$.
-%
-\begin{figure}[tpb]
-        \centering
-        \begin{subfigure}[b]{0.6\textwidth}
-	        \includegraphics[width=\textwidth]{no-of-eigenvectors}
-        		\caption{A plot of the differences on a range of eigenvalues.}
-        \end{subfigure}%
-        ~
-        \begin{subfigure}[b]{0.4\textwidth}
-           \centering
-           \def\arraystretch{1.5}
-           \begin{tabular}{|c|c|}
-	   \hline
-	   Parameters & Value of d() \\
-	   \hline
-	   $d(B^{20}, T^{10})$ & 0.2501 \\
-	   \hline
-	   $d(B^{20}, T^{20})$ & 0.2257   \\
-	   \hline
-   	   $d(B^{20}, T^{30})$ & 0.2243   \\
-	   \hline
-	   $d(B^{20}, T^{40})$ & 0.2208   \\
-	   \hline
-	   $d(B^{20}, T^{50})$ & 0.2150 \\
-	   \hline
-	   $d(B^{20}, T^{100})$ & 0.2453\\
-	   \hline
-	    $d(B^{20}$, $T^{199})$ & 0.0325 \\
-	    \hline
-	   \end{tabular}
-	   \caption{Table of some of the values.}
-	   \label{tbl:comparisons}
-        \end{subfigure}%
-        \caption{Difference of results between brute-force and approximative approaches.}
-	\label{fig:no-of-eigenvectors}
-\end{figure}
-%
-
-
-The value of $d()$ was evaluated on a randomly generated connected graph with $200$
-vertices and $350$ edges, between the brute-force approach with $m=20$ iterations
-and the approximative approach with $m' = 10$ to $199$ eigenvectors. The choice
-of the penalising factor $\mu=0.5$ was used for all the runs. The results can be
-observed in \emph{Figure~\ref{fig:no-of-eigenvectors}}. We can observe that if
-we use the majority of eigenvalues, the value of $d()$ is very small. It is
-computationally infeasible to do that on a large dataset thus we will aim for a
-number of eigenvectors $m'$ in the range of $20$ to $40$, where the difference
-seems to be at a local minimum (for this graph). The local minimum differs from
-dataset to dataset depending mainly on the size of the dataset. For completeness,
-the experiment was run on a randomly generated connected graph with $500$ vertices
-and $700$ edges. The first local minimum of $d()$ was at around 100 eigenvectors
-with a value of approx. $0.2$. At $40$ and $20$ eigenvectors, the values of $d()$
-obtained are $0.2297$ and $0.2557$, respectively.
 
 
 %
