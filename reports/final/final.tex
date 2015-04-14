@@ -957,37 +957,26 @@ only reduced the prediction accuracy by ...
 %-------------------------------------------------------------------------------
 % IMPLEMENTATION
 %-------------------------------------------------------------------------------
+%
 \section{Implementation}
 %\addcontentsline{toc}{section}{Implementation}
 %
-A choice had to be made on what tools and languages to use for the implementation
-of this algorithm. It involves linear algebra so programming languages that support
-such operations or have good libraries for this purpose were candidates. Matlab
-was chosen for this task because it has very strong linear algebra features built-in,
-it is easy and fast to try different experiments (can also be used interactively)
-and programs are usually smaller in size (lines of code) than their variants in C++
-or other languages. At a later stage when the algorithm is closer to its final
-version, porting it to a language like Go or C++ will be considered.
+
+\subsection{Early versions}
+
+At the beginning of the project, a choice had to be made on what tools and
+languages to use for the implementation of this algorithm. At a very early stage
+the requirement was a language that provides easy interfaces to common and not
+very common linear algebra functions and algorithms. Matlab was picked because
+it has all the common matrix operations, good sparse matrix support and all the
+eigenvalue algorithms required built-in. Matlab is also easy to prototype in.
 
 
-Matlab has the function \textit{eigs(A,m)} to compute the leading $m$ eigenvectors
-and eigenvalues \cite{matlab:eigs}. Internally, it uses the software package ARPACK which implements
-implicitly restarted Arnoldi methods. \cite{lehoucq1998arpack}
-
-
-Sparse matrices were used for the implementation of both the approximative and
-the brute-force approaches. A sparse matrix in Matlab only stores the non-zero
-values of a matrix, therefore a sparse matrix only uses memory for the positions
-where it holds values\cite{gilbert1992sparse}. For instance, to store the adjacency matrix of a very
-large graph $G(v,\epsilon)$, using a dense matrix would take $O(|v|^2)$ memory
-whereas using a sparse matrix only takes $O(|\epsilon|)$ memory. Sparse matrices
-are faster at linear algebra operations.
-
-
-The approximative approach was implemented in Matlab as a couple of Matlab functions.
-The function signatures along with descriptions is presented in \emph{Table~\ref{tbl:interface}}.
-Some helper functions are not included in the table.
-%
+The approximative approach for undirected graphs was implemented in Matlab as a
+couple of functions. The function signatures along with descriptions are
+presented in \emph{Table~\ref{tbl:interface}}. Some helper functions are not
+included in the table. The (iterative) naive algorithm was implemented as a
+separate set of Matlab functions with a very similar interface.
 \begin{table}[!ht]\footnotesize
    \centering
    \begin{tabular}{ll}
@@ -997,13 +986,17 @@ Some helper functions are not included in the table.
    top(q,z,i) & Uses simlist(q,z,i) and sorts the results. \\
    randomGraph(nodes, vertices, directed) & Generates a random connected graph.
    \end{tabular}
-   \caption{Implementation interface. Parameters: q represents the matrix $Q$, z represents the matrix $\mat{Z}$, adj represents the adjacency matrix, and i and j represent vertex numbers.}
+   \caption{Implementation interface. Parameters: q represents the matrix
+    $\mat{Q}$, z represents the matrix $\mat{Z}$, adj represents the adjacency
+    matrix, and i and j represent vertex numbers.}
    \label{tbl:interface}
 \end{table}
 
 
-The brute-force algorithm was implemented as a separate set of Matlab functions
-with a very similar interface.
+
+
+
+
 
 
 %
