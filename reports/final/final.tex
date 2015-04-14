@@ -992,9 +992,42 @@ separate set of Matlab functions with a very similar interface.
    \label{tbl:interface}
 \end{table}
 
+Matlab is, however, not very good at handling different types of files, loops,
+and general data wrangling. It also cannot be easily used from the command line
+or from other languages which is very useful for data processing and for
+incorporating the algorithm in larger systems.
+
+\subsection{Data processing tools}
+
+In an ideal world, the comes in the exact format that we want. Unfortunately,
+this is never the case in the real world where data comes in all the shapes and
+sizes and thus there is a need for tools to process it, and reshape it to fit
+into the system.
 
 
+In the Matlab model, a graph file could be a CSV file with each row representing
+an edge, and each vertex would be an integer starting from 1 and incrementing.
+No real world dataset comes in this format and in order to make the conversion
+some tools must be implemented.
 
+
+A good language for writing data wrangling tools is simple, easy to compile and
+run, easy to prototype in and has a good standard library for I/O and parsing
+common file formats. Go was picked due to my fluency in the language and because
+it fits all the requirements for writing such tools.
+
+
+A way to parse an input dataset to CSV edge lists was required. The tools are
+different from dataset to dataset, and the implementations can vary from small
+Go programs to bash scripts, depending on the input formats.
+
+
+After the dataset was in CSV format, a tool was needed to make the vertex IDs
+integers from 1 to N (the number of vertices). A command line tool called
+\emph{autoincr} was implemented in Go. It takes a CSV edge list as input and it
+outputs
+
+\subsection{Python, SciPy and NumPy}
 
 
 
