@@ -727,15 +727,38 @@ $\lambda_j = \conj{\lambda_i}$.
 
 Let $\bm{\hat{c}}_i$ be the approximation of the cloud vector $\bm{c}_i$,
 \begin{equation}
+  \label{eq:directed-hat-ci}
   \bm{\hat{c}}_i = \sum_{a=1}^k \frac{\bm{\vee}_{\bm{L}i}^{(a)}}
              {1 - \mu \lambda_a} \bm{\vee_R}^{(a)}.
 \end{equation}
+
+For any complex number, $x = a+bi$, the sum $x + \conj{x} = a + bi + a - bi =
+2a$ is real. The approximative cloud vectors $\bm{\hat{c}}_i$ are real vectors
+because
+\begin{align}
+  \label{eq:directed-ci-real}
+  \text{for all } \lambda_a \in \mathbb{C}-\mathbb{R} \
+    &\text{there exists } \lambda_b = \conj{\lambda_a}
+    \text{ such that} \ b \leq k, \\
+  \text{for all } \bm{\vee}_{\bm{L}i}^{(a)} \in \mathbb{C}-\mathbb{R} \
+    &\text{there exists } \bm{\vee}_{\bm{L}i}^{(b)} = \conj{\bm{\vee}_{\bm{L}i}^{(a)}}
+    \text{ such that} b \leq k, \\
+  \text{for all } \bm{\vee_R}^{(a)} \in \mathbb{C}-\mathbb{R} \
+    &\text{there exists } \bm{\vee_R}^{(b)} = \conj{\bm{\vee_R}^{(a)}}
+    \text{ such that} \ b \leq k.
+\end{align}
+The assumption about $k$ only covers the first rule
+(\emph{Equation~\ref{eq:directed-ci-real}}) but it is sufficient because an
+eigenvector is complex only if its corresponding eigenvalue is also complex and
+if two eigenvalues are conjugates $\lambda_a = \conj{\lambda_b}$ then their
+corresponding eigenvectors are also conjugates $\bm{\vee}^{(a)} =
+\conj{\bm{\vee}^{(b)}}$.
 
 %
 %% (Directed) Define Z
 %
 
-It can be rewritten as
+\emph{Equation~\ref{eq:directed-hat-ci}} can be rewritten as
 \begin{equation}
   \bm{\hat{c}}_i = \sum_{a=1}^k \mat{Z}_{ia} \bm{\vee_R}^{(a)},
 \end{equation}
