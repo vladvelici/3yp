@@ -630,6 +630,10 @@ which takes $O(kN)$ space. Computing an approximative dot product has the time
 complexity $O(k)$, because the only operation is a dot product of two vectors of
 size $k$.
 
+In the rest of this report, we will refer to a computed $\mat{omega}$ as an
+\emph{undirected index}, because it is the only matrix required to compute all
+the relevant similarity measures for an undirected graph.
+
 %% TODO: time complexity analysis of training: lanczos method and cholesky
 
 
@@ -816,6 +820,9 @@ take $O(k^2+kN)$ space. The time complexity of computing the approximative dot
 product between two cloud vectors is the same as multiplying two vectors of
 length $k$ and a $k \times k$ matrix.
 
+In the rest of this report, we will refer to a computed pair of matrices
+$\mat{Q}$ and $\mat{Z}$ as a \emph{directed index}.
+
 %
 %% Comparison with naive
 %
@@ -905,6 +912,43 @@ ignoring some information is better than using it and the approximation approach
 might perform better. For large enough datasets it is impossible to compute the
 exact similarities.
 
+%
+%% Heuristics and the n^2 comparisons
+%
+
+\section{Heuristics and the $N^2$ comparisons}
+
+After having a directed or undirected index, thus a fast way of computing the
+dot products between cloud vectors and the relevant similarity measures, it is
+still required to compute the similarities between all the vertices in the graph
+to obtain the pairs of top similar vertices, which is a task of complexity
+$O(kN^2+2N^2\log N)$ (computing all similarities and sorting). For some
+applications like recommender systems, evaluating the top similarities on demand
+for one vertex at a time and having a good cache will save some computing power,
+however it is still a $O(kN+N\log N)$ task for every cache miss, which might be
+too slow for large systems that require a constant low latency.
+
+
+Assume that if two vertices are too far away from each other in the graph, they
+are unlikely to be similar. The computation of similarities can then be limited
+to only those pairs of vertices that are not too far away. Formally, let
+$dist(i,j)$ be the distance between vertices $i$ and $j$ (the length of the
+shortest path). Only compute similarities for those pairs of vertices such that
+$dist(i, j) \leq d$ for $d$ being the maximum distance allowed, and consider all
+the other pairs of vertices not similar. This filter is implemented using a
+trivial breadth first search stopping at the desired maximum depth.
+
+
+We will call the filter applied on the graph to drop pairs of edges that are
+unlikely to be similar a \emph{heuristic}, and the maximum distance filter
+described above will be called the \emph{maximum depth heuristic}.
+
+
+Using a heuristic can reduce the number of similarities computed and thus speed
+up the computation while not hainvg a big impact on the overall accuracy.
+
+
+%% TODO: heuristic performance analysis
 
 
 %
