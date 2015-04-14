@@ -19,7 +19,7 @@ class Maxdepth:
         - a node: Applies heuristic on that node only.
         - a list of nodes: Applies heuristic on all nodes of the list."""
         if nodes is None:
-            return nx.all_pairs_shortest_path_length(self.g, self.depth)
+            pairs = nx.all_pairs_shortest_path_length(self.g, self.depth)
             for f, dst in pairs.items():
                 for t, _ in dst.items():
                     yield((f,t))
