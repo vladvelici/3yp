@@ -1063,8 +1063,65 @@ the MIT licence. The URL of the repository is
 
 \subsection{Python, SciPy and NumPy}
 
+After starting to process a real-world dataset for the evaluation of this
+algorithm, it turns out that Matlab was not the best choice for a couple of
+reasons:
+
+1. It is very hard to write command line tools and they are slow to run because
+they need to open Matlab before running the scripts. This could be solved by
+using Octave to run the existing Matlab codebase, but it would not solve the
+other limitations.
+
+2. The language is designed for linear algebra tasks, and it is inconvenient and
+non-intuitive to implement even simple graph algorithms in it.
+
+3. It is hard to integrate the Matlab scripts into another system (e.g. a
+web service for building a visualisation for the algorithm).
 
 
+Other languages were investigated to port the algorithm in. The first one to
+look at was Go because some tools were already written in Go. There are some
+libraries for linear algebra in Go (e.g. bigo.matrix which uses BLAS, or
+skelterjohn/go.matrix which has parallel matrix multiplication implemented), but
+they are not mature enough and do not have (or have very limited) support for
+sparse matrices and eigenvalue/eigenvector computations.
+
+Linear algebra libraries for C++ were also investigated. SLEPc is a mature
+library for large sparse eigenvalue problems implemented as an extension of
+PETSc. It includes implementations of the Lanczons Method and Arnoldi Iteration,
+however the interfaces are too low level and prototyping using it would be too
+slow.
+
+Armadillo is another C++ linear algebra library. It has a high level API backed
+by efficient implementations of all the basic matrix operations. It also has
+support for sparse matrices and computation of leading eigenvalues and eigenvectors.
+The API Armadillo provides is very similar to Matlab, making the algorithm easier
+to port.
+
+The last language and set of libraries analysed is Python with NumPy and SciPy.
+Python is a scripting language that is easy to read and write and can be used
+interactively. SciPy is a mature scientific computing library for Python which
+contains all the basic linear algebra functions, has good support for sparse
+matrices and uses ARPACK (same as Matlab and Armadillo) to access efficient
+implementations of the Lanczos Method and the Arnoldi Iteration. It also has a
+very good and accessible documentation, a relatively large user base and active
+community.
+
+A choice had to be made on which of these tools to use. C++ with Armadillo and
+Python with NumPy and SciPy were the best options in terms of linear algebra
+support and ease of use. Simple code was written in C++ with Armadillo and it
+turned out that routine parts of the code like parsing CSV files, dealing with
+I/O and command line flags were taking too long to write. In Python these tasks
+are trivial and the Python Standard Library has parsers for plenty of file
+formats and command line flag parsers. The interactive shell was also very handy
+to try things out before implementing them in a larger codebase.
+
+As a result, Python with NumPy and SciPy were chosen to port the algorithm and
+continue the development.
+
+\subsection{Architecture of the final implementation}
+
+Hello World.
 
 %
 %-------------------------------------------------------------------------------
