@@ -31,6 +31,8 @@
 \usepackage{lscape}
 \usepackage{url}
 \usepackage{bm}
+\usepackage{listings}
+
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1.2em}
 
@@ -948,7 +950,7 @@ Using a heuristic can reduce the number of similarities computed and thus speed
 up the computation while not hainvg a big impact on the overall accuracy. As an
 example, on a friends dataset of 2212 vertices and 37397 edges, the maximum depth
 heuristic with depth 5 has reduced the number of comparisons by 47.93\%, and
-only reduced the prediction accuracy by ...
+only reduced the prediction accuracy by x.
 
 %% TODO: heuristic performance analysis
 
@@ -1011,10 +1013,13 @@ No real world dataset comes in this format and in order to make the conversion
 some tools must be implemented.
 
 
-A good language for writing data wrangling tools is simple, easy to compile and
-run, easy to prototype in and has a good standard library for I/O and parsing
-common file formats. Go was picked due to my fluency in the language and because
-it fits all the requirements for writing such tools.
+The tools should be quick and easy to use and simple to change and adapt if the
+requirements change, thus it is best if they are small command line programs
+that are good at doing one task each. A good language for writing data wrangling
+tools is simple, easy to compile and run, easy to prototype in and has a good
+standard library for I/O and parsing common file formats. Go was picked due to
+my fluency in the language and because it fits all the requirements for writing
+such tools.
 
 
 A way to parse an input dataset to CSV edge lists was required. The tools are
@@ -1024,8 +1029,37 @@ Go programs to bash scripts, depending on the input formats.
 
 After the dataset was in CSV format, a tool was needed to make the vertex IDs
 integers from 1 to N (the number of vertices). A command line tool called
-\emph{autoincr} was implemented in Go. It takes a CSV edge list as input and it
-outputs
+\emph{autoincr} was implemented in Go. It takes one or more CSV edge lists and
+assigns each vertex an integer ID starting from one and incrementing. It also
+stores a JSON file with the mappings created so the original vertex names can be
+looked up. The help message of the command line tool explains how it works in
+more detail.
+
+
+Given a CSV edge list file, it was necessary to be able to easily find basic
+information about the graph it describes, like how many connected components it
+has, whether it is directed or undirected, the number of vertices, the number of
+edges. It was also required to be able to manipulate these graphs easily with
+actions like forcing a directed graph to be undirected (by adding the missing
+reverse edges), splitting a disconnected graph into more graphs, one for each
+connected component, and removing random edges from a connected graph while
+keeping it connected. The command line tool \emph{conncomp} was written in Go
+for this purpose. The tool is used like this (snippet from the help message):
+
+\begin{lstlisting}
+  conncomp -action <action> [flags] <list of edge lists>
+
+  Possible actions:
+
+  details           Output details about the graphs.
+  components        Splits the graph(s) in connected components.
+  remove -n P       Removes at most P% random edges from graph(s).
+  force-undirected  Force the graph(s) into undirected graph(s).
+\end{lstlisting}
+
+All the tools described in this section are publicly available on GitHub under
+the MIT licence. The URL of the repository is
+\url{https://github.com/vladvelici/graph-dataset-tools}.
 
 \subsection{Python, SciPy and NumPy}
 
