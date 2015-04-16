@@ -16,7 +16,7 @@
 \usepackage[myheadings]{fullpage}
 \usepackage{fancyhdr}
 \usepackage{lastpage}
-\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage{graphicx, wrapfig, subcaption, setspace}
 \graphicspath{ {img/} }
 \usepackage[T1]{fontenc}
 \usepackage[font=small, labelfont=bf]{caption}
@@ -1057,6 +1057,8 @@ for this purpose. The tool is used like this (snippet from the help message):
   force-undirected  Force the graph(s) into undirected graph(s).
 \end{lstlisting}
 
+Unit tests were written for both \emph{conncomp} and \emph{autoincr}.
+
 All the tools described in this section are publicly available on GitHub under
 the MIT licence. The URL of the repository is
 \url{https://github.com/vladvelici/graph-dataset-tools}.
@@ -1121,7 +1123,85 @@ continue the development.
 
 \subsection{Architecture of the final implementation}
 
-Hello World.
+The final implementation is based on two simple concepts. A similarity index,
+called a {\tt Sim} object and a provider ({\tt Provider}).
+
+In the package {\tt sim}, the class {\tt Sim} represents a directed or undirected
+index. It has the following methods:
+
+\begin{lstlisting}
+  _dotprod(a, b)   Computes the dot product between vertices a and b.
+  score(a, b)      Computes the Euclidean distance score.
+  save(f)          Writes the index into file f.
+  nodelist()       Returns a list of all vertices.
+  nid(a)           Returns the index of vertex a in the index.
+  __len__()        Returns the number of vertices.
+\end{lstlisting}
+
+Internally, a {\tt Sim} object has either a $\bm{\omega}$ matrix or a pair of
+$\mat{Q}$ and $\mat{Z}$, which it uses to compute the dot products and the
+similarities. The implementation of {\tt Sim.nib(a)} is simply returning {\tt a}.
+This is because the {\tt Sim} class represents an index directly trained from
+an adjacency matrix. In practice, vertices usually come with different IDs,
+strings or integers that do not start at 1 or 0.
+
+The class {\tt Simp} extends the class {\tt Sim}. To promote an object of type
+{\tt Sim} to {\tt Simp}, it needs a {\tt Provider}. Any object that can create
+an adjacency matrix and a mapping from any (relevant) type of vertex ID to an
+integer index in the adjacency matrix is a {\tt Provider}. The list of methods
+an object is required to implement to be a {\tt Provider} is shown below:
+
+\begin{lstlisting}
+  __getitem__(a)    Get the index of a in the adj. matrix.
+  __len__()         Return the number of vertices.
+  adj()             Get the adjacency matrix.
+  nodelist()        Return a list of all vertices.
+  save(f)           Saves itself in the file f.
+\end{lstlisting}
+
+
+The class {\tt Simp} (also defined in package {\tt sim}) overwrites the
+{\tt nib(a)}, {\tt \_\_len\_\_()} and {\tt nodelist()} methods of {\tt Sim} by
+simply delegating them to the {\tt Provider} object it has. The {\tt save(f)}
+method is overwritten to persist both the {\tt Provider} object and the
+{\tt Sim} object into a single tar file.
+
+In the package {\tt sim} there are some important functions defined:
+
+\begin{lstlisting}
+  train(adj, mu, k)             Calls train_directed or train_undirected,
+                                depending on whether adj is symmetric.
+  train_undirected(adj, mu, k)  Undirected algorithm to obtain omega.
+  train_directed(ajd, mu, k)    Directed algorithm to obtain Q and Z.
+
+  All train*() functions return a Sim object.
+
+  prov(provider, sim)           Combines the given sim with the given
+                                provider and returns a Simp object.
+  loadp(path)                   Load an index (Sim or Simp) from path.
+\end{lstlisting}
+
+There are two providers implemented in the {\tt provider} package. One is
+{\tt EdgeList} and it takes a list of edges (as a Python array of tuples), it
+generates a unique integer ID starting at 0 for each vertex and creates an
+adjacency matrix. The mapping is kept as a Python dict. The other provider is
+built for CSV edge list files initially created for Matlab, and is called {\tt
+Offset}. It takes a list of edges that has integer vertex IDs and an offset.
+The mapping from the original vertex ID and the index in the adjacency matrix is
+made by adding the offset to the vertex ID. For the CSV files made for Matlab,
+the offset should be set to $-1$.
+
+The maximum depth heuristic is implemented as the class {\tt Maxdepth} of the
+package {\tt heuristics}. It takes an edgelist and a depth and has a generator
+method {\tt top(node)} that yields pairs of vertices that should be compared.
+
+A command line tool was built on top of the implementation. It has functionality
+to train (create an index), compute similarities between specific vertices,
+compute top similar vertices using or not using the maximum depth heuristic. It
+also has evaluation functionality, which includes evaluating a persisted index
+or evaluating the algorithm on a dataset and a range of choices for $k$ and $\mu$.
+Detailed usage examples and snippets of the help messages are included in the
+appendix of this report.
 
 %
 %-------------------------------------------------------------------------------
