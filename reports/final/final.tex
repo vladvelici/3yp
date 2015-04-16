@@ -1210,21 +1210,53 @@ appendix of this report.
 %
 \section{Evaluation}
 %\addcontentsline{toc}{section}{Evaluation}
-\subsection{Comparison of approximative and brute-force approaches}
-%\addcontentsline{toc}{subsection}{Comparison of approximative and brute-force approaches}
-%
+
+To objectively evaluate how well the outputs of the algorithm reflect the reality
+of the dataset it is being used on, we need to carefully define the goals of the
+algorithm in respect of the dataset. We want labelled datasets where the natural
+\textit{similarities} between entities is known and depends exclusively on the
+graph structure. We do not want to evaluate how well the weights of different
+relationship types are defined, thus the evaluation dataset must have only one
+relationship type.
+
+In reality, datasets have multiple types of relationships and the similarity
+between two entities is not trivial to define. However, an evaluation metric can
+be formed by randomly removing a number of relationships and then running the
+algorithm to see how well it finds the removed relationships. It is subjective
+to some noise due to naturally similar vertices that are not linked in the
+original dataset (e.g. a social network might not contain all the real
+friendships and the algorithm might pick some of these relationships to be more
+similar then the ones removed).
 
 
-%
-% -----
-% Evaluation of the algorithm itself
-% -----
-%
-Although the evaluation metric described above might be useful to compare the two
-approaches directly, it does not tell anything about how well the algorithm achieves
-its goal of finding similar entities in a real dataset. We will now examine ways to
-evaluate the performance of the algorithm on real problems.
+\subsection{Undirected evaluation on a friends dataset}
 
+One of the datasets used for the evaluation of the algorithm is a small subset
+of the friends relationships from the social network Facebook. The data was
+given away by volutneers for a Kaggle competition and it has been fully
+anonimised by Kaggle before making it available to the public. % TODO: citation
+
+The friends dataset was transformed in a CSV edge list graph where a vertex
+represents a person and an edge represents a bidirectional friendship. The graph
+has $26,457$ vertices and $372,227$ undirected edges, but it is divided into
+$378$ connected components. The largest connected components (by the number
+of vertices) are the following:
+
+\begin{lstlisting}
+  Component    Vertices  Edges
+  4_all.csv    2212      41552
+  10_all.csv   1700      36179
+  3_all.csv    1304      23029
+  5_all.csv    1216      13772
+  9_all.csv    942       6743
+  23_all.csv   724       14712
+  8_all.csv    653       21597
+  27_all.csv   630       7865
+  14_all.csv   617       9446
+  39_all.csv   527       24838
+  45_all.csv   442       5547
+  21_all.csv   435       6334
+\end{lstlisting}
 
 %
 \subsection{Visualisation}
