@@ -965,6 +965,31 @@ only reduced the prediction accuracy by x.
 %\addcontentsline{toc}{section}{Implementation}
 %
 
+
+\newenvironment{methodListC}[2]{
+  \newcommand{\mtd}[2]{\texttt{##1} & ##2 \\}
+  \newcommand{\mtdfootCaption}{#2}
+  \newcommand{\mtdfootLabel}{#1}
+  \begin{table}[!ht]
+    \centering
+    \begin{tabular}{lp{10cm}}
+}{
+\end{tabular}
+\caption{\mtdfootCaption}
+\label{\mtdfootLabel}
+\end{table}
+}
+
+\newenvironment{methodList}{
+  \newcommand{\mtd}[2]{\texttt{##1} & ##2 \\}
+  \begin{table}[!ht]
+    \centering
+    \begin{tabular}{lp{10cm}}
+}{
+\end{tabular}
+\end{table}
+}
+
 \subsection{Early versions}
 
 At the beginning of the project, a choice had to be made on what tools and
@@ -977,23 +1002,21 @@ eigenvalue algorithms required built-in. Matlab is also easy to prototype in.
 
 The approximative approach for undirected graphs was implemented in Matlab as a
 couple of functions. The function signatures along with descriptions are
-presented in \emph{Table~\ref{tbl:interface}}. Some helper functions are not
+presented in \emph{Table~\ref{tbl:matlab-interface}}. Some helper functions are not
 included in the table. The (iterative) naive algorithm was implemented as a
 separate set of Matlab functions with a very similar interface.
-\begin{table}[!ht]\footnotesize
-   \centering
-   \begin{tabular}{ll}
-   similarity(adj, mu, m) & Computes and returns the matrices Q and Z. \\
-   sim2(q,z,i,j) & Computes the similarity between vertices i and j. \\
-   simlist(q,z,i) & Computes the similarity between vertex i and all other vertices. \\
-   top(q,z,i) & Uses simlist(q,z,i) and sorts the results. \\
-   randomGraph(nodes, vertices, directed) & Generates a random connected graph.
-   \end{tabular}
-   \caption{Implementation interface. Parameters: q represents the matrix
-    $\mat{Q}$, z represents the matrix $\mat{Z}$, adj represents the adjacency
-    matrix, and i and j represent vertex numbers.}
-   \label{tbl:interface}
-\end{table}
+
+\begin{methodListC}{tbl:matlab-interface}{Matlab implementation interface.}
+  \mtd{similarity(adj, mu, k)}{Computes and returns matrices $\mat{Q}$ and
+    $\mat{Z}$.}
+  \mtd{sim2(q, z, i, j)}{Computes the similarity between vertices i and j.}
+  \mtd{simlist(q, z, i)}{Computes the similarity between vertex i and all other
+    vertices.}
+  \mtd{top(q, z, i)}{Uses simlist(q,z,i) and sorts the results.}
+  \mtd{randomGraph(v, e, dir)}{Generates a random connected graph with v
+    vertices and e edges. If dir==true, the graph is directed, otherwise it is
+    undirected. }
+\end{methodListC}
 
 Matlab is, however, not very good at handling different types of files, loops,
 and general data wrangling. It also cannot be easily used from the command line
@@ -1128,37 +1151,38 @@ The final implementation is based on two simple concepts. A similarity index,
 called a {\tt Sim} object and a provider ({\tt Provider}).
 
 In the package {\tt sim}, the class {\tt Sim} represents a directed or undirected
-index. It has the following methods:
+index. A list of methods is in \emph{Table~\ref{tbl:sim-methods}}. Internally,
+a {\tt Sim} object has either a $\bm{\omega}$ matrix or a pair of $\mat{Q}$ and
+$\mat{Z}$, which it uses to compute the dot products and the similarities. The
+implementation of {\tt Sim.nib(a)} is simply returning {\tt a}. This is because
+the {\tt Sim} class represents an index directly trained from an adjacency
+matrix but, in practice, vertices usually come with different IDs, strings or
+integers that are not necessarily consecutive.
 
-\begin{lstlisting}
-  _dotprod(a, b)   Computes the dot product between vertices a and b.
-  score(a, b)      Computes the Euclidean distance score.
-  save(f)          Writes the index into file f.
-  nodelist()       Returns a list of all vertices.
-  nid(a)           Returns the index of vertex a in the index.
-  __len__()        Returns the number of vertices.
-\end{lstlisting}
+\begin{methodListC}{tbl:sim-methods}{Methods of class {\tt Sim}.}
+  \mtd{\_dotprod(a, b)}{Computes the dot product between vertices {\tt a} and {\tt b}.}
+  \mtd{score(a, b)    }{Computes the Euclidean distance score.}
+  \mtd{save(f)        }{Writes the index into file {\tt f}.}
+  \mtd{nodelist()     }{Returns a list of all vertices.}
+  \mtd{nid(a)         }{Returns the index of vertex {\tt a} in the index.}
+  \mtd{\_\_len\_\_()  }{Returns the number of vertices.}
+\end{methodListC}
 
-Internally, a {\tt Sim} object has either a $\bm{\omega}$ matrix or a pair of
-$\mat{Q}$ and $\mat{Z}$, which it uses to compute the dot products and the
-similarities. The implementation of {\tt Sim.nib(a)} is simply returning {\tt a}.
-This is because the {\tt Sim} class represents an index directly trained from
-an adjacency matrix. In practice, vertices usually come with different IDs,
-strings or integers that do not start at 1 or 0.
-
-The class {\tt Simp} extends the class {\tt Sim}. To promote an object of type
-{\tt Sim} to {\tt Simp}, it needs a {\tt Provider}. Any object that can create
+The class {\tt Simp} extends the class {\tt Sim}. A {\tt Provider} is required
+to promote an object of type {\tt Sim} to {\tt Simp}. Any object that can create
 an adjacency matrix and a mapping from any (relevant) type of vertex ID to an
 integer index in the adjacency matrix is a {\tt Provider}. The list of methods
-an object is required to implement to be a {\tt Provider} is shown below:
+an object is required to implement to be a {\tt Provider} is in
+\emph{Table~\ref{tbl:provider-methods}}.
 
-\begin{lstlisting}
-  __getitem__(a)    Get the index of a in the adj. matrix.
-  __len__()         Return the number of vertices.
-  adj()             Get the adjacency matrix.
-  nodelist()        Return a list of all vertices.
-  save(f)           Saves itself in the file f.
-\end{lstlisting}
+\begin{methodListC}{tbl:provider-methods}{List of methods required for an object
+  to have to be a valid {\tt Provider}.}
+  \mtd{\_\_getitem\_\_(a)}{Get the index of {\tt a} in the adjacency matrix.}
+  \mtd{\_\_len\_\_()     }{Return the number of vertices.}
+  \mtd{adj()         }{Get the adjacency matrix.}
+  \mtd{nodelist()    }{Return a list of all vertices.}
+  \mtd{save(f)       }{Saves itself in the file {\tt f}.}
+\end{methodListC}
 
 
 The class {\tt Simp} (also defined in package {\tt sim}) overwrites the
@@ -1167,20 +1191,28 @@ simply delegating them to the {\tt Provider} object it has. The {\tt save(f)}
 method is overwritten to persist both the {\tt Provider} object and the
 {\tt Sim} object into a single tar file.
 
-In the package {\tt sim} there are some important functions defined:
+The main algorithm is implemented in package {\tt sim}, where there are some
+other helper functions defined. A list of functions is in
+\emph{Table~\ref{tbl:sim-package}}.
 
-\begin{lstlisting}
-  train(adj, mu, k)             Calls train_directed or train_undirected,
-                                depending on whether adj is symmetric.
-  train_undirected(adj, mu, k)  Undirected algorithm to obtain omega.
-  train_directed(ajd, mu, k)    Directed algorithm to obtain Q and Z.
-
-  All train*() functions return a Sim object.
-
-  prov(provider, sim)           Combines the given sim with the given
-                                provider and returns a Simp object.
-  loadp(path)                   Load an index (Sim or Simp) from path.
-\end{lstlisting}
+\begin{methodListC}{tbl:sim-package}{Partial list of functions from package
+  {\tt sim}.}
+  \mtd{train(adj, mu, k)}{If {\tt adj} is symmetric, it calls
+    {\tt train\_undirected()}, otherwise it calls {\tt train\_directed()}.
+    Returns a {\tt Sim} object.}
+  \mtd{train\_undirected(adj, mu, k)}{Implementation of the undirected
+    approximative algorithm. It uses the {\tt k} leading eigenvalues and the
+    penalising factor {\tt mu}. Returns a {\tt Sim} object that contains the
+    matrix $\bm{\omega}$.}
+  \mtd{train\_directed(adj, mu, k)}{Implementation of the directed
+    approximative algorithm. It uses the {\tt k} leading eigenvalues and the
+    penalising factor {\tt mu}. If some of the eigenvalues are complex and their
+    complex conjugates are not included, they are dropped without any warning.
+    Returns a {\tt Sim} object that contains the matrices $\mat{Q}$ and $\mat{Z}$.}
+  \mtd{prov(p, sim)}{Combines the {\tt Sim} object {\tt sim} with the
+    {\tt Provider p} to return a {\tt Simp} object.}
+  \mtd{loadp(path)}{Load an index ({\tt Sim} or {\tt Simp}) from {\tt path}.}
+\end{methodListC}
 
 There are two providers implemented in the {\tt provider} package. One is
 {\tt EdgeList} and it takes a list of edges (as a Python array of tuples), it
@@ -1245,7 +1277,7 @@ connected component (by the number of vertices) has $2212$ vertices and $41552$
 undirected edges. The top 10 largest components is shown in
 \emph{Table~\ref{tbl:conncomp}}.
 
-\begin{table}[!ht]\footnotesize
+\begin{table}[!ht]
   \centering
   \begin{tabular}{p{3cm}p{2cm}l}
     \textbf{Component} & \textbf{Vertices} & \textbf{Edges} \\ \hline
