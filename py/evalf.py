@@ -25,7 +25,14 @@ EvalResult = namedtuple("EvalResult", [
     'diff_relative'])
 
 def _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc, heu):
-    index = trainfunc(prov, mu, k, True)
+    index = trainfunc(prov, mu, k)
+
+    if eachFunc is None:
+        def show_progress(edge, position, score, relative_score, i):
+            progress = (i+1.0)*100/len(edges)
+            print("\r%.2f %%\t for k=%d mu=%f" % (progress, k, mu), end="         ")
+
+        eachFunc = show_progress
 
     return evaluate(
         index=index,
@@ -44,9 +51,6 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, d
         prov = pr.EdgeList(edgelist=input)
     else:
         prov = pr.Offset(input, offset)
-        for i, _ in enumerate(edges):
-            edges[i][0] = int(edges[i][0]) + offset
-            edges[i][1] = int(edges[i][1]) + offset
 
     trainfunc = None
     if directed == "d" or directed == "directed":
@@ -83,6 +87,8 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, d
 def evaluate(index, edges, cache, eachFunc=None, heu=None):
     sc = index
     if cache:
+        sc = simcache.precomputeSkip(index)
+    else:
         sc = simcache.undirected(index)
 
     total_position = 0.0
@@ -109,9 +115,11 @@ def evaluate(index, edges, cache, eachFunc=None, heu=None):
         rand_score = sc.score(a,randomtarget)
         best = score
 
-        enum = enumerate(allnodes)
+        enum = None
         if heu is not None:
             enum = heu(a)
+        else:
+            enum = enumerate(allnodes)
 
         for _, b in enum:
             if a == b or str(b) == str(a):
@@ -135,7 +143,7 @@ def evaluate(index, edges, cache, eachFunc=None, heu=None):
         rand_total_score = rand_total_score + rand_score
         rand_total_relative_score = rand_total_relative_score + rand_relative
 
-        if eachFunc is not None:
+        if i % 100 == 0 and eachFunc is not None:
             eachFunc((a, targetb), position, score, relative_score, i)
 
     no_nodes = len(allnodes)

@@ -248,6 +248,7 @@ def train_eval(args):
         directed = args.type,
         heu = heu)
 
+    print("\r")
     print("mu\tk\tposition\tscore   \trelative\tdiff pos\tdiff scr\tdiff rel")
     for res in results:
         r = res[2]

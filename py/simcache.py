@@ -1,7 +1,20 @@
-def undirected(s):
-    """Undirected score cache factory. Changes s and returns it for convenience."""
+def precomputeSkip(s):
     base = type(s)
-    class Undirected(base):
+    class Precompute(base):
+        def _dotprod(self, a, b):
+            return self._dpcache[a,b]
+        def score(self, a, b):
+            return self._scrcache[a,b]
+    s._dpcache = s.q.T * s.q
+    j = s._dpcache.diagonal().repeat(s._dpcache.shape[0], axis=0)
+    s._scrcache = j + j.transpose() - 2 * s._dpcache
+    s.__class__ = Precompute
+    return s
+
+def score(s):
+    """Score cache factory. Changes s and returns it for convenience."""
+    base = type(s)
+    class Score(base):
         def score(self, a, b):
             a = str(a)
             b = str(b)
@@ -17,7 +30,7 @@ def undirected(s):
                 self._scorecache[a][b] = score
                 return score
             return self._scorecache[a][b]
-    s.__class__ = Undirected
+    s.__class__ = Score
     s._scorecache = {}
     return s
 

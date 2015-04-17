@@ -204,8 +204,8 @@ class Simp(Sim):
 
     """
     def __init__(self, q, z, provider):
-        self.q = np.matrix(s.q)
-        self.z = np.matrix(s.z)
+        self.q = np.matrix(q)
+        self.z = np.matrix(z)
         self.provider = provider
 
     def nid(self, a):
