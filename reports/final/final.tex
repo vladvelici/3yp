@@ -1265,37 +1265,13 @@ similar then the ones removed).
 \subsection{Undirected evaluation on a friends dataset}
 
 One of the datasets used for the evaluation of the algorithm is a small subset
-of the friends relationships from the social network Facebook. The data was
-given away by volutneers for a Kaggle competition and it has been fully
-anonimised by Kaggle before making it available to the public. % TODO: citation
+of the friends relationships from the social network Facebook. The  data is
+completely anonimised and it was downloaded from SNAP \cite{snapnets}.
 
-The friends dataset was converted to a CSV edge list graph (using a small Go
-program) where a vertex represents a person and an edge represents a
-bidirectional friendship. The graph has $26,457$ vertices and $372,227$
-undirected edges, but it is divided into $378$ connected components. The largest
-connected component (by the number of vertices) has $2212$ vertices and $41552$
-undirected edges. The top 10 largest components is shown in
-\emph{Table~\ref{tbl:conncomp}}.
-
-\begin{table}[!ht]
-  \centering
-  \begin{tabular}{p{3cm}p{2cm}l}
-    \textbf{Component} & \textbf{Vertices} & \textbf{Edges} \\ \hline
-    {\tt 4\_all.csv  }  & 2212     & 41552 \\
-    {\tt 10\_all.csv }  & 1700     & 36179 \\
-    {\tt 3\_all.csv  }  & 1304     & 23029 \\
-    {\tt 5\_all.csv  }  & 1216     & 13772 \\
-    {\tt 9\_all.csv  }  & 942      & 6743  \\
-    {\tt 23\_all.csv }  & 724      & 14712 \\
-    {\tt 8\_all.csv  }  & 653      & 21597 \\
-    {\tt 27\_all.csv }  & 630      & 7865  \\
-    {\tt 14\_all.csv }  & 617      & 9446  \\
-    {\tt 39\_all.csv }  & 527      & 24838
-  \end{tabular}
-  \caption{Top 10 connected components by the number of vertices in the friends
-   dataset.}
-  \label{tbl:conncomp}
-\end{table}
+The friends graph was provided as an edge list in TXT format and it was converted
+to CSV using a {\tt sed} command. Vertices are consecutive integers starting
+from 0, so there is no need for remapping. The dataset is a connected graph that
+contains $4039$ vertices and $88,234$ undirected edges.
 
 
 %
