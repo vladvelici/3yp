@@ -61,6 +61,7 @@ def main():
     p_top.add_argument("--limit", "-l", help="Limit the number of total results", type=int, default=0)
     p_top.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
     p_top.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
+    p_top.add_argument("--blacklist", "-b", help="Blacklist graph file.", default=None)
 
     ## EVALUATION
     p_eval = sbp.add_parser("eval", help="Evaluate index using a list of (should predict) edges.")
@@ -187,12 +188,12 @@ def fromToHeuristic(to):
 
 def top(args):
     s = read_index(args.index)
-    s = simcache.undirected(s)
+    s = simcache.score(s)
     heu = None
-    if len(args.graph) > 0:
+    if args.graph is not None and len(args.graph) > 0:
         edges = pr.csv_file(args.graph)
         h = heuristics.Maxdepth(edges, args.depth)
-        heu = h.top
+        heu = h.topGen
     else:
         heu = fromToHeuristic(s.nodelist())
 
@@ -202,8 +203,15 @@ def top(args):
     else:
         gen = heu(s.nodelist())
 
+    blacklist = None
+    if args.blacklist is not None:
+        be = pr.csv_file(args.blacklist)
+        blacklist = evalf.Blacklist(be)
+
     top = []
     for edge in gen:
+        if blacklist is not None and edge in blacklist:
+            continue
         score = s.score(edge[0], edge[1])
         top.append((edge[0], edge[1], score))
 
@@ -249,12 +257,12 @@ def train_eval(args):
         heu = heu)
 
     print("\r")
-    print("mu\tk\tposition\tscore   \trelative\tdiff pos\tdiff scr\tdiff rel")
+    print("mu\tk\tposition\tgood pos\tscore   \trelative\tbetter rnd\tdiff pos\trnd gPos\trand scr\tdiff scr\tdiff rel")
     for res in results:
         r = res[2]
-        print("%.2f\t%d\t%e\t%e\t%e\t%e\t%e\t%e" % (res[0], res[1],
-            r.position, r.score, r.relative,
-            r.diff_position, r.diff_score, r.diff_relative))
+        print("%.2f\t%d\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e" % (res[0], res[1],
+            r.position, r.good_position, r.score, r.relative, r.better_than_random,
+            r.diff_position, r.rand_good_position, r.rand_score, r.diff_score, r.diff_relative))
 
 
 

@@ -12,21 +12,34 @@ class Maxdepth:
         self.g = nx.DiGraph()
         self.g.add_edges_from(edgelist)
         self.depth = depth
+        self._pairs = None
 
     def top(self,nodes=None):
         """Yields (from,to) pairs. Arguments can be:
         - no arguments: Apply heuristic for all graph.
         - a node: Applies heuristic on that node only.
         - a list of nodes: Applies heuristic on all nodes of the list."""
+
+        if self._pairs is None:
+            print("Computing HEU")
+            p = nx.all_pairs_shortest_path_length(self.g, self.depth) 
+            self._pairs = {k: [i for i,_ in tos.items()] for k, tos in p.items()}
+
         if nodes is None:
-            pairs = nx.all_pairs_shortest_path_length(self.g, self.depth)
-            for f, dst in pairs.items():
-                for t, _ in dst.items():
-                    yield((f,t))
+            return self._pairs
+        if not isinstance(nodes, list):
+            return self._pairs[nodes]
+        return {k: self._pairs[k] for k in nodes }
+
+    def topGen(self, nodes=None):
+        res = self.top(nodes)
+
+        if isinstance(res, list):
+            for i in res:
+                yield((nodes, i))
+
         else:
-            if not isinstance(nodes, list):
-                nodes = [nodes]
-            for node in nodes:
-                dests = nx.single_source_shortest_path_length(self.g, node, self.depth)
-                for k in dests:
-                    yield((node, k))
+            for i,l in res.items():
+                for j in l:
+                    yield((i,j))
+

@@ -2,9 +2,9 @@ def precomputeSkip(s):
     base = type(s)
     class Precompute(base):
         def _dotprod(self, a, b):
-            return self._dpcache[a,b]
+            return self._dpcache[self.nid(a),self.nid(b)]
         def score(self, a, b):
-            return self._scrcache[a,b]
+            return self._scrcache[self.nid(a),self.nid(b)]
     s._dpcache = s.q.T * s.q
     j = s._dpcache.diagonal().repeat(s._dpcache.shape[0], axis=0)
     s._scrcache = j + j.transpose() - 2 * s._dpcache
