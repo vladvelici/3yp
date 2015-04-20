@@ -1279,25 +1279,25 @@ contains $4039$ vertices and $88,234$ undirected edges.
 
 To evaluate the algorithm on this dataset, $5\%$ of the edges were randomly
 removed and two files were obtained, {\tt 05fb.csv} is the dataset with the
-edges removed, and {\tt 05removed\_fb.csv} is a list of the edges removed.
-The {\tt conncomp} tool command used is:
+edges removed, and {\tt 05removed\_fb.csv} is a list containing the removed
+edges. The {\tt conncomp} tool command used is:
 \begin{lstlisting}
   conncomp -action remove -p 0.05 -o "05" fb.csv
 \end{lstlisting}
+
 
 To evaluate how well the Euclidean distance between cloud vectors is predicting
 the removed edges, we run the algorithm on the dataset with the edges removed,
 and compute the similarity for all the removed edges.
 
+
 For any vertex $i$ we can define the top similar vertices to be an ordered list
 of all the other vertices in the graph, sorted in ascending order by the score
-(Euclidean distance squared). For example, if $top(i) = [a, b, c, d]$, then
+(Euclidean distance squared). For example, if $\ttop(i) = [a, b, c, d]$, then
 $\|\bm{c}_i - \bm{c}_a\|^2 \leq \|\bm{c}_i - \bm{c}_b\|^2 \leq
 \|\bm{c}_i - \bm{c}_c\|^2 \leq \|\bm{c}_i - \bm{c}_d\|^2$. The position of
-vertex $a$ in the top of vertex $i$ is denoted by $pos(a,top(i))$, and in the
+vertex $a$ in the top of vertex $i$ is denoted by $\pos(a,\ttop(i))$, and in the
 example given it is 1.
-
-
 
 
 If $\ttop(i) = [a, b, c, d]$ and there are two removed edges $(i, b)$ and $(i, c)$,
@@ -1313,7 +1313,10 @@ position of $a$ in the top of $i$ without counting the pairs that are in the
 blacklist. Mathematically,
 \begin{equation}
   \bpos(a, \ttop(i)) = \pos(a, \ttop(i)) - \sum_{(i, k) \in \text{Blacklist}}
-  \Big[ 1 \text{  if  } \pos(k, \ttop(i)) < \pos(a, \ttop(i)) \Big].
+  \begin{bmatrix}
+    1, && \text{  if  } \pos(k, \ttop(i)) < \pos(a, \ttop(i)) \\
+    0, && \text{  otherwise  }
+  \end{bmatrix}
 \end{equation}
 
 
@@ -1334,7 +1337,7 @@ all the removed edges,
   \frac{1}{|R|} \sum_{(i,j) \in R} \bpos(j, \ttop(i)),
 \end{equation}
 where $R$ is a set of all the removed edges, is a similarity metric that contains
-more information. A plot of this averate versus the number of eigenvalues used
+more information. A plot of this average versus the number of eigenvalues used
 is in \emph{Figure~\ref{fig:fb_eig_pos}}, from which can be conlcuded that the
 algorithm performs best at $k=40$ eigenvalues, because at lower and higher
 values of $k$, the average is much higher. Despite the fact that the
@@ -1348,7 +1351,7 @@ that they are not in the list of removed edges or existing edges and it is never
 a pair like $(i, i)$. The average percentage (from three runs) of the edges that
 have smaller scores (higher similarities) than random vs the number of
 eigenvalues used, $k$, is plotted in \emph{Figure~\ref{fig:fb_eig_better}}.
-It can be observed that the it peaks $k=40$ and $k=50$ with values between
+It can be observed that the it peaks at $k=40$ and $k=50$ with values between
 $88.1\%$ and $88.2\%$, decreasing for higher or smaller values of $k$.
 
 The average score is plotted in \emph{Figure~\ref{fig:fb_eig_scores}}, along
