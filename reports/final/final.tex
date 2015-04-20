@@ -612,8 +612,6 @@ Substitute $\mat{Q}$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain
   &= \mat{Z}_i^T \mat{Q} \mat{Z}_j \label{eq:dot-zq-vectorised}
 \end{align}
 
-%% TODO: why cholesky works.
-
 Using Cholesky decomposition, $\mat{Q}$ can be written as $\mat{Q} = \mat{L}
 \mat{L}^T$, which can be used to simplify the dot product even further as
 follows
@@ -743,7 +741,7 @@ Let $\bm{\hat{c}}_i$ be the approximation of the cloud vector $\bm{c}_i$,
              {1 - \mu \lambda_a} \bm{\vee_R}^{(a)}.
 \end{equation}
 
-For any complex number, $x = a+bi$, the sum $x + \conj{x} = a + bi + a - bi =
+For any complex number $x = a+bi$, the sum $x + \conj{x} = a + bi + a - bi =
 2a$ is real. The approximative cloud vectors $\bm{\hat{c}}_i$ are real vectors
 because
 \begin{align}
@@ -1311,13 +1309,15 @@ this we introduce a set of pairs of vertices containing the removed and existing
 edges and call it Blacklist, then we define the $\bpos(a, \ttop(i))$ to be the
 position of $a$ in the top of $i$ without counting the pairs that are in the
 blacklist. Mathematically,
-\begin{equation}
-  \bpos(a, \ttop(i)) = \pos(a, \ttop(i)) - \sum_{(i, k) \in \text{Blacklist}}
-  \begin{bmatrix}
-    1, && \text{  if  } \pos(k, \ttop(i)) < \pos(a, \ttop(i)) \\
-    0, && \text{  otherwise  }
-  \end{bmatrix}
-\end{equation}
+\begin{align}
+  \text{Blacklist} &= B = R \cup \mathcal{E} \cup \{(i,j) | \forall i, j \in
+    \mathcal{V}\}, \\
+  \bpos(a, \ttop(i)) &= \pos(a, \ttop(i)) - \sum_{(i, k) \in B} g(a,i,k), \\
+  g(a,i,k) &= \left\{ \begin{array}{ll}
+    1, & \pos(k, \ttop(i)) < \pos(a, \ttop(i)) \\
+    0, & \text{otherwise}.
+  \end{array} \right.
+\end{align}
 
 
 One evaluation metric is the percentage of the removed edges that have
@@ -1326,7 +1326,8 @@ the $\bpos$ top position to ignore the ordering between removed edges and
 existing edges in the top. A chart of this measure versus the number of
 eigenvalues used, $k$, can be seen in \emph{Figure~\ref{fig:fb_eig_top5}}.
 According to this metric it can be concluded that the accuracy increases with
-the number of eigenvalues used.
+the number of eigenvalues used, and that, regardless of the choice of $\mu$,
+it increases quicker up to 30 eigenvalues and more slowly for higher values.
 
 The measure described above ignores the exact position of the removed edges in
 the top, which might prove to be useful, especially because if the dataset is
@@ -1338,21 +1339,34 @@ all the removed edges,
 \end{equation}
 where $R$ is a set of all the removed edges, is a similarity metric that contains
 more information. A plot of this average versus the number of eigenvalues used
-is in \emph{Figure~\ref{fig:fb_eig_pos}}, from which can be conlcuded that the
-algorithm performs best at $k=40$ eigenvalues, because at lower and higher
-values of $k$, the average is much higher. Despite the fact that the
-percentage of removed edges in top 5 increases with $k$, the average does not
-decrease with the increase of $k$, fact explained by the similarities outside of
-top 5 being very low (thus being placed far in the top).
+is in \emph{Figure~\ref{fig:fb_eig_pos}}, from which we can observe that for
+all choices of $\mu$, the average top position decreases until $k=40$
+eigenvalues, after which the difference between the means for different $\mu$
+increases and for large $\mu$ the average top position still decreases, but it
+increases for small $\mu$. Despite the fact that the percentage of removed edges
+in top 5 increases with $k$, the average top position does not always decrease
+with the increase of $k$, fact explained by the similarities outside of top 5
+being very low (thus being placed far in the top).
+
 
 Another evaluation metric is comparing the scores obtained for the removed edges
 with the scores of random pairs of vertices. The random pairs were chosen such
-that they are not in the list of removed edges or existing edges and it is never
-a pair like $(i, i)$. The average percentage (from three runs) of the edges that
-have smaller scores (higher similarities) than random vs the number of
-eigenvalues used, $k$, is plotted in \emph{Figure~\ref{fig:fb_eig_better}}.
-It can be observed that the it peaks at $k=40$ and $k=50$ with values between
-$88.1\%$ and $88.2\%$, decreasing for higher or smaller values of $k$.
+that they are not in Blacklist. The average percentage (from three runs) of
+the edges that have smaller scores (higher similarities) than random vs the
+number of eigenvalues used, $k$, is plotted in \emph{Figure~\ref{fig:fb_eig_better}}.
+It can be observed that it increases until $k=40$ and $k=50$ eigenvalues for all
+choices of $mu$, where it gets to values between $88\%$ and $88.5\%$, after
+which the values and slopes differ with $\mu$ (for large $\mu$ it increases and
+for small $\mu$ it decreases).
+
+
+The peaks and changes at $k=40$ are related to the local mimimum observed in
+\emph{Figure~\ref{fig:no-of-eigenvectors}}, where the naive and approximative
+approaches are compared, and it is deduced that there is a $k \ll N$ for which
+the approximation best represents the graph. We can argue that for this size of
+datasets the best choice is at around $k=40$ eigenvalues. For this particular
+dataset, a penalising factor of approx. $\mu = 0.5$ is a good choice.
+
 
 The average score is plotted in \emph{Figure~\ref{fig:fb_eig_scores}}, along
 with the relative score (squared difference between best score and the removed
@@ -1365,6 +1379,7 @@ where $\operatorname{best}(i) = \min_{j} (\|\bm{C}_i - \bm{C}_j\|^2), j \neq i $
 It can be observed that the scores increase with the number of eigenvalues. This
 is explained by the fact that the dot products between cloud vectors are sums of
 $k$ terms.
+
 
 \begin{figure}[tpb]
   \centering
@@ -1383,7 +1398,7 @@ $k$ terms.
   \end{subfigure}
   \begin{subfigure}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{fb_eig_scores}
-		\caption{Removed edges and relative scores.}
+		\caption{Removed edges and relative scores. $\mu = 0.5$.}
     \label{fig:fb_eig_scores}
   \end{subfigure}%
   ~
@@ -1392,11 +1407,9 @@ $k$ terms.
     \caption{Normalised sum of top positions.}
     \label{fig:fb_eig_pos}
   \end{subfigure}
-
-
   \caption{Different evaluation metrics on the friends dataset using the
   squared Euclidean distance between cloud vectors as the similarity measure
-  (score). The penalising factor used is $\mu = 0.5$.}
+  (score).}
   \label{fig:fb_eval_euclidean}
 \end{figure}
 
