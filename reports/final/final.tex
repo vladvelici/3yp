@@ -826,7 +826,7 @@ Define a $k \times k$ matrix $\mat{Q}$ such that
 \end{equation}
 or vectorised
 \begin{equation}
-  \mat{Q} = \bm{\vee_R}^T \bm{\vee_R},
+  \mat{Q} = \bm{\hat{\vee}_R}^T \bm{\hat{\vee}_R},
 \end{equation}
 and substitute it into the dot product (\emph{Equation~\ref{eq:directed-ci-z}})
 to obtain
@@ -842,7 +842,8 @@ graph is then
   \bm{\hat{c}}_i^T \bm{\hat{c}}_j = \mat{Z}_i^T \mat{Q} \mat{Z}_j.
 \end{equation}
 
-%% TODO: why cholesky does not work.
+In this case, Cholesky decomposition cannot be applied because $\bm{\hat{\vee}}$
+is not orthogonal and, as a consequence, $\mat{Q}$ is not positive-definite.
 
 It is only required to compute and store $\mat{Q}$ and $\mat{Z}$, which together
 take $O(k^2+kN)$ space. The time complexity of computing the approximative dot
