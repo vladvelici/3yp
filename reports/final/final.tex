@@ -612,6 +612,30 @@ Substitute $\mat{Q}$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain
   &= \mat{Z}_i^T \mat{Q} \mat{Z}_j \label{eq:dot-zq-vectorised}
 \end{align}
 
+%
+%% Cholesky and positive definite Q
+%
+
+A Hermitian, positive-definite matrix can be factorised into a lower (or upper)
+triagular matrix and its transpose. The process is called Cholesky decomposition.
+The matrix $\mat{Q}$ only has real elements, and
+\begin{align}
+  \mat{Q}^T = (\bm{\hat{\vee}}^T \mat{W} \bm{\hat{\vee}})^T
+    = \bm{\hat{\vee}}^T (\bm{\hat{\vee}}^T \mat{W})^T
+    = \bm{\hat{\vee}}^T \mat{W} \bm{\hat{\vee}} = \mat{Q},
+\end{align}
+thus $\mat{Q}$ is a real symmetric matrix, so Hermitian. We expect all the
+weights in the graph to be positive, so all the diagonal elements in $\mat{W}$
+are positive, therefore we can say that
+\begin{align}
+  \forall \bm{x} \neq \bm{0},\  \bm{x}^T \mat{Q} \bm{x} &=
+     (\bm{\hat{\vee}}\bm{x})^T \mat{W} (\bm{\hat{\vee}}\bm{x}) \\
+     &= \sum_i \mat{W}_{ii} (\bm{\hat{\vee}}\bm{x})_i^2 > 0,
+\end{align}
+because $(\bm{\hat{\vee}}\bm{x}) = \bm{0}$ if and only if $\bm{x} = \bm{0}$
+since $\bm{\hat{\vee}}$ is orthogonal. Therefore, by definition, $\mat{Q}$ is
+positive definite.
+
 Using Cholesky decomposition, $\mat{Q}$ can be written as $\mat{Q} = \mat{L}
 \mat{L}^T$, which can be used to simplify the dot product even further as
 follows
@@ -635,7 +659,7 @@ which takes $O(kN)$ space. Computing an approximative dot product has the time
 complexity $O(k)$, because the only operation is a dot product of two vectors of
 size $k$.
 
-In the rest of this report, we will refer to a computed $\mat{omega}$ as an
+In the rest of this report, we will refer to a computed $\mat{\omega}$ as an
 \emph{undirected index}, because it is the only matrix required to compute all
 the relevant similarity measures for an undirected graph.
 
