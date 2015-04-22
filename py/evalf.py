@@ -27,7 +27,7 @@ EvalResult = namedtuple("EvalResult", [
     'diff_score',
     'diff_relative'])
 
-def _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc, heu, blacklist, picks):
+def _train_and_eval(prov, mu, k, edges, cache, eachFunc, trainfunc, heu, blacklist, picks):
     index = trainfunc(prov, mu, k)
 
     if eachFunc is None:
@@ -40,15 +40,15 @@ def _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc, heu, blacklist, pic
     return evaluate(
         index=index,
         edges=edges,
-        cache=True,
+        cache=cache,
         eachFunc=eachFunc,
         heu=heu,
         blacklist=blacklist,
-        picks=picks
+        picks=picks,
     )
 
 # direct=true for any numeric offset. Set to None for direct=false
-def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, directed="auto", heu=None):
+def train_and_evaluate(input, offset, range_mu, range_k, edges, cache, eachFunc=None, directed="auto", heu=None):
     """Returns a list of (mu, k, EvalResult)"""
 
     prov = None
@@ -76,7 +76,7 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, eachFunc=None, d
     res = []
     for mu in range_mu:
         for k in range_k:
-            res.append((mu, k, _train_and_eval(prov, mu, k, edges, eachFunc, trainfunc, heu, blacklist, picks)))
+            res.append((mu, k, _train_and_eval(prov, mu, k, edges, cache, eachFunc, trainfunc, heu, blacklist, picks)))
     return res
 
 class Blacklist:
@@ -90,11 +90,7 @@ class Blacklist:
         return pair[0] == pair[1] or str(pair[0]) == str(pair[1]) or pair in self._d or (str(pair[0]), str(pair[1])) in self._d
 
 def evaluate(index, edges, cache, eachFunc=None, heu=None, blacklist=None, picks=None):
-    sc = index
-    if cache:
-        sc = simcache.precomputeSkip(index)
-    else:
-        sc = simcache.score(index)
+    sc = simcache.apply(index, cache)
 
     if blacklist is None:
         blacklist = Blacklist(edges)

@@ -11,6 +11,7 @@ import evalf
 import heuristics
 import simcache
 
+cache_options = simcache.OPTIONS
 
 def main():
     parser = argparse.ArgumentParser()
@@ -62,6 +63,7 @@ def main():
     p_top.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
     p_top.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
     p_top.add_argument("--blacklist", "-b", help="Blacklist graph file.", default=None)
+    p_top.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
 
     ## EVALUATION
     p_eval = sbp.add_parser("eval", help="Evaluate index using a list of (should predict) edges.")
@@ -69,7 +71,7 @@ def main():
     p_eval.add_argument("edges", help="Edges file.")
     p_eval.add_argument("--format", "-f", default="csv", choices=["csv"], help="Edges file format.")
     p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
-    p_eval.add_argument("--cache", action="store_true", help="Use an undirected cache. Undirected graphs only.")
+    p_eval.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
     p_eval.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
     p_eval.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
 
@@ -88,6 +90,7 @@ def main():
     p_trev.add_argument("--penalise", "-mu", help="List of penalisation factors (mu).",
                         nargs='+', type=float, dest="mu")
     p_trev.add_argument("--depth", "-d", help="Depth for maxdepth heuristic.", type=int, default=0)
+    p_trev.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
 
     args = parser.parse_args()
     if args.action == 'sim':
@@ -188,7 +191,7 @@ def fromToHeuristic(to):
 
 def top(args):
     s = read_index(args.index)
-    s = simcache.score(s)
+    s = simcache.apply(s, args.cache)
     heu = None
     if args.graph is not None and len(args.graph) > 0:
         edges = pr.csv_file(args.graph)
@@ -227,7 +230,7 @@ def top(args):
 def make_dot(args):
     edges = pr.csv_file(args.graph)
     index = read_index(args.index)
-
+    index = simcache.apply(index, args.cache)
 
     print("strict graph {")
     print("  node[shape=point, label=\"\"];")
@@ -269,6 +272,7 @@ def train_eval(args):
         range_mu = args.mu,
         edges = edges,
         directed = args.type,
+        cache = args.cache,
         heu = heu)
 
     print("\r")
