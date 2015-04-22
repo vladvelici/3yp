@@ -1503,92 +1503,42 @@ and $\mu=0.5$ is rendered in a similar way in \emph{Figure~\ref{fig:snap}}.
 % LIMITATIONS
 %-------------------------------------------------------------------------------
 %
-\section{Limitations of current implementation}
-%\addcontentsline{toc}{section}{Limitations of the current implementation}
+\section{Limitations and future plans}
 %
 The current implementation of this algorithm has various limitations which are
 discussed along with possible improvements.
 
 
-Directed graphs are not currently supported. In practice, datasets have meaningful
-unidirectional relationships (e.g. in a social network person A follows person B,
-but B does not follow A), and often datasets are represented as directed graphs
-rather than undirected graphs. The algorithm can be adapted to support both directed
-and undirected graphs but it will have the disadvantage of requiring to compute
-$V^{-1}$ (for undirected graphs, $V^{-1} = V^T$).
+The algorithm has only been evaluated on an undirected dataset of medium size.
+The next immediate step is to find directed graphs on which the algorithm can
+be evaluated, and perform a similar evaluation. For larger graphs, the evaluation
+process used so far would not scale and different, more efficient methods will
+be required.
 
 
 In the real world datasets might have different types of relationships between
 entities. Some relationship types might be more relevant than others in finding
 a specific result. For instance, in a social network two people being friends
 might be more relevant for recommending new friends than two people following the
-same topic. The current implementation of the algorithm can compute similarities
-if it is given a weighted (symmetric) adjacency matrix but it does not have a
-way to automatically obtain (learn) these weights from the dataset.
+same topic, but also using both features might be better than only one of them.
+The current implementation of the algorithm can compute similarities if it is
+given a weighted adjacency matrix but it does not have a way to automatically
+obtain (learn) these weights from the dataset.
 
 
 What if the dataset is too large to fit into main memory? The algorithm is
 currently designed to run only on one machine, but finding ways to distribute it
-over multiple machines will help run it on even larger datasets.
-
-%
-%-------------------------------------------------------------------------------
-% FUTURE PLANS
-%-------------------------------------------------------------------------------
-%
-\section{Future plans}
-%\addcontentsline{toc}{section}{Future plans}
-%
-The highest priority improvements are: develop a good evaluation method, add support
-for directed graphs, and use different edge weights for different types of relationships.
-A detailed plan can be observed in the Gantt Chart in \emph{Figure~\ref{fig:gan}}.
+over multiple machines will help run it on even larger datasets. One extension
+of the algorithm is to make it reasonable for distributed computing. An immediate
+step could be distributing the computations of similarities and not the training,
+because it reduces to simply distributing the storage of a matrix or two and dot
+product between two vectors or two vectors and a matrix.
 
 
-An evaluation method is not trivial to design and build for this algorithm, but
-it is crucial to the validation, further development and fine-tuning of the algorithm.
-Researching an evaluation model has the highest priority in the list of tasks.
+Instead of computing similarities between vertices directly, it might be useful
+to try to apply different methods of clustering on the results to find a structure
+of the graph.
 
-
-Plenty of datasets on which this algorithm can be applied describe directed graphs
-with multiple types of relationships. The relevant tasks are the next tasks in
-the Gantt Chart.
-
-
-A demo on one or more datasets will be built. The first step into getting feedback
-and evaluating how the algorithm performs on real data is to build an interface
-where users can interact with the results.
-
-
-A small research on how to make the algorithm run on multiple machines will be
-done. Also, if the time allows, the code will be ported to a language like Go or
-C++ and released as an open-source project.
-\begin{landscape}
-\begin{figure}[ft]
-\begin{center}
-\begin{ganttchart}[vgrid=true, hgrid=true, y unit chart=1.5em, y unit title=1.4em, title height=1]{1}{32}
-\gantttitle{Semester 1}{17} \gantttitle{Semester 2}{15} \\
-\gantttitlelist{1,...,32}{1} \\
-\ganttbar{Agreed project \& brief}{1}{2} \\
-\ganttbar{Implemented brute-force}{3}{3} \\
-\ganttbar{Understanding math.}{4}{9} \\
-\ganttbar{Implementing approx.}{8}{10} \\
-\ganttbar{Evaluation ideas}{10}{11} \\
-\ganttbar{Write progress report}{11}{11} \\
-\ganttmilestone{Progress report}{11} \\
-\ganttbar{Research evaluation}{12}{19} \\
-\ganttbar{Directed graphs support}{18}{21} \\
-\ganttbar{Learn weights algorithm}{21}{25} \\
-\ganttbar{Real datasets demo}{26}{28} \\
-\ganttbar{Write final report}{28}{30} \\
-\ganttmilestone{Final report}{30} \\
-\ganttbar{Prepare Viva}{31}{32} \\
-\ganttmilestone{Viva}{32}
-\end{ganttchart}
-\end{center}
-\caption{Gantt Chart of done and planned tasks over weeks.}
-\label{fig:gan}
-\end{figure}
-\end{landscape}
 
 \newpage
 \addcontentsline{toc}{section}{Bibliography}
