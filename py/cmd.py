@@ -222,6 +222,21 @@ def top(args):
     for entry in top:
         print("%s\t%s\t%e" % entry)
 
+## MAKE DOT FILE
+
+def make_dot(args):
+    edges = pr.csv_file(args.graph)
+    index = read_index(args.index)
+
+
+    print("strict graph {")
+    print("  node[shape=point, label=\"\"];")
+    print("  edge[color=\"#33333377\"];")
+    for a,b in edges:
+        print("  %s -- %s" % (a,b))
+
+    print("}")
+
 
 ### TRAIN AND EVALUATE
 
