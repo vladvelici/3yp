@@ -70,7 +70,7 @@ def main():
     p_dot.add_argument("index", help="Similarity index saved by train.")
     p_dot.add_argument("graph", help="Graph to use.")
     p_dot.add_argument("--limit", "-l", help="Limit the number of total results", type=int, default=10)
-    p_dot.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
+    p_dot.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3, type=int)
     p_dot.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
 
     ## EVALUATION
@@ -81,7 +81,7 @@ def main():
     p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
     p_eval.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
     p_eval.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
-    p_eval.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
+    p_eval.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3, type=int)
 
     ## TRAIN AND EVALUATE
     p_trev = sbp.add_parser("trev", help="Train and evaluate on a range of mu and k.")
