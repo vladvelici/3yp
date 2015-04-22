@@ -65,6 +65,14 @@ def main():
     p_top.add_argument("--blacklist", "-b", help="Blacklist graph file.", default=None)
     p_top.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
 
+    ## MAKE DOT FILE WITH TOP
+    p_dot = sbp.add_parser("dot", help="Create a dot file.")
+    p_dot.add_argument("index", help="Similarity index saved by train.")
+    p_dot.add_argument("graph", help="Graph to use.")
+    p_dot.add_argument("--limit", "-l", help="Limit the number of total results", type=int, default=10)
+    p_dot.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
+    p_dot.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
+
     ## EVALUATION
     p_eval = sbp.add_parser("eval", help="Evaluate index using a list of (should predict) edges.")
     p_eval.add_argument("index", help="Index file.")
@@ -105,6 +113,8 @@ def main():
         train_eval(args)
     elif args.action == 'top':
         top(args)
+    elif args.action == 'dot':
+        make_dot(args)
 
 ### TRAIN
 
@@ -195,6 +205,7 @@ def top(args):
     heu = None
     if args.graph is not None and len(args.graph) > 0:
         edges = pr.csv_file(args.graph)
+        edges = [(s.nid(x), s.nid(y)) for x,y in edges]
         h = heuristics.Maxdepth(edges, args.depth)
         heu = h.topGen
     else:
@@ -209,6 +220,7 @@ def top(args):
     blacklist = None
     if args.blacklist is not None:
         be = pr.csv_file(args.blacklist)
+        be = [(s.nid(x),s.nid(y)) for x,y in be]
         blacklist = evalf.Blacklist(be)
 
     top = []
@@ -228,16 +240,52 @@ def top(args):
 ## MAKE DOT FILE
 
 def make_dot(args):
-    edges = pr.csv_file(args.graph)
     index = read_index(args.index)
     index = simcache.apply(index, args.cache)
+
+    edges = pr.csv_file(args.graph)
+    edges = [(index.nid(x), index.nid(y)) for x,y in edges]
+
+    heu = None
+    if args.depth > 0:
+        h = heuristics.Maxdepth(edges, args.depth)
+        heu = h.top
+    else:
+        heu = lambda x: index.nodelist()
+
+    blacklist = evalf.Blacklist(edges)
+
+    gtop = []
+    args.limit = args.limit-1
+    for a in index.nodelist():
+        top = []
+        for b in heu(a):
+            if (a,b) in blacklist:
+                continue
+            if len(top) < args.limit:
+                top.append((a,b,index.score(a,b)))
+            elif len(top) == args.limit:
+                top.append((a,b,index.score(a,b)))
+                top = sorted(top, key=lambda it: it[2])
+            else:
+                score = index.score(a,b)
+                p = len(top)-1
+                if top[p][2] > score:
+                    top[p] = (a,b,score)
+                    p = p - 1
+                    while p>0 and top[p][2] > score:
+                        top[p], top[p-1] = top[p-1], top[p]
+                        p=p-1
+        gtop.append(top)
 
     print("strict graph {")
     print("  node[shape=point, label=\"\"];")
     print("  edge[color=\"#33333377\"];")
     for a,b in edges:
         print("  %s -- %s" % (a,b))
-
+    for top in gtop:
+        for pair in top:
+            print("  %s -- %s [color=\"#ee333377\"]" % (str(pair[0]), str(pair[1])))
     print("}")
 
 
