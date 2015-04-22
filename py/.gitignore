@@ -58,3 +58,6 @@ target/
 # .csv and .index files
 *.csv
 *.index
+
+# data files
+/data/
