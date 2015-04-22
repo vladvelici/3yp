@@ -1292,13 +1292,23 @@ similar then the ones removed).
 \subsection{Undirected evaluation on a friends dataset}
 
 One of the datasets used for the evaluation of the algorithm is a small subset
-of the friends relationships from the social network Facebook. The  data is
+of the friends relationships from the social network Facebook. The data is
 completely anonimised and it was downloaded from SNAP \cite{snapnets}.
+
 
 The friends graph was provided as an edge list in TXT format and it was converted
 to CSV using a {\tt sed} command. Vertices are consecutive integers starting
 from 0, so there is no need for remapping. The dataset is a connected graph that
-contains $4039$ vertices and $88,234$ undirected edges.
+contains $4039$ vertices and $88,234$ undirected edges. A vertex represents a
+person and an edge represents a friendship relationship.
+
+
+The evaluation is based on the assumption that the likelihood of two people
+being friends is higher if the two people have more common friends, or friends
+of friends, or friends of freinds of frineds and so on. For this algorithm the
+similarity between two vertices in a graph is how similar their neighbourhoods
+are, which is the likelihood of people being friends defined above.
+
 
 To evaluate the algorithm on this dataset, $5\%$ of the edges were randomly
 removed and two files were obtained, {\tt 05fb.csv} is the dataset with the
@@ -1353,6 +1363,7 @@ eigenvalues used, $k$, can be seen in \emph{Figure~\ref{fig:fb_eig_top5}}.
 According to this metric it can be concluded that the accuracy increases with
 the number of eigenvalues used, and that, regardless of the choice of $\mu$,
 it increases quicker up to 30 eigenvalues and more slowly for higher values.
+
 
 The measure described above ignores the exact position of the removed edges in
 the top, which might prove to be useful, especially because if the dataset is
@@ -1438,6 +1449,18 @@ $k$ terms.
   \label{fig:fb_eval_euclidean}
 \end{figure}
 
+For a choice of $k=40$ and $\mu=0.5$, the algorithm performs between $88\%$ and
+$88.5\%$ better than random at finding the randomly removed friendships. However,
+the percentage of the removed edges that have a position in top 5 is arguably
+low at around $4.6\%$; the percentage increases to around $15\%$ for top 20. It
+might be the case that there are natural friendships in the dataset which are
+missing from the data. As a conclusion, it can be argued that the algorithm
+performs resonably well under the assumption that the likelihood of two people
+being friends increases with their network of common friends, but in reality
+the friendship relationship is more complicated and depends on many features
+that are not modelled in this dataset and considered by this algorithm.
+
+
 
 %
 \subsection{Visualisation}
@@ -1464,6 +1487,16 @@ vertices and $41$ undirected edges.
   \label{fig:visual_first}
 \end{figure}
 
+The SNAP Facebook dataset with the top 5 similar vertices and parameters $k=40$
+and $\mu=0.5$ is rendered in a similar way in \emph{Figure~\ref{fig:snap}}.
+
+\begin{figure}[tbp]
+  \includegraphics[width=\textwidth]{snap}
+  \caption{SNAP Facebook dataset where the gray edges represent real friendships
+  in the graph and the red edges represent similar vertices (in top 5 for each
+  vertex).}
+  \label{fig:snap}
+\end{figure}
 
 %
 %-------------------------------------------------------------------------------
