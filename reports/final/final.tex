@@ -164,7 +164,7 @@ The adjacency matrix has the property that if it is raised to the $k^{th}$ power
 the $(i, j)$ element of it, $\mat{M}^k_{ij}$, is the number of walks of length
 $k$ from vertex $i$ to vertex $j$. Therefore the $i^{th}$ column of $\mat{M}^k$
 is a vector that represents the way vertex $i$ is connected to the rest of the
-graph by walks of lenght $k$.
+graph by walks of length $k$.
 
 The could vectors should include the walks of all lengths with a preference
 towards the shorter walks over the longer walks. Therefore the adjacency matrix
@@ -197,7 +197,7 @@ where $\bm{\delta}_i$ is the $i^{th}$ column of the $N \times N$ identity matrix
 $\bm{c}_i$ up to $k = 0, 1, 2, 3, 4, 5$. The coloured vertices are used in the
 computation of $\bm{c}_i$ up to that $k$. The saturation of the colour of a vertex
 $j$ represents the $j^{th}$ value of a normalised $\bm{c}_i$, such that red
-represents the highest value in $\bm{c}_i$ and light gray represents values of 0.
+represents the highest value in $\bm{c}_i$ and light grey represents values of 0.
 In other words, the saturation of the colour of a vertex $j$ represents the strength
 of the connection between vertex $i$ and vertex $j$. When $k=0$, only the first
 vertex, $i$, counts. As $k$ gets larger, more and more vertices are considered
@@ -238,7 +238,7 @@ into the cloud vector $\bm{c}_i$, making it more accurate.
   \caption{Computation of $\bm{c}_i = \sum_{t=0}^k 0.5^t \mat{D}^t \bm{\delta}_i$ up
   to different $k$. Vertex $i$ is the only red vertex in \textbf{(a)}. The
   saturation of the colour of a vertex, $j$, represents the connection strength
-  between vertices $i$ and $j$ (red means strong connection and light gray no
+  between vertices $i$ and $j$ (red means strong connection and light grey no
   connection).}
   \label{fig:ci_diffusion}
 \end{figure}
@@ -619,7 +619,7 @@ Substitute $\mat{Q}$ into \emph{Equation~\ref{eq:dot-zvw}} and obtain
 %
 
 A Hermitian, positive-definite matrix can be factorised into a lower (or upper)
-triagular matrix and its transpose. The process is called Cholesky decomposition.
+triangular matrix and its transpose. The process is called Cholesky decomposition.
 The matrix $\mat{Q}$ only has real elements, and
 \begin{align}
   \mat{Q}^T = (\bm{\hat{\vee}}^T \mat{W} \bm{\hat{\vee}})^T
@@ -703,7 +703,7 @@ $\bm{\vee_L}$ is a matrix of the left eigenvectors.
 \end{align}
 
 Some of the eigenvalues and some elements of the eigenvectors might be complex.
-However, because $\mat{D}$ is real, if an eigenvalue $\lambda_i$ is copmlex,
+However, because $\mat{D}$ is real, if an eigenvalue $\lambda_i$ is complex,
 there exists an eigenvalue $\lambda_j$ that is its complex conjugate, that is
 $\lambda_i = \conj{\lambda_j}$. The same applies to eigenvectors, if an
 eigenvector $\bm{\vee}^{(i)}$ (left or right) has complex elements, there exists
@@ -977,7 +977,7 @@ described above will be called the \emph{maximum depth heuristic}.
 
 
 Using a heuristic can reduce the number of similarities computed and thus speed
-up the computation while not hainvg a big impact on the overall accuracy. As an
+up the computation while not having a big impact on the overall accuracy. As an
 example, on a friends dataset of $4039$ vertices, $83,822$ edges and a diameter
 of $8$ (longest shortest path), the maximum depth heuristic with depth 3 has
 reduced the number of comparisons by approx. $36.3\%$, and the overall change in
@@ -1144,7 +1144,7 @@ computations.
 
 Linear algebra libraries for C++ were also investigated. SLEPc \cite{slepc} is a
 mature library for large sparse eigenvalue problems implemented as an extension
-of PETSc \cite{petsc}. It includes implementations of the Lanczons Method and
+of PETSc \cite{petsc}. It includes implementations of the Lanczos Method and
 Arnoldi Iteration, however the interfaces are very low level and prototyping
 using it would be too slow.
 
@@ -1256,7 +1256,7 @@ There are two providers implemented in the {\tt provider} package. These are
 \end{enumerate}
 
 The maximum depth heuristic is implemented as the class {\tt Maxdepth} of the
-package {\tt heuristics}. It takes an edgelist and a depth and has a method
+package {\tt heuristics}. It takes an edge list and a depth and has a method
 {\tt top(node=None)} that returns a dict of pairs if {\tt node} is {\tt None} or
 a list of nodes, or it returns a list of nodes if {\tt node} is just one node.
 For example, {\tt top(3)} returns something like {\tt [2, 4, 9]}, but
@@ -1383,7 +1383,7 @@ similar then the ones removed).
 
 One of the datasets used for the evaluation of the algorithm is a small subset
 of the friends relationships from the social network Facebook. The data is
-completely anonimised and it was downloaded from SNAP \cite{snapnets}.
+completely anonymised and it was downloaded from SNAP \cite{snapnets}.
 
 
 The friends graph was provided as an edge list in TXT format and it was converted
@@ -1395,7 +1395,7 @@ person and an edge represents a friendship relationship.
 
 The evaluation is based on the assumption that the likelihood of two people
 being friends is higher if the two people have more common friends, or friends
-of friends, or friends of freinds of frineds and so on. For this algorithm the
+of friends, or friends of friends of friends and so on. For this algorithm the
 similarity between two vertices in a graph is how similar their neighbourhoods
 are, which is the likelihood of people being friends defined above.
 
@@ -1486,7 +1486,7 @@ which the values and slopes differ with $\mu$ (for large $\mu$ it increases and
 for small $\mu$ it decreases).
 
 
-The peaks and changes at $k=40$ are related to the local mimimum observed in
+The peaks and changes at $k=40$ are related to the local minimum observed in
 \emph{Figure~\ref{fig:no-of-eigenvectors}}, where the naive and approximative
 approaches are compared, and it is deduced that there is a $k \ll N$ for which
 the approximation best represents the graph. We can argue that for this size of
@@ -1545,7 +1545,7 @@ the percentage of the removed edges that have a position in top 5 is arguably
 low at around $4.6\%$; the percentage increases to around $15\%$ for top 20. It
 might be the case that there are natural friendships in the dataset which are
 missing from the data. As a conclusion, it can be argued that the algorithm
-performs resonably well under the assumption that the likelihood of two people
+performs reasonably well under the assumption that the likelihood of two people
 being friends increases with their network of common friends, but in reality
 the friendship relationship is more complicated and depends on many features
 that are not modelled in this dataset and considered by this algorithm.
@@ -1563,7 +1563,7 @@ large graphs, but it might give a broad idea of what the results are and help
 fine-tune the algorithm on specific problems.
 
 The undirected graph from \emph{Figure~\ref{fig:ci_diffusion}} was rendered
-using Graphviz \cite{graphviz} in \emph{Figure~\ref{fig:visual_first}}, where the gray edges
+using Graphviz \cite{graphviz} in \emph{Figure~\ref{fig:visual_first}}, where the grey edges
 represent real edges in the graph and the red edges represent similar vertices.
 Only the top two similar vertices (that are not in Blacklist) are rendered. The
 parameters used for the algorithm are $k=6$ and $\mu=0.5$. The graph has $31$
@@ -1571,7 +1571,7 @@ vertices and $41$ undirected edges.
 
 \begin{figure}[tbp]
   \includegraphics[width=\textwidth]{visual_first}
-  \caption{Top 2 similar vertices on a small undirected graph. Gray edges are
+  \caption{Top 2 similar vertices on a small undirected graph. Grey edges are
   real edges in the graph and red edges represent similarities (top two of one
   of the vertices).}
   \label{fig:visual_first}
@@ -1582,7 +1582,7 @@ and $\mu=0.5$ is rendered in a similar way in \emph{Figure~\ref{fig:snap}}.
 
 \begin{figure}[tbp]
   \includegraphics[width=\textwidth]{snap}
-  \caption{SNAP Facebook dataset where the gray edges represent real friendships
+  \caption{SNAP Facebook dataset where the grey edges represent real friendships
   in the graph and the red edges represent similar vertices (in top 5 for each
   vertex).}
   \label{fig:snap}
