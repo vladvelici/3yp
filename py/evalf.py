@@ -106,7 +106,8 @@ def evaluate(index, edges, cache, eachFunc=None, heu=None, blacklist=None, picks
     rand_total_score = 0.0
     rand_total_relative_score = 0.0
 
-    good_threshold = 5
+    good_threshold = int(round(len(index)/100)) # 1% of nodes
+    print("threshold = %d" % good_threshold)
 
     allnodes = index.nodelist()
     for i, pair in enumerate(edges):
@@ -183,14 +184,14 @@ def evaluate(index, edges, cache, eachFunc=None, heu=None, blacklist=None, picks
         nodes               =       no_nodes,
         edges               =       len(edges),
         position            =       total_position,
-        good_position       =       good_position,
+        good_position       =       good_position / len(edges),
         rand_position       =       rand_total_position,
         score               =       total_score,
-        better_than_random  =       better_than_random,
+        better_than_random  =       better_than_random / len(edges),
         rand_score          =       rand_total_score,
         relative            =       total_relative_score,
         rand_relative       =       rand_total_relative_score,
-        rand_good_position  =       rand_good_position,
+        rand_good_position  =       rand_good_position / len(edges),
         diff_position       =       rand_total_position - total_position,
         diff_score          =       rand_total_score - total_score,
         diff_relative       =       rand_total_relative_score - total_relative_score
