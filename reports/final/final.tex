@@ -304,6 +304,7 @@ a computationally costly operation of complexity $O(N^3)$.
 %
 %% Motivation for dot products only.
 %
+
 There are two similarity measures that should be computed, namely the Euclidean
 distance between two cloud vectors and the cosine of the angle between them.
 
@@ -352,8 +353,9 @@ will be described.
 
 The algorithm is slightly different for directed and undirected graphs, because
 undirected graphs have symmetric adjacency matrices. Symmetric matrices have the
-advantage of having real eigenvalues, whereas non-symmetric matrices can have
-both real and complex eigenvalues.
+advantage of having real eigenvalues and orthogonal eigenvectors, whereas
+non-symmetric matrices can have both real and complex eigenvalues and the
+eigenvectors need not be orthogonal.
 
 Both versions of the algorithm use the normalised adjacency matrix (from
 \emph{Equation~\ref{eq:initial-d}}), which can be vectorised as
@@ -514,7 +516,7 @@ smaller than the number of data points squared. In terms of the undirected graph
 $\mathcal{G}(\mathcal{V}, \mathcal{E})$, it is expected that $\|\mathcal{E}\|
 \ll \|\mathcal{V}\|^2$. The Lanczos Method is an efficient iterative algorithm
 to compute the leading eigenvalues of large sparse real symmetric matrices
-\cite{calvetti1994implicitly} and it is implemented in both Matlab and Python
+\cite{calvetti1994implicitly} and it is implemented in both Matlab\cite{matlab:eigs} and Python
 (SciPy).
 
 Compute the largest $k$ eigenvalues and eigenvectors using the Lanczos Method
@@ -1029,8 +1031,8 @@ eigenvalue algorithms required built-in. Matlab is also easy to prototype in.
 
 The approximative approach for undirected graphs was implemented in Matlab as a
 couple of functions. The function signatures along with descriptions are
-presented in \emph{Table~\ref{tbl:matlab-interface}}. Some helper functions are not
-included in the table. The (iterative) naive algorithm was implemented as a
+presented in \emph{Table~\ref{tbl:matlab-interface}}. Some helper functions are
+not included in the table. The (iterative) naive algorithm was implemented as a
 separate set of Matlab functions with a very similar interface.
 
 \begin{methodListC}{tbl:matlab-interface}{Matlab implementation interface.}
@@ -1134,31 +1136,32 @@ web service for building an interactive visualisation for the algorithm).
 
 Other languages were investigated to port the algorithm in. The first one to
 look at was Go because some tools were already written in Go. There are some
-libraries for linear algebra in Go (e.g. bigo.matrix which uses BLAS, or
-skelterjohn/go.matrix which has parallel matrix multiplication implemented), but
-they are not mature enough and do not have (or have very limited) support for
-sparse matrices and eigenvalue/eigenvector computations.
+libraries for linear algebra in Go (e.g. bigo.matrix \cite{biogo} which uses
+BLAS, or skelterjohn/go.matrix \cite{go.matrix} which has parallel matrix
+multiplication implemented), but they are not mature enough and do not have
+(or have very limited) support for sparse matrices and eigenvalue/eigenvector
+computations.
 
-Linear algebra libraries for C++ were also investigated. SLEPc is a mature
-library for large sparse eigenvalue problems implemented as an extension of
-PETSc. It includes implementations of the Lanczons Method and Arnoldi Iteration,
-however the interfaces are too low level and prototyping using it would be too
-slow.
+Linear algebra libraries for C++ were also investigated. SLEPc \cite{slepc} is a
+mature library for large sparse eigenvalue problems implemented as an extension
+of PETSc \cite{petsc}. It includes implementations of the Lanczons Method and
+Arnoldi Iteration, however the interfaces are very low level and prototyping
+using it would be too slow.
 
-Armadillo is another C++ linear algebra library. It has a high level API backed
-by efficient implementations of all the basic matrix operations. It also has
-support for sparse matrices and computation of leading eigenvalues and eigenvectors.
-The API Armadillo provides is very similar to Matlab, making the algorithm easier
-to port.
+Armadillo \cite{armadillo} is another C++ linear algebra library. It has a high
+level API backed by efficient implementations of all the basic matrix operations.
+It also has support for sparse matrices and computation of leading eigenvalues
+and eigenvectors. The API Armadillo provides is very similar to Matlab, making
+the algorithm easier to port.
 
-The last language and set of libraries analysed is Python with NumPy and SciPy.
-Python is a scripting language that is easy to read and write and can be used
-interactively. SciPy is a mature scientific computing library for Python which
-contains all the basic linear algebra functions, has good support for sparse
-matrices and uses ARPACK (same as Matlab and Armadillo) to access efficient
-implementations of the Lanczos Method and the Arnoldi Iteration. It also has a
-very good and accessible documentation, a relatively large user base and active
-community.
+The last language and set of libraries analysed is Python with NumPy and SciPy
+\cite{scipy}. Python is a scripting language that is easy to read and write and
+can be used interactively. SciPy is a mature scientific computing library for
+Python which contains all the basic linear algebra functions, has good support
+for sparse matrices and uses ARPACK (same as Matlab and Armadillo) to access
+efficient implementations of the Lanczos Method and the Arnoldi Iteration. It
+also has a very good and accessible documentation, a relatively large user base
+and active community.
 
 A choice had to be made on which of these tools to use. C++ with Armadillo and
 Python with NumPy and SciPy were the best options in terms of linear algebra
