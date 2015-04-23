@@ -114,9 +114,11 @@ from large datasets represented as graphs.
 large graphs for different use cases and implementing an open-source software
 library to provide everyone with this functionality.
 \newpage
+%
 %-------------------------------------------------------------------------------
 % INTRODUCTION
 %-------------------------------------------------------------------------------
+%
 \section{Introduction}
 %\addcontentsline{toc}{section}{Introduction}
 %
@@ -138,6 +140,29 @@ It is computationally too expensive to compute all the cloud vectors and then
 the dot products or the Euclidean distances. This project investigates methods
 for approximating the dot products, different similarity measures based on the
 dot products, and the evaluation of these measures on real world datasets.
+
+%
+%-------------------------------------------------------------------------------
+% SIMILAR WORK
+%-------------------------------------------------------------------------------
+%
+\section{Related work}
+
+The work in \cite{fouss2007random} presents a way to characterise similarities
+between vertices of weighted undirected graphs based on a Markov-chain model of
+random walks. It uses the leading eigenvectors to approximate the
+Laplacian matrix of the graph and its pseudo-inverse to provide a similarity
+measure. The model is used as a recommender system in the work.
+
+A similar diffusion process is used in \cite{pons2005computing} for an algorithm
+to find communities (parts of the graph with vertices connecting to each other
+more than they connect to the rest of the graph) in graphs, which has various
+applications in graph visualisation, recommender systems, analysis of networks,
+especially social networks, etc.
+
+A model that works for both directed and undirected graphs is presented in this
+report. It uses the normalised adjacency matrix to model a diffusion process and
+obtain similarity measures between vertices.
 
 
 %
