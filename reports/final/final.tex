@@ -1422,21 +1422,22 @@ The evaluation is based on the assumption that the likelihood of two people
 being friends is higher if the two people have more common friends, or friends
 of friends, or friends of friends of friends and so on. For this algorithm the
 similarity between two vertices in a graph is how similar their neighbourhoods
-are, which is the likelihood of people being friends defined above.
+are, which is the likelihood of people being friends as defined above.
 
 
 To evaluate the algorithm on this dataset, $5\%$ of the edges were randomly
 removed and two files were obtained, {\tt 05fb.csv} is the dataset with the
-edges removed, and {\tt 05removed\_fb.csv} is a list containing the removed
-edges. The {\tt conncomp} tool command used is:
+edges removed, the training set (or $\mathcal{E}$), and {\tt 05removed\_fb.csv}
+is a list containing the removed edges, the test set (or $R$). The
+{\tt conncomp} tool command used is:
 \begin{lstlisting}
   conncomp -action remove -p 0.05 -o "05" fb.csv
 \end{lstlisting}
 
 
 To evaluate how well the Euclidean distance between cloud vectors is predicting
-the removed edges, we run the algorithm on the dataset with the edges removed,
-and compute the similarity for all the removed edges.
+the removed edges, we run the algorithm on the training set, and compute the
+similarity for all pairs in the test set.
 
 
 For any vertex $i$ we can define the top similar vertices to be an ordered list
@@ -1450,15 +1451,15 @@ example given it is 1.
 
 If $\ttop(i) = [a, b, c, d]$ and there are two removed edges $(i, b)$ and $(i, c)$,
 we cannot say which of those pairs should be more similar, therefore we want
-the top to ignore the ordering of vertices in the removed edges (in other words,
-we want $\ttop(i) = [a, b, c, d]$ to be equivalent to $\ttop(i) = [a, c, b, d]$ in
-terms of the evaluation of the algorithm). In fact, ignoring both the removed
-edges and the existing edges is better as we do not want to compare the
-similarity between vertices that are already connected in the dataset. To do
-this we introduce a set of pairs of vertices containing the removed and existing
-edges and call it Blacklist, then we define the $\bpos(a, \ttop(i))$ to be the
-position of $a$ in the top of $i$ without counting the pairs that are in the
-blacklist. Mathematically,
+the top to ignore the ordering of the pairs in the test set (in other words,
+we want $\ttop(i) = [a, b, c, d]$ to be equivalent to $\ttop(i) = [a, c, b, d]$
+in terms of the evaluation of the algorithm). In fact, ignoring the pairs in
+both the test set and the training set is better as we do not want to compare
+the similarity between vertices that are already connected. To do this we
+introduce a set, Blacklist (or $B$), that is the union of the test set,
+training set and all edges of type $(i,i)$, then we define the
+$\bpos(a, \ttop(i))$ to be the position of $a$ in the top of $i$ without
+counting the pairs that are in the blacklist. Mathematically,
 \begin{align}
   \text{Blacklist} &= B = R \cup \mathcal{E} \cup \{(i,j) | \forall i, j \in
     \mathcal{V}\}, \\
@@ -1471,33 +1472,33 @@ blacklist. Mathematically,
 
 
 One evaluation metric is the percentage of the removed edges that have
-their end vertex in the the top 5 similar vertices of the start vertex, using
-the $\bpos$ top position to ignore the ordering between removed edges and
-existing edges in the top. A chart of this measure versus the number of
+their end vertex in the the top 5 similar vertices of the start vertex using
+the $\bpos$ top position. A chart of this measure versus the number of
 eigenvalues used, $k$, can be seen in \emph{Figure~\ref{fig:fb_eig_top5}}.
 According to this metric it can be concluded that the accuracy increases with
 the number of eigenvalues used, and that, regardless of the choice of $\mu$,
 it increases quicker up to 30 eigenvalues and more slowly for higher values.
 
 
-The measure described above ignores the exact position of the removed edges in
-the top, which might prove to be useful, especially because if the dataset is
+The measure described above ignores the exact position of pairs in the test set
+in the top, which might prove to be useful, especially because if the dataset is
 large the top 5 vertices would be a too small threshold and, in general, picking
-a sensible threshold is not trivial. The average of the positions in top of
-all the removed edges,
+a sensible threshold is not trivial -- it is dependent on the use case, but a
+choice can be a set percentage of the size of the test set (e.g. 1\%).
+The average of the positions in top of all the pairs in the test set,
 \begin{equation}
   \frac{1}{|R|} \sum_{(i,j) \in R} \bpos(j, \ttop(i)),
 \end{equation}
-where $R$ is a set of all the removed edges, is a similarity metric that contains
-more information. A plot of this average versus the number of eigenvalues used
-is in \emph{Figure~\ref{fig:fb_eig_pos}}, from which we can observe that for
-all choices of $\mu$, the average top position decreases until $k=40$
-eigenvalues, after which the difference between the means for different $\mu$
-increases and for large $\mu$ the average top position still decreases, but it
-increases for small $\mu$. Despite the fact that the percentage of removed edges
-in top 5 increases with $k$, the average top position does not always decrease
-with the increase of $k$, fact explained by the similarities outside of top 5
-being very low (thus being placed far in the top).
+is a similarity metric that contains more information. A plot of this average
+versus the number of eigenvalues used is in \emph{Figure~\ref{fig:fb_eig_pos}},
+from which we can observe that for all choices of $\mu$, the average top
+position decreases until $k=40$ eigenvalues, after which the difference between
+the means for different $\mu$ increases and for large $\mu$ the average top
+position still decreases, but it increases for small $\mu$. Despite the fact
+that the percentage of removed edges in top 5 increases with $k$, the average
+top position does not always decrease with the increase of $k$, fact explained
+by the similarities outside of top 5 being very low (thus being placed far in
+the top).
 
 
 Another evaluation metric is comparing the scores obtained for the removed edges
@@ -1567,13 +1568,14 @@ $k$ terms.
 For a choice of $k=40$ and $\mu=0.5$, the algorithm performs between $88\%$ and
 $88.5\%$ better than random at finding the randomly removed friendships. However,
 the percentage of the removed edges that have a position in top 5 is arguably
-low at around $4.6\%$; the percentage increases to around $15\%$ for top 20. It
-might be the case that there are natural friendships in the dataset which are
-missing from the data. As a conclusion, it can be argued that the algorithm
-performs reasonably well under the assumption that the likelihood of two people
-being friends increases with their network of common friends, but in reality
-the friendship relationship is more complicated and depends on many features
-that are not modelled in this dataset and considered by this algorithm.
+low at around $4.6\%$; the percentage increases to around $15\%$ for top 20, and
+to around $26\%$ for top 40 (1\% of the test set). It might be the case that
+there are natural friendships in the dataset which are missing from the data. As
+a conclusion, it can be argued that the algorithm performs reasonably well under
+the assumption that the likelihood of two people being friends increases with
+their network of common friends, but in reality the friendship relationship is
+more complicated and depends on many features that are not modelled in this
+dataset and not considered by this algorithm.
 
 
 
