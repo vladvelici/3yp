@@ -33,6 +33,7 @@
 \usepackage{bm}
 \usepackage{listings}
 \usepackage{tabularx}
+\usepackage[utf8]{inputenc}
 
 \setlength{\parindent}{0em}
 \setlength{\parskip}{1.2em}
@@ -130,8 +131,8 @@ common interests from research publications repositories or identifying possible
 duplicates in a dataset.
 
 It is possible to calculate cloud vectors that represent the neighbourhoods of
-vertices in a graph only by looking at the structure of the graph. Then if a cloud
-vector is close to another it means the vertices they represent belong to a similar
+vertices in a graph only by looking at its stucture. Then if a cloud vector is
+close to another it means the vertices they represent belong to a similar
 neighbourhood. Using the dot product of cloud vectors we can compute different
 similarity measures between vertices. Cosine similarity and Euclidean distance
 are studied in this report.
@@ -197,7 +198,7 @@ should be normalised such that all rows sum up to one. Let
 %
 \begin{equation}
 \label{eq:initial-d}
-\mat{D}_{ij} = \frac{\mat{M}_{ij}}{\sum_k^N \mat{M}_{ik}}
+\mat{D}_{ij} = \frac{\mat{M}_{ij}}{\sum_{k=1}^N \mat{M}_{ik}}
 \end{equation}
 be the normalised adjacency matrix. A matrix that includes walks of all lengths
 as described above can be written as the sum
@@ -207,7 +208,7 @@ as described above can be written as the sum
 \sum_t^\infty \mu^t \mat{D}^t,
 \end{equation}
 %
-where $\mu \in [0,1]$ is a penalising factor. For each vertex of the graph, $i
+where $\mu \in (0, 1)$ is a penalising factor. For each vertex of the graph, $i
 \in \mathcal{V}$, the cloud vector is the $i^{th}$ column of the matrix in
 \emph{Equation~\ref{eq:mu^t_d^t}}, or mathematically
 %
@@ -283,7 +284,7 @@ similarity between a vertex and itself.
 Another similarity measure is the cosine similarity, which is the cosine of the
 angle between the two vectors. It has values in the interval $[-1,1]$, with the
 property that $\cos(0) = 1$ and $\cos(a) < \cos(b) \leq 1$, where $\pi \geq a > b
-\geq 0$. A higher values means higher similarity, with $1$ being the maximum. The
+\geq 0$. A higher value means higher similarity, with $1$ being the maximum. The
 cosine similarity ignores the magnitudes of the cloud vectors and only considers
 the angle between them, therefore two cloud vectors that are not identical but
 have the same direction (angle between them $0$) have the cosine similarity $1$.
@@ -429,8 +430,8 @@ diagonal elements and obtain $(\mat{W}^{\sfrac{1}{2}})_{ii} = (\mat{W}_{ii})^
 %
 
 
-Let $\lambda_i$ be the $i^{th}$ eigenvalue of $\mat{A}$ and $\bm{\vee}^{(i)}$ be
-the $i^{th}$ eigenvector of $\mat{A}$ ($\forall i \in \{ 1, 2, ..., N \}$).
+Let $\lambda_i$ be the $i^{th}$ eigenvalue of $\mat{A}$ and $\bm{\vee}^{(i)}$
+its corresponding eigenvector ($\forall i \in \{ 1, 2, ..., N \}$).
 $\mat{V}$ is a matrix of all $N$ eigenvectors (such that $\bm{\vee}^{(i)}$ is
 the $i^{th}$ column of $\bm{\vee}$), and $\bm{\Lambda}$ is a diagonal matrix
 of all $N$ eigenvalues
@@ -605,7 +606,7 @@ The dot product between $\bm{\hat{c}}_i$ and $\bm{\hat{c}}_j$ becomes
 \begin{align}
   \bm{\hat{c}}^T_i \bm{\hat{c}}_j &=
     \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a=1}^{k} \mat{Z}_{ia} \bm{\vee}^{(a)} \Big)^T
-    \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a'=1}^{k} \mat{Z}_{ia} \bm{\vee}^{(a')} \Big)
+    \Big(\mat{W}^{\sfrac{1}{2}} \sum_{a'=1}^{k} \mat{Z}_{ia'} \bm{\vee}^{(a')} \Big)
   \\
   &= \sum_{a=1}^{k} \mat{Z}_{ia} \bm{\vee}^{(a)T} \mat{W}
     \sum_{a'=1}^{k} \mat{Z}_{ia'} \bm{\vee}^{(a')}
@@ -794,7 +795,8 @@ Let $\bm{\hat{c}}_i$ be the approximation of the cloud vector $\bm{c}_i$,
 
 For any complex number $x = a+bi$, the sum $x + \conj{x} = a + bi + a - bi =
 2a$ is real. The approximative cloud vectors $\bm{\hat{c}}_i$ are real vectors
-because
+because they are sums of real numbers and pairs of complex and complex
+conjugates, as
 \begin{align}
   \label{eq:directed-ci-real}
   \text{for all } \lambda_a \in \mathbb{C}-\mathbb{R} \
@@ -802,14 +804,14 @@ because
     \text{ such that} \ b \leq k, \\
   \text{for all } \bm{\vee}_{\bm{L}i}^{(a)} \in \mathbb{C}-\mathbb{R} \
     &\text{there exists } \bm{\vee}_{\bm{L}i}^{(b)} = \conj{\bm{\vee}_{\bm{L}i}^{(a)}}
-    \text{ such that} b \leq k, \\
+    \text{ such that} \ b \leq k, \\
   \text{for all } \bm{\vee_R}^{(a)} \in \mathbb{C}-\mathbb{R} \
     &\text{there exists } \bm{\vee_R}^{(b)} = \conj{\bm{\vee_R}^{(a)}}
     \text{ such that} \ b \leq k.
 \end{align}
 The assumption about $k$ only covers the first rule
 (\emph{Equation~\ref{eq:directed-ci-real}}) but it is sufficient because an
-eigenvector is complex only if its corresponding eigenvalue is also complex and
+eigenvector is complex only if its corresponding eigenvalue is complex and
 if two eigenvalues are conjugates $\lambda_a = \conj{\lambda_b}$ then their
 corresponding eigenvectors are also conjugates $\bm{\vee}^{(a)} =
 \conj{\bm{\vee}^{(b)}}$.
@@ -886,10 +888,9 @@ $\mat{Q}$ and $\mat{Z}$ as a \emph{directed index}.
 
 \subsection{Comparison with naive approach}
 
-While the naive approach takes significantly more time ($O(N^3)$ compared to
-...) and space ($O(N^3)$ compared to $O(k^2 + kN)$), it also tends
-to be more accurate because it uses the whole adjacency matrix and not only an
-approximation of it.
+While the naive approach takes significantly more time and space ($O(N^3)$ space
+compared to $O(k^2 + kN)$), it also represents the graph more accurately because
+it uses the whole adjacency matrix and not only an approximation of it.
 
 A simple evaluation metric of how well the approximative approach retains the
 most important information from the graph is to evaluate how different are the
@@ -989,11 +990,12 @@ too slow for large systems that require a constant low latency.
 Assume that if two vertices are too far away from each other in the graph, they
 are unlikely to be similar. The computation of similarities can then be limited
 to only those pairs of vertices that are not too far away. Formally, let
-$dist(i,j)$ be the distance between vertices $i$ and $j$ (the length of the
-shortest path). Only compute similarities for those pairs of vertices such that
-$dist(i, j) \leq d$ for $d$ being the maximum distance allowed, and consider all
-the other pairs of vertices not similar. This filter is implemented using a
-trivial breadth first search stopping at the desired maximum depth.
+$\operatorname{dist}(i,j)$ be the distance between vertices $i$ and $j$ (the
+length of the shortest path). Only compute similarities for those pairs of
+vertices such that $\operatorname{dist}(i, j) \leq d$ for $d$ being the maximum
+distance allowed, and consider all the other pairs of vertices not similar. This
+filter is implemented using a trivial breadth first search stopping at the
+desired maximum depth.
 
 
 We will call the filter applied on the graph to drop pairs of edges that are
@@ -1006,9 +1008,10 @@ up the computation while not having a big impact on the overall accuracy. As an
 example, on a friends dataset of $4039$ vertices, $83,822$ edges and a diameter
 of $8$ (longest shortest path), the maximum depth heuristic with depth 3 has
 reduced the number of comparisons by approx. $36.3\%$, and the overall change in
-accuracy is negligible. The evaluation of the algorithm on this dataset with no
-heuristic takes about $37$ minutes, and with the maximum depth heuristic of depth
-$3$, it only takes about $18$ minutes (approx. $2x$ speed-up).
+accuracy is negligible. The evaluation of the algorithm on the SNAP Facebook
+dataset (on a range of $k$ and $\mu$) with no heuristic takes about $37$
+minutes, and with the maximum depth heuristic of depth $3$, it only takes about
+$18$ minutes (approx. $2x$ speed-up).
 
 %
 %-------------------------------------------------------------------------------
@@ -1079,15 +1082,15 @@ incorporating the algorithm in larger systems.
 
 \subsection{Data processing tools}
 
-In an ideal world, the comes in the exact format that we want. Unfortunately,
-this is never the case in the real world where data comes in all the shapes and
-sizes and thus there is a need for tools to process it, and reshape it to fit
-into the system.
+In an ideal world, the data comes in the exact format that we want.
+Unfortunately, this is never the case in the real world where data comes in all
+shapes and sizes and thus there is a need for tools to process it, and reshape
+it to fit into the system.
 
 
-In the Matlab model, a graph file could be a CSV file with each row representing
-an edge, and each vertex would be an integer starting from 1 and incrementing.
-No real world dataset comes in this format and in order to make the conversion
+In the Matlab model, a graph file could be a CSV file where each row represents
+an edge, and each vertex is an integer starting from 1 and incrementing. Nearly
+no real world dataset comes in this format and in order to make the conversion
 some tools must be implemented.
 
 
@@ -1105,7 +1108,7 @@ different from dataset to dataset, and the implementations can vary from small
 Go programs to bash scripts, depending on the input formats.
 
 
-After the dataset was in CSV format, a tool was needed to make the vertex IDs
+After the dataset is in CSV format, a tool is needed to make the vertex IDs
 integers from 1 to N (the number of vertices). A command line tool called
 \emph{autoincr} was implemented in Go. It takes one or more CSV edge lists and
 assigns each vertex an integer ID starting from one and incrementing. It also
@@ -1200,7 +1203,7 @@ to try things out before implementing them in a larger codebase.
 As a result, Python with NumPy and SciPy were chosen to port the algorithm and
 continue the development.
 
-\subsection{Architecture of the final implementation}
+\subsection{Final implementation}
 
 The final implementation is based on two simple concepts. A similarity index,
 called a {\tt Sim} object and a provider ({\tt Provider}).
@@ -1247,7 +1250,7 @@ method is overwritten to persist both the {\tt Provider} object and the
 {\tt Sim} object into a single tar file.
 
 The main algorithm is implemented in package {\tt sim}, where there are some
-other helper functions defined. A list of functions is in
+other helper functions defined. A partial list of functions is in
 \emph{Table~\ref{tbl:sim-package}}.
 
 \begin{methodListC}{tbl:sim-package}{Partial list of functions from package
@@ -1280,7 +1283,7 @@ There are two providers implemented in the {\tt provider} package. These are
   the offset should be set to $-1$.
 \end{enumerate}
 
-The maximum depth heuristic is implemented as the class {\tt Maxdepth} of the
+The maximum depth heuristic is implemented as the class {\tt Maxdepth} from
 package {\tt heuristics}. It takes an edge list and a depth and has a method
 {\tt top(node=None)} that returns a dict of pairs if {\tt node} is {\tt None} or
 a list of nodes, or it returns a list of nodes if {\tt node} is just one node.
@@ -1298,11 +1301,11 @@ following capabilities
   \item[train] Takes an edge list and parameters like $\mu$ and $k$ to create
     an index file that can be used for computing similarities and visualisations.
     It can be configured to use the {\tt Edgelist} or {\tt Offset} providers.
-    Usage example:
+    Example usage:
 
     {\tt \$ ./cmd.py train snap.csv -k 40 -mu 0.5 ----direct -o snap.index}
   \item[info] Outputs information about an index file, like the number of nodes
-    and the type of index. Usage example:
+    and the type of index. Example usage:
 
     \begin{lstlisting}
 $ ./cmd.py info snap.index
@@ -1311,7 +1314,7 @@ tar index file with 4039 nodes.
 Index is in short format (for Q=L^T*L, stores L^T * Z^T).
     \end{lstlisting}
   \item[sim] Takes an index file and a list of vertices for which to compute
-    similarities and outputs the results; Usage example:
+    similarities and outputs the results. Example usage:
 
     \begin{lstlisting}
 $ ./cmd.py sim snap.index 2 3 --to 5 6
@@ -1345,28 +1348,28 @@ $ ./cmd.py top snap.index 2 3 --limit 4 -b snap.csv
 
   {\tt \$ dot snap.dot -Tpng -o snap.png}
 
-  or
+  or a faster way for large graphs
 
   {\tt \$ sfdp -Gsize=30! -Goverlap=prism -Tsvg -o snap.svg snap.dot}
   \item[eval] Perform an evaluation of an index file. Takes an index file and
-  a removed edges file and computes the following evaluation metrics
+  a test set file and computes the following evaluation metrics
   \begin{enumerate}
-    \item average position in top of the removed edges,
-    \item percentage of removed edges in top 5 similarities,
-    \item average score of removed edges,
-    \item average relative score of removed edges (squared difference of the
-      removed edge score and the best score of the first vertex),
+    \item average position in top of the test pairs,
+    \item percentage of test pairs in top 5 similarities,
+    \item average score of test pairs,
+    \item average relative score of test pairs (squared difference of the
+      test pair score and the best score of the first vertex),
     \item percentage better than random,
     \item random average top position,
     \item random average score, and
     \item and random average relative score.
   \end{enumerate}
-  Usage example:
+  Example usage:
 
   {\tt \$ ./cmd.py eval snap\_short.index snap\_removed.csv}
-  \item[trev] Train and evaluate. It takes a graph, a list of removed edges and
-    a range of $k$ and $\mu$ and evaluates the same similarity metrics as
-    \textbf{eval} but on all the combinations of $k$ and $\mu$ in the ranges given.
+  \item[trev] Train and evaluate. It takes a graph, a test set and  a range of
+    $k$ and $\mu$ and evaluates the same similarity metrics as \textbf{eval} but
+    on all the combinations of $k$ and $\mu$ in the ranges given.
     Example usage:
 
     {\tt \$ ./cmd.py trev snap\_short.index snap\_removed.csv -t u ----direct -k 20 30 40 -mu 0.3 0.5 0.7 }
@@ -1377,6 +1380,9 @@ The command line tool has useful help messages when the {\tt -t} flag is used, l
   $ ./cmd.py -h
   $ ./cmd.py trev -h.
 \end{lstlisting}
+
+The project was developed using git as a version control system with a remote
+repository on GitHub (\url{https://github.com/vladvelici/3yp}).
 
 %
 %-------------------------------------------------------------------------------
@@ -1461,7 +1467,7 @@ training set and all edges of type $(i,i)$, then we define the
 $\bpos(a, \ttop(i))$ to be the position of $a$ in the top of $i$ without
 counting the pairs that are in the blacklist. Mathematically,
 \begin{align}
-  \text{Blacklist} &= B = R \cup \mathcal{E} \cup \{(i,j) | \forall i, j \in
+  \text{Blacklist} &= B = R \cup \mathcal{E} \cup \{(i,i) | \forall i \in
     \mathcal{V}\}, \\
   \bpos(a, \ttop(i)) &= \pos(a, \ttop(i)) - \sum_{(i, k) \in B} g(a,i,k), \\
   g(a,i,k) &= \left\{ \begin{array}{ll}
@@ -1484,7 +1490,7 @@ The measure described above ignores the exact position of pairs in the test set
 in the top, which might prove to be useful, especially because if the dataset is
 large the top 5 vertices would be a too small threshold and, in general, picking
 a sensible threshold is not trivial -- it is dependent on the use case, but a
-choice can be a set percentage of the size of the test set (e.g. 1\%).
+choice can be a percentage of the size of the test set (e.g. 1\%).
 The average of the positions in top of all the pairs in the test set,
 \begin{equation}
   \frac{1}{|R|} \sum_{(i,j) \in R} \bpos(j, \ttop(i)),
@@ -1544,19 +1550,19 @@ $k$ terms.
   ~
   \begin{subfigure}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{fb_eig_better}
-		\caption{Percentage of removed edges that have a higher similarity
-    than a random pair of vertices (that is not in the removed list).}
+		\caption{Percentage of test pairs that have a higher similarity
+    than a random pair of vertices (that is not blacklisted).}
     \label{fig:fb_eig_better}
   \end{subfigure}
   \begin{subfigure}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{fb_eig_scores}
-		\caption{Removed edges and relative scores. $\mu = 0.5$.}
+		\caption{Test pair and relative scores. $\mu = 0.5$.}
     \label{fig:fb_eig_scores}
   \end{subfigure}%
   ~
   \begin{subfigure}[b]{0.5\textwidth}
     \includegraphics[width=\textwidth]{fb_eig_pos}
-    \caption{Normalised sum of top positions.}
+    \caption{Average sum of top positions.}
     \label{fig:fb_eig_pos}
   \end{subfigure}
   \caption{Different evaluation metrics on the friends dataset using the
@@ -1583,10 +1589,10 @@ dataset and not considered by this algorithm.
 \subsection{Visualisation}
 %\addcontentsline{toc}{subsection}{Visualisation}
 %
-A subjective method of evaluation on real data is attempting to visualise the
-algorithm output on real data and deduce whether it gives sensitive results.
-This method has the disadvantage of being subjective and it cannot scale to very
-large graphs, but it might give a broad idea of what the results are and help
+A subjective method of evaluation is attempting to visualise the algorithm
+output on real data and deduce whether it gives sensitive results. This method
+has the disadvantage of being subjective and it cannot scale to very large
+graphs, but it might give a broad idea of what the results are and help
 fine-tune the algorithm on specific problems.
 
 The undirected graph from \emph{Figure~\ref{fig:ci_diffusion}} was rendered
@@ -1630,13 +1636,20 @@ natural similarities are trivial to infer for the human eye.
 The current implementation of this algorithm has various limitations which are
 discussed along with possible improvements.
 
+The algorithm has only been evaluated on an undirected dataset of (arguably)
+medium size. The next immediate step is to find directed graphs on which the
+algorithm can be evaluated, and perform a similar evaluation. For larger graphs,
+the evaluation process used so far would not scale and different, more efficient
+methods will be required.
 
-The algorithm has only been evaluated on an undirected dataset of medium size.
-The next immediate step is to find directed graphs on which the algorithm can
-be evaluated, and perform a similar evaluation. For larger graphs, the evaluation
-process used so far would not scale and different, more efficient methods will
-be required.
+A comparison with similar algorithms, like the one described in
+\cite{fouss2007random}, could be performed to see if this algorithm has
+advantages compared to other work.
 
+Cosine similarity and Euclidean distance similarity were presented in this report,
+however only euclidean distance is well developed and evaluated. It is a trivial
+task to add support for the cosine similarity, and then perform a similar
+evaluation. After this, a comparison of the two metrics can be done.
 
 In the real world datasets might have different types of relationships between
 entities. Some relationship types might be more relevant than others in finding
@@ -1651,16 +1664,25 @@ obtain (learn) these weights from the dataset.
 What if the dataset is too large to fit into main memory? The algorithm is
 currently designed to run only on one machine, but finding ways to distribute it
 over multiple machines will help run it on even larger datasets. One extension
-of the algorithm is to make it reasonable for distributed computing. An immediate
+of the algorithm is to make it suitable for distributed computing. An immediate
 step could be distributing the computations of similarities and not the training,
-because it reduces to simply distributing the storage of a matrix or two and dot
-product between two vectors or two vectors and a matrix.
+because it reduces to simply distributing the storage of a matrix or two and
+computing the dot product between two vectors or two vectors and a matrix.
 
 
+Finding communities in graphs is not in the immediate goals of
+this work but it can be extended to perform such tasks.
 Instead of computing similarities between vertices directly, it might be useful
 to try to apply different methods of clustering on the results to find a structure
 of the graph.
 
+
+The implementation for directed graphs has the limitation of needing to check
+whether the eigenvalues are real or, if they are complex it needs to check if
+the complex conjugate has also been computed. If these conditions aren't met for
+an eigenpair, the whole eigenpair is dropped. A (small) optimisation could be to
+find a way to compute the correct number of eigenpairs taking into consideration
+the possibility of values being complex.
 
 \newpage
 \addcontentsline{toc}{section}{Bibliography}
