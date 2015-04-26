@@ -14,6 +14,9 @@ import simcache
 cache_options = simcache.OPTIONS
 
 def main():
+    """Intro point into the command line tool. Process command line arguments
+    and delegate to the relevant function."""
+
     parser = argparse.ArgumentParser()
 
     sbp = parser.add_subparsers(dest="action", help="Action to run.")
@@ -78,7 +81,6 @@ def main():
     p_eval.add_argument("index", help="Index file.")
     p_eval.add_argument("edges", help="Edges file.")
     p_eval.add_argument("--format", "-f", default="csv", choices=["csv"], help="Edges file format.")
-    p_eval.add_argument("--offset", type=int, default=0, help="Nodes will be considered ints and added offset to ids.")
     p_eval.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
     p_eval.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
     p_eval.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3, type=int)
@@ -119,6 +121,10 @@ def main():
 ### TRAIN
 
 def _train(args):
+    """Train helper function. Reads input graph, creates the relevant provider
+    object, trains an index using the relevant train function and returns the
+    Sim object."""
+
     edgelist = []
     if args.format == 'csv':
         edgelist = pr.csv_file(args.input)
@@ -145,7 +151,8 @@ def _train(args):
     return s
 
 def train(args):
-    """Perform training from a graph file. Use the values provided."""
+    """Perform training from a graph file using the given arguments. Save the
+    index file."""
     s = _train(args)
     if s is not None:
         s.save(args.output)
@@ -153,12 +160,23 @@ def train(args):
 ### SIMILARITY
 
 def read_index(path):
+    """Helper function to read an index file. It returns a Sim or a Simp object,
+    depending on the type of index.
+
+    * tar index results in Simp object
+    * plain index results in a Sim object
+    """
+
     if tarfile.is_tarfile(path):
         return sim.loadp(path)
     else:
         return sim.load(path)
 
 def similarity(args):
+    """Computes the similarities between the given nodes using the given index
+    file and prints them on the screen. Includes minimalistic top functionality.
+    For better top computations, use **top**.
+    """
     s = read_index(args.index)
 
     nodes = args.nodes
@@ -193,6 +211,12 @@ def similarity(args):
 ### TOP
 
 def fromToHeuristic(to):
+    """A fake heuristic function that simply yields all the edges in the graph.
+    It is used as a convenience function in some use cases (e.g. computing tops).
+
+    It returns a function similar to heuristics.Maxdepth.top_gen, but it generates
+    all possible edges using the to parameter, and the from parameter given to it.
+    """
     def h(fr):
         for a in fr:
             for b in to:
@@ -200,6 +224,9 @@ def fromToHeuristic(to):
     return h
 
 def top(args):
+    """Computes the top pairs from an index file and prints them on standard
+    output. It can be configured to use heuristics, different blacklists, and
+    different limits."""
     s = read_index(args.index)
     s = simcache.apply(s, args.cache)
     heu = None
@@ -240,6 +267,10 @@ def top(args):
 ## MAKE DOT FILE
 
 def make_dot(args):
+    """It takes a graph and an index file and creates a dot file that can be
+    used for visualisation using Graphviz. The number of top similar pairs to be
+    rendered is configurable, as well as the heuristic. The backlist used is a
+    set of the edges in the graph."""
     index = read_index(args.index)
     index = simcache.apply(index, args.cache)
 
@@ -292,6 +323,9 @@ def make_dot(args):
 ### TRAIN AND EVALUATE
 
 def train_eval(args):
+    """Take a graph and a test set, and train using a range of mu and k. Then
+    performs a similar evaluation (to eval) for each combination of mu and k.
+    The results are printed on standard output."""
     edgelist = []
     if args.format == 'csv':
         edgelist = pr.csv_file(args.input)
@@ -336,6 +370,19 @@ def train_eval(args):
 ### EVALUATE
 
 def evaluate(args):
+    """Takes an index file and a test set and performs an evaluation, giving
+    the following metrics:
+
+    * average top position of test pairs
+    * average score of test pairs
+    * average relative score of test pairs
+    * percentage of test pairs in top 1%% similar vertices
+    * percentage better than random
+    * random average top position
+    * random average score
+    * random average relative score
+    * percentage of random pairs in top 1%% similar vertices
+    """
     index = read_index(args.index)
 
     edges = []
@@ -349,7 +396,7 @@ def evaluate(args):
         print("\r%.2f %%" % progress, end="       ")
 
     heu = None
-    if len(args.graph) > 0:
+    if args.graph is not None:
         graphcsv = pr.csv_file(args.graph)
         h = heuristics.Maxdepth(graphcsv, args.depth)
         heu = h.top
@@ -358,38 +405,47 @@ def evaluate(args):
         index=index,
         edges=edges,
         cache=args.cache,
-        offset=args.offset,
         eachFunc=show_progress,
         heu=heu
     )
 
     print(end="\r")
-    print("Top position offset:\t %e" % res.position)
-    print("Total score:\t\t %e" % res.score)
-    print("Total relative score:\t %e" % res.relative)
-    print("")
-
-    print("Rand Top position offset:\t %e" % res.rand_position)
-    print("Rand Total score:\t\t %e" % res.rand_score)
-    print("Rand Total relative score:\t %e" % res.rand_relative)
+    print("Average top position:\t %e" % res.position)
+    print("Average score:\t\t %e" % res.score)
+    print("Average relative score:\t %e" % res.relative)
+    print("%% of test set in top 1%%:\t %f" % res.good_position)
 
     print("")
+
+    print("Rand average position:\t %e" % res.rand_position)
+    print("Rand average score:\t\t %e" % res.rand_score)
+    print("Rand average relative score:\t %e" % res.rand_relative)
+    print("%% of random in top 1%%:\t %f" % res.rand_good_position)
+
+    print("")
+
     print("Differences (random - expected)")
-    print("top position offset:\t %e" % res.diff_position)
-    print("Total score:\t\t %e" % res.diff_score)
-    print("Total relative score:\t %e" % res.diff_relative)
+    print("Average top position:\t %e" % res.diff_position)
+    print("Average score:\t\t %e" % res.diff_score)
+    print("Average relative score:\t %e" % res.diff_relative)
+    print("%% better than random:\t %f" % res.better_than_random)
+
     print("\nEdges to predict:\t%d\nNo of nodes:\t%d." % (res.edges, res.nodes))
 
 
 ### INFO
 
 def info(args):
+    """Print information about an index file. Delegate to relevant index file
+    type."""
     if tarfile.is_tarfile(args.index):
         info_tar(args)
     else:
         info_sim(args)
 
 def info_sim(args):
+    """Print information about a direct index file (that does not have a
+    provider.)"""
     s = None
     try:
         s = sim.load(args.index)
@@ -413,6 +469,8 @@ def info_sim(args):
         print(s.z)
 
 def info_tar(args):
+    """Print information about an index file that has a provider (thus stored
+    as a tar file containing the provider and sim object)."""
     s = None
     try:
         s = sim.loadp(args.index)
