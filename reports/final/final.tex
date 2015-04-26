@@ -1293,6 +1293,22 @@ maximum depth heuristic is implemented using NetworkX \cite{networkx} for the
 graph algorithms.
 
 
+The dot products and similarity measures can be cached. Three caching methods
+were implemented in the package {\tt simcache}. A cache function takes any type
+of {\tt Sim} object (can be {\tt Sim}, {\tt Simp} or any object that has the
+required methods, {\tt \_dotprod(a,b)} and {\tt score(a,b)}) and extends it to
+add the relevant cache functionality. The caching functions are
+\begin{enumerate}
+  \item {\tt precompute} pre-computes the dot products and scores using
+  matrix operations. It is unsuitable for large graphs as it uses $O(2N^2)$
+  memory for storage from the start.
+  \item {\tt score} uses two hash maps to cache scores after they are computed
+  the first time. It always uses the smaller vertex ID as the key for the first
+  map and the larger ID for the second hash map, because scores are symmetric.
+  \item {\tt dotprod} is similar to {\tt score} but caches dot products instead.
+\end{enumerate}
+
+
 A command line tool was built on top of the implementation. It is the main tool
 used to compute evaluations and visualisations of this algorithm. It has the
 following capabilities
