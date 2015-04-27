@@ -23,34 +23,34 @@ def main():
 
     ## TRAIN
     p_train = sbp.add_parser("train", help="Train a similarity index.")
-    p_train.add_argument("input", help="Path to input file.")
+    p_train.add_argument("input", help="Path to input graph.")
     p_train.add_argument("--format", "-f", default="csv",
                             choices=["csv"],
-                            help="Input file format.")
-    p_train.add_argument("--type", "-t", help="Type of the graph.",
+                            help="Input graph file format.")
+    p_train.add_argument("--type", "-t", help="Type of the graph. a for autodetect.",
                             default="auto", choices=["a", "auto", "d", "directed", "u", "undirected"])
-    p_train.add_argument("--output", "-o", help="Output path for matrices q,z.",
+    p_train.add_argument("--output", "-o", help="Output path for index file.",
                             required=True)
-    p_train.add_argument("--eigenvalues", "-k", help="Number of eigenvalues to use",
+    p_train.add_argument("--eigenvalues", "-k", help="Number of eigenvalues to use. Must be less then no. of nodes.",
                             default=6, dest="k", type=int)
-    p_train.add_argument("--penalise", "-mu", help="Penalisation factor",
+    p_train.add_argument("--penalise", "-mu", help="Penalising factor, must be between 0 and 1.",
                             default=0.5, dest="mu", type=float)
-    p_train.add_argument("--long", help="Don't use Cholesky decomposition.", action="store_true")
-    p_train.add_argument("--direct", "-d", help="Use the input values as int node ids.",
+    p_train.add_argument("--long", help="Don't use Cholesky decomposition for undirected graphs.", action="store_true")
+    p_train.add_argument("--direct", "-d", help="Use the input vertex IDs as integers directly.",
                             action="store_true")
     p_train.add_argument("--offset", default=0, type=int,
-        help="Offset for node ids in direct mode. Set to -1 for Matlab compatibility")
+        help="Offset for vertex IDs in direct mode. Set to -1 for Matlab compatibility.")
 
     ## ACTION
     p_info = sbp.add_parser("info", help="Get info about an index file.")
     p_info.add_argument("index", help="Path to index file.")
     p_info.add_argument("--nodes", help="Show all nodes", action="store_true")
     p_info.add_argument("-q", help="Print matrix Q.", action="store_true")
-    p_info.add_argument("-z", help="Print matriz Z.", action="store_true")
+    p_info.add_argument("-z", help="Print matriz Z (some index files do not have a Z).", action="store_true")
 
     ## SIMILARITY
     p_sim = sbp.add_parser("sim", help="Compute similarity between given edges.")
-    p_sim.add_argument("index", help="Similartiy index saved by train.")
+    p_sim.add_argument("index", help="Similartiy index (as saved by train).")
     p_sim.add_argument("nodes", help="Node(s) from which to compute similarity.",
                             nargs='*')
     p_sim.add_argument("--to", "-t", help="Node(s) to which to compute similarity.",
@@ -59,9 +59,9 @@ def main():
                             type=int, default=0)
 
     ## TOP
-    p_top = sbp.add_parser("top", help="Compute tops for nodes.")
-    p_top.add_argument("index", help="Similarity index saved by train.")
-    p_top.add_argument("nodes", help="Nodes from which to compute similarity.", nargs="*")
+    p_top = sbp.add_parser("top", help="Compute top similar vertices for given vertices. More advanced then `sim --top`.")
+    p_top.add_argument("index", help="Similarity index (as saved by train).")
+    p_top.add_argument("nodes", help="Vertices from which to compute similarity.", nargs="*")
     p_top.add_argument("--limit", "-l", help="Limit the number of total results", type=int, default=0)
     p_top.add_argument("--graph", "-g", help="Graph file to use with maxdepth heuristic. CSV format.")
     p_top.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3)
