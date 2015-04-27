@@ -107,6 +107,7 @@ class EdgeList:
         return r
 
     def nodelist(self):
+        """Returns the list of vertices, in their original form."""
         return self._inverted_index
 
     ## Inverted index lookup:
@@ -152,6 +153,7 @@ class Offset:
         return self._adj.shape[0]
 
     def nodelist(self):
+        """Returns the list of vertices in their original form."""
         return range(-self.offset, len(self) - self.offset)
 
     def save(self, where):

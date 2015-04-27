@@ -1,4 +1,13 @@
 def precompute(s):
+    """The precompute cache uses matrix operations to precompute all the
+    dot products and (Euclidean distance) similarities, and then update the
+    given index to use the precomputed values instead of computing them every
+    time.
+
+    It currently only works on undirected graphs. (can be easily extended)
+
+    It changes the given s object directly, and also returns it for convenience.
+    """
     base = type(s)
     class Precompute(base):
         def _dotprod(self, a, b):
@@ -12,7 +21,13 @@ def precompute(s):
     return s
 
 def score(s):
-    """Score cache factory. Changes s and returns it for convenience."""
+    """The score cache uses two dicts to store the similarities after they are
+    computed the first time. score(a,b) is symmetric (=score(b,a)), so the
+    similarity between a and b is stored as {a: {b: score}} iff a<b. Lookups are
+    made in a similar way. Both undirected and directed index objects are
+    supported.
+
+    Changes s and returns it for convenience."""
     base = type(s)
     class Score(base):
         def score(self, a, b):
@@ -35,7 +50,10 @@ def score(s):
     return s
 
 def dotprod(s):
-    """Dot product cache factory. Changes s and returns it for convenience."""
+    """Dot product cache is similar to score cache internally, except it caches
+    the _dotprod() method instead of score().
+
+    Changes s and returns it for convenience."""
     base = type(s)
     class Dotprod(base):
         def _dotprod(self, a, b):

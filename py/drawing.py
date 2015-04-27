@@ -1,3 +1,10 @@
+"""Drawing functions used with sigma.js implementations. It has helper methods
+for outputting sigma.js friendly JSON and to manipulate it to colour the nodes
+by their similarities (or other measures). Same for size.
+
+It was used to draw Figure 1 in the final report.
+"""
+
 import json
 import random
 import numpy as np

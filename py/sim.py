@@ -6,9 +6,12 @@ import tarfile
 import tempfile
 import provider
 
+## If the imaginary part of a result is higher than this,
+## we raise an error, as something must've gone wrong.
 COMPLEX_TOLERANCE = 1e15
 
 class Sim:
+    """Base index object. It can store directed and undirected indices."""
     def __init__(self, q, z=None):
         self.q = np.matrix(q)
         if z is None:
@@ -17,15 +20,18 @@ class Sim:
             self.z = np.matrix(z)
 
     def __len__(self):
-        """Returns the number of nodes provided in this method."""
+        """Returns the number of vertices this index has."""
         if self.z is None:
             return self.q.shape[1]
         return self.z.shape[0]
 
     def nodelist(self):
+        """Returns a list of all vertex IDs."""
         return range(len(self))
 
     def _dotprod(self, a, b):
+        """Computes the dot product between a and b. Uses nib() to get the
+        correct indices from vertex IDs."""
         a=self.nid(a)
         b=self.nid(b)
         pm = None
@@ -42,11 +48,14 @@ class Sim:
         return np.real(res).tolist() # python hackery. complex type but real no.
 
     def nid(self, a):
+        """Identity function to return index of the vertex in the initial
+        adjacency matrix (or row in Z, or column in Q for Cholesky decomposed
+        indices). This method will be overridden by providers."""
         return int(a)
 
     def score(self, a, b):
         """Compute the score between a and b. The score is the eucliden
-        distance between the similarity vectors of the nodes. (c_a and c_b)"""
+        distance between the cloud vectors of the nodes squared. (c_a and c_b)"""
         norma = self._dotprod(a,a)
         normb = self._dotprod(b,b)
         ab = self._dotprod(a,b)
@@ -147,7 +156,7 @@ def normalise_adj(adj):
     return w * adj
 
 def train(adj, mu, k, qandz=False):
-    """Training for undirected graphs (symmetric adjacency matrix).
+    """Training for undirected and directed graphs.
 
     Use the adjacency matrix to compute similarity matrices.
     It computes matrix Q and Z if the last argument is set to true. Default is
@@ -155,13 +164,14 @@ def train(adj, mu, k, qandz=False):
 
     If qandz is set to False (the default), it computes the matrix W using
     Cholesky decomposition. This will speed up pairwise comparisons but may or
-    may not lose some precision.
+    may not lose some precision and increase training time.
 
-    This function, before training, is checking whether the graph is undirected or directed
-    by checking if the adj matrix is symmetric or not. (symmetric adjacency matrix means
-    undirected graph).
+    This function, before training, is checking whether the graph is undirected
+    or directed by checking if the adj matrix is symmetric or not. (symmetric
+    adjacency matrix means undirected graph).
 
-    For speed, consider directly using the functions train_directed and train_undirected.
+    For speed, consider directly using the functions train_directed and
+    train_undirected.
 
     It returns a Sim object.
     """
@@ -204,17 +214,26 @@ class Simp(Sim):
 
     """
     def __init__(self, q, z, provider):
+        """Initialise with q,z and provider."""
         self.q = np.matrix(q)
         self.z = np.matrix(z)
         self.provider = provider
 
     def nid(self, a):
+        """Delegate index from vertex IDs to provider."""
         return self.provider[a]
 
     def nodelist(self):
+        """Return the list of vertices from provider."""
         return self.provider.nodelist()
 
     def _save(self, f):
+        """Save a tar index file containing two files:
+        1. the Sim object (q and z) as saved by Sim.save(),
+        2. The Provider object as saved by self.provider.save().
+
+        f is always a file, not a path.
+        """
         simf = tempfile.TemporaryFile()
         Sim.save(self, simf)
         simf_size = simf.tell()
@@ -238,6 +257,12 @@ class Simp(Sim):
         simf.close()
 
     def save(self, path):
+        """Save a tar index file containing two files:
+        1. the Sim object (q and z) as saved by Sim.save(),
+        2. The Provider object as saved by self.provider.save().
+
+        f is a file or a path.
+        """"
         if type(path) == str:
             with open(path, "wb") as f:
                 self._save(f)
@@ -272,6 +297,7 @@ def loadprov(path, provider):
     return prov(load(path), provider)
 
 def _loadp(f):
+    """Helper method for loadp(path), where f is always a file."""
     with tarfile.open(None, 'r', f) as tf:
         f_prov = tf.extractfile("provindex")
         f_sim = tf.extractfile("simqz")
@@ -292,7 +318,9 @@ def loadp(path):
 
 def scoremat(s):
     """Return the matrix of scores of all possible nodes.
-    This function was written for testing purposes only."""
+    This function was written for testing purposes only, and it uses loops
+    instead of linear algebra operations to compute the scores. It is not very
+    efficient."""
     m = []
     for i in s.nodelist():
         row = []

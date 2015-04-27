@@ -1,5 +1,10 @@
 #!/usr/local/bin/python3
 
+"""This is a small script that takes plain index files and an offset, and saves
+a tar index file with an Offest provider. Initial implementations did not have
+the Offset provider and this script was used to update old index files, then
+the offset parameter was removed from some cmd.py actions (like sim and top)."""
+
 import sim
 import provider as pr
 import sys

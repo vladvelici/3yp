@@ -1,5 +1,7 @@
 #!/usr/local/bin/python3
 
+"""A small utility that prints the neighbours of a vertex, given a graph."""
+
 import provider as pr
 import argparse
 
@@ -14,13 +16,11 @@ def main():
 
     for i in args.nodes:
         print("=== For node %s ===" % str(i))
-        
+
         lst = [(a,b) for a,b in edges if a == i]
         print("Edge count = %d" % len(lst))
         for b in lst:
             print(b)
-    
+
 if __name__ == '__main__':
     main()
-
-

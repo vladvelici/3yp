@@ -1,3 +1,6 @@
+"""This package provides evaluation functions. It it used by cmd.py for the eval
+and trev actions."""
+
 import provider as pr
 import sim
 import tarfile
@@ -5,6 +8,7 @@ from collections import namedtuple
 import random
 import simcache
 
+## Same read_index as in cmd.py. Copied here to avoid complicated imports.
 def read_index(path):
     if tarfile.is_tarfile(path):
         return sim.loadp(path)
@@ -28,6 +32,9 @@ EvalResult = namedtuple("EvalResult", [
     'diff_relative'])
 
 def _train_and_eval(prov, mu, k, edges, cache, eachFunc, trainfunc, heu, blacklist, picks):
+    """Helper method for train_and_evaluate. It returns an EvalResult object.
+    If eachFunc is not set, it defaults to printing the process on stdout.
+    (not a good practice in general...)"""
     index = trainfunc(prov, mu, k)
 
     if eachFunc is None:
@@ -80,6 +87,7 @@ def train_and_evaluate(input, offset, range_mu, range_k, edges, cache, eachFunc=
     return res
 
 class Blacklist:
+    """Frozen set implementation of blacklists. Adds convenience functions."""
     def __init__(self, edges):
         self._d = frozenset(edges)
 
@@ -90,6 +98,19 @@ class Blacklist:
         return pair[0] == pair[1] or str(pair[0]) == str(pair[1]) or pair in self._d or (str(pair[0]), str(pair[1])) in self._d
 
 def evaluate(index, edges, cache, eachFunc=None, heu=None, blacklist=None, picks=None):
+    """Run an evaluation on the given index with the given options.
+
+    edges:      List of pairs in the test set pairs.
+    cache:      Cache option. See cache.py.
+    eachFunc:   Function to call after each pair in the test set. Usually to
+                show the progress on the command line.
+    heu:        Heuristic function to use.
+    blacklist:  Blacklist set. If None, it defaults to the test set.
+    picks:      Dict-like object of lists from which to randomly sample a pair.
+                usage: random.sample(picks[a], 1) for a random pair from a.
+
+    Returns an EvalResult object.
+    """
     sc = simcache.apply(index, cache)
 
     if blacklist is None:
