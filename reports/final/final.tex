@@ -131,7 +131,7 @@ common interests from research publications repositories or identifying possible
 duplicates in a dataset.
 
 It is possible to calculate cloud vectors that represent the neighbourhoods of
-vertices in a graph only by looking at its stucture. Then if a cloud vector is
+vertices in a graph only by looking at its structure. Then if a cloud vector is
 close to another it means the vertices they represent belong to a similar
 neighbourhood. Using the dot product of cloud vectors we can compute different
 similarity measures between vertices. Cosine similarity and Euclidean distance
@@ -1696,10 +1696,44 @@ of the graph.
 
 The implementation for directed graphs has the limitation of needing to check
 whether the eigenvalues are real or, if they are complex it needs to check if
-the complex conjugate has also been computed. If these conditions aren't met for
+the complex conjugate has also been computed. If these conditions are not met for
 an eigenpair, the whole eigenpair is dropped. A (small) optimisation could be to
 find a way to compute the correct number of eigenpairs taking into consideration
 the possibility of values being complex.
+
+\newpage
+
+\begin{landscape}
+\section*{Appendix A - Project Gantt Chart}
+\addcontentsline{toc}{section}{Appendix A - Project Gantt Chart}
+\begin{figure}[hft]
+\begin{center}
+\begin{ganttchart}[vgrid=true, hgrid=true, y unit chart=1.5em, y unit title=1.4em, title height=1]{1}{32}
+\gantttitle{Semester 1}{17} \gantttitle{Semester 2}{15} \\
+\gantttitlelist{1,...,32}{1} \\
+\ganttbar{Agreed project \& brief}{1}{2} \\
+\ganttbar{Implemented brute-force}{3}{3} \\
+\ganttbar{Understanding math}{4}{9} \\
+\ganttbar{Implementing approx.}{8}{10} \\
+\ganttbar{Evaluation ideas}{10}{11} \\
+\ganttbar{Write progress report}{11}{11} \\
+\ganttmilestone{Progress report}{11} \\
+\ganttbar{Graph processing tools}{12}{14} \\
+\ganttbar{(Limited) Evaluation in Matlab}{14}{15} \\
+\ganttbar{Choose language to port algorithm}{15}{17} \\
+\ganttbar{Implement in Python}{17}{20} \\
+\ganttbar{Max. depth heuristic}{20}{21} \\
+\ganttbar{Directed math and implementation}{21}{25} \\
+\ganttbar{cmd.py evaluation on SNAP Fb.}{23}{28} \\
+\ganttbar{Graphviz visualisation}{28}{29} \\
+\ganttbar{Write final report}{27}{30} \\
+\ganttmilestone{Final report}{30} \\
+\ganttbar{Prepare Viva}{31}{32} \\
+\ganttmilestone{Viva}{32}
+\end{ganttchart}
+\end{center}
+\end{figure}
+\end{landscape}
 
 \newpage
 \addcontentsline{toc}{section}{Bibliography}
