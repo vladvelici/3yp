@@ -9,6 +9,13 @@ import json
 import random
 import numpy as np
 import colorsys
+from io import StringIO
+
+def _anyprop(accepted, available):
+    for i in accepted:
+        if i in available:
+            return True
+    return False
 
 class D:
     def __init__(self, sigma_dict):
@@ -26,9 +33,53 @@ class D:
                 return self.json(f)
         return json.dump(self.r(), dest)
 
+    def dot(self, dest=None, directed=False):
+        if dest is None:
+            buf = StringIO()
+        else:
+            buf=dest
+
+        if directed:
+            buf.write("digraph {\n")
+        else:
+            buf.write("strict graph {\n")
+        buf.write("  node[shape=circle style=filled fontcolor=white]\n")
+
+        node_properties = ["label", "size", "color"]
+        # write nodes
+        for nid, props in self.sigma_dict["nodes"].items():
+            buf.write("  " + nid)
+            if _anyprop(node_properties, props):
+                buf.write(" [")
+                for acc in node_properties:
+                    if acc in props:
+                        buf.write(str(acc) + "=\"" + str(props[acc]) + "\" ")
+                buf.write("]")
+            buf.write("\n")
+
+        # write edges
+        write_edge = lambda x: x["source"] + " -- " + x["target"]
+        if directed:
+            write_edge = lambda x: x["source"] + "->" + x["target"]
+
+        edge_properties = ["color", "label"]
+        for edge in self.sigma_dict["edges"]:
+            buf.write("  " + write_edge(edge))
+            # properties:
+            if _anyprop(edge_properties, edge):
+                buf.write(" [")
+                for acc in edge_properties:
+                    if acc in edge:
+                        buf.write(acc + "=\"" + edge[acc] + "\" ")
+                buf.write("]")
+            buf.write("\n")
+
+        buf.write("}")
+        return buf
+
     def add_properties(self, prop):
         for k,v in prop.items():
-            print(k,"\t",v)
+            # print(k,"\t",v)
             self.sigma_dict["nodes"][k].update(v)
 
 
@@ -45,7 +96,7 @@ def edgelist(edgelist):
             "id": str(a) + "_to_" + str(b),
             "source": a,
             "target": b,
-            "color": "#ccc"
+            "color": "#cccccc"
         })
 
     return D({
@@ -87,9 +138,26 @@ def strength_size(vector, ids=None, sf=None):
 
 def default_bcf(v):
     if v <= 0:
-        return "#ccc"
+        return "#cccccc"
     r,g,b = colorsys.hls_to_rgb(0, 0.5, v);
-    return "rgb(%d, %d, %d)" % (int(round(r*255)), int(round(g*255)), int(round(b*255)))
+    return "#%0.2X%0.2X%0.2X" % (int(round(r*255)), int(round(g*255)), int(round(b*255)))
+
+
+def colour_vector(vector):
+    vector = vector / vector.sum()
+    values = np.unique(vector.flat)
+    values = values[1:] if len(values) > 1 and values[0] == 0.0 else values
+    colours = {0.0: 0.0}
+    for index, val in enumerate(values):
+        colours[val] = (index+1)/len(values)
+
+    res = {}
+    for index, val in enumerate(vector.flat):
+        res[ids[index]] = {"color": bcf(colours[val]) }
+        if label:
+            res[ids[index]]["label"] =  "%s (%.2f)" % (ids[index], val)
+    return res
+
 
 def strength_color(vector, label=True, ids=None, bcf=default_bcf):
     """Given a vector (a c_i), it normalises it (such that no element is larger

@@ -10,6 +10,8 @@ import random
 import evalf
 import heuristics
 import simcache
+import numpy as np
+import drawing
 
 cache_options = simcache.OPTIONS
 
@@ -75,6 +77,17 @@ def main():
     p_dot.add_argument("--limit", "-l", help="Limit the number of total results", type=int, default=10)
     p_dot.add_argument("--depth", "-d", help="The depth for the heuristic function", default=3, type=int)
     p_dot.add_argument("--cache", help="Type of cache to use.", choices=cache_options, default=simcache.SCORE)
+    
+    # MAKE DOT FRAME
+    p_dotf = sbp.add_parser("dotframe", help="Create a dot file for a frame of brute-force computation.")
+    p_dotf.add_argument("graph", help="Graph to use. Assume direct format with offset 0.")
+    p_dotf.add_argument("node", help="ID of node to use.", type=int)
+    p_dotf.add_argument("output", help="Output file name")
+
+    p_dotf.add_argument("--eigenvalues", "-k", help="Number of iterations in brute-force mode.",
+                            default=6, dest="k", type=int)
+    p_dotf.add_argument("--penalise", "-mu", help="Penalising factor, must be between 0 and 1.",
+                            default=0.5, dest="mu", type=float)
 
     ## EVALUATION
     p_eval = sbp.add_parser("eval", help="Evaluate index using a list of (should predict) edges.")
@@ -117,6 +130,8 @@ def main():
         top(args)
     elif args.action == 'dot':
         make_dot(args)
+    elif args.action == "dotframe":
+        make_dot_frames(args)
 
 ### TRAIN
 
@@ -319,6 +334,53 @@ def make_dot(args):
             print("  %s -- %s [color=\"#ee333377\"]" % (str(pair[0]), str(pair[1])))
     print("}")
 
+
+def make_dot_frames(args):
+    """Direct computations only."""
+    edges = pr.csv_file(args.graph)
+    
+    adj = pr.mkadj(edges)
+    
+    # normalize
+    nadj = sim.normalise_adj(adj)
+    ci = np.matrix(np.eye(adj.shape[0]))[:,args.node]
+
+    for i in range(args.k):
+        ci = ci + nadj[:,args.node] * args.mu
+        nadj = nadj * nadj
+        args.mu = args.mu*args.mu
+
+    d = drawing.edgelist(edges) 
+    d.add_properties(drawing.strength_color(ci.copy(), label=False))
+#    d.add_properties(drawing.strength_size(ci.copy(), sf=lambda v: "4!" if v > 0 else "1!"))
+
+    with open(args.output, "w") as f:
+        dot_format = d.dot(f)
+
+    with open(args.output, "w") as f:
+        dot_format = d.dot(f)
+
+def change_svg_file(args):
+
+
+    edges = pr.csv_file(args.graph)
+    
+    adj = pr.mkadj(edges)
+    
+    # normalize
+    nadj = sim.normalise_adj(adj)
+    ci = np.matrix(np.eye(adj.shape[0]))[:,args.node]
+    
+    with open ("rendered.svg", "r") as myfile:
+        layout=myfile.read()
+        for i in range(args.k):
+
+            # first frame here.
+
+            ci = ci + nadj[:,args.node] * args.mu
+            nadj = nadj * nadj
+            args.mu = args.mu*args.mu
+        
 
 ### TRAIN AND EVALUATE
 

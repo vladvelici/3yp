@@ -112,6 +112,7 @@ def train_directed(adj, mu, k, qandz=False):
     discarded. This usually means that at most one eigenvalue is discarded but it is
     not guaranteed.
     """
+    adj = normalise_adj(adj)
     val, vec = linalg.eigs(adj, k=k, which="LM")
 
     # check for complex conjugates
@@ -151,7 +152,7 @@ def is_symmetric(adj):
     return True
 
 def normalise_adj(adj):
-    neigh = 1/adj.sum(1)
+    neigh = np.matrix([[1/i for i in adj.sum(1).flat]])
     w = sparse.diags(neigh.flat, 0)
     return w * adj
 
@@ -262,7 +263,7 @@ class Simp(Sim):
         2. The Provider object as saved by self.provider.save().
 
         f is a file or a path.
-        """"
+        """
         if type(path) == str:
             with open(path, "wb") as f:
                 self._save(f)
